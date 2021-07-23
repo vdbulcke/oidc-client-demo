@@ -1,6 +1,7 @@
 ---
-client_id: demo_oidc_client
-client_secret: password
+### Client ID
+client_id: 
+client_secret: 
 
 scopes:
   - openid
