@@ -1,7 +1,7 @@
 GIT_COMMIT ?= $(shell git rev-parse --short HEAD)
 LD_FLAGS ?= -X main.GitCommit=${GIT_COMMIT}
 
-all: build-linux_amd64 build-windows_amd64 build-windows_386
+all: build-linux_amd64 build-windows_amd64 build-windows_386  build-darwin_amd64
 
 	
 build-linux_amd64: 
