@@ -1,0 +1,21 @@
+---
+client_id: demo_oidc_client
+client_secret: password
+
+scopes:
+  - openid
+  - profile
+  - egovnrn
+
+acr_values: "urn:be:fedict:iam:fas:citizen:Level300"
+
+issuer: "https://idp.iamfas.ta.belgium.be/fas/oauth2"
+
+
+# token_endpoint: "https://idp.iamfas.ta.belgium.be/fas/oauth2/access_token"
+# authorize_endpoint:  "https://idp.iamfas.ta.belgium.be/fas/oauth2/authorize"
+# userinfo_endpoint: "https://idp.iamfas.ta.belgium.be/fas/oauth2/userinfo"
+# jwks_endpoint: 
+token_signing_alg: "RS256"
+
+skip_tls_verification: true
