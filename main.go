@@ -14,7 +14,7 @@ import (
 var GitCommit string
 
 // Version
-var version = "0.0.1"
+var version = "0.0.2"
 
 // HumanVersion version with commit
 var HumanVersion = fmt.Sprintf("%s-(%s)", version, GitCommit)
