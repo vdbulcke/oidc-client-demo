@@ -12,16 +12,16 @@ build-linux_amd64:
 	
 build-windows_amd64: 
 	mkdir -p bin/
-	env GOOS=windows GOARCH=amd64 CGO_ENABLED=0  go build -ldflags "${LD_FLAGS}" -o bin/oidc-client_windows_amd64 main.go 
+	env GOOS=windows GOARCH=amd64 CGO_ENABLED=0  go build -ldflags "${LD_FLAGS}" -o bin/oidc-client_windows_amd64.exe main.go 
 	mkdir -p releases/
-	zip releases/oidc-client_windows_amd64.zip bin/oidc-client_windows_amd64
+	zip releases/oidc-client_windows_amd64.zip bin/oidc-client_windows_amd64.exe
 
 	
 build-windows_386: 
 	mkdir -p bin/
-	env GOOS=windows GOARCH=386 CGO_ENABLED=0  go build -ldflags "${LD_FLAGS}" -o bin/oidc-client_windows_386 main.go 
+	env GOOS=windows GOARCH=386 CGO_ENABLED=0  go build -ldflags "${LD_FLAGS}" -o bin/oidc-client_windows_386.exe main.go 
 	mkdir -p releases/
-	zip releases/oidc-client_windows_386.zip bin/oidc-client_windows_386
+	zip releases/oidc-client_windows_386.zip bin/oidc-client_windows_386.exe
 
 build-darwin_amd64:
 	mkdir -p bin/
