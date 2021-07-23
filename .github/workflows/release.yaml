@@ -18,7 +18,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build the binary
-      run: make build-zip
+      run: make 
 
     - name: Archive production artifacts
       uses: actions/upload-artifact@v2
