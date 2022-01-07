@@ -49,6 +49,7 @@ func main() {
 	appLogger = hclog.New(&hclog.LoggerOptions{
 		Name:  "oidc-client",
 		Level: logLevel,
+		Color: hclog.AutoColor,
 	})
 
 	// Parse Config

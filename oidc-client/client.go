@@ -15,6 +15,18 @@ import (
 	"golang.org/x/oauth2"
 )
 
+// JSONAccessTokenResponse ...
+type JSONAccessTokenResponse struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+	Scope        string `json:"scope"`
+	IDToken      string `json:"id_token"`
+	TokenType    string `json:"token_type"`
+	Nonce        string `json:"nonce"`
+	// NOTE: this is reformatted as Human readable time
+	ExpiresInHumanReadable string `json:"expires_in_human_readable"`
+}
+
 func (c *OIDCClient) randString(nByte int) (string, error) {
 	b := make([]byte, nByte)
 	if _, err := io.ReadFull(rand.Reader, b); err != nil {
@@ -32,6 +44,77 @@ func (c *OIDCClient) setCallbackCookie(w http.ResponseWriter, r *http.Request, n
 		HttpOnly: true,
 	}
 	http.SetCookie(w, cookie)
+}
+
+func (c *OIDCClient) parseAccessTokenResponse(oauth2Token *oauth2.Token) (*JSONAccessTokenResponse, error) {
+	// common logger text
+	commonLoggerText := "Access Token Response"
+
+	// Parse Access Token
+	accessToken := oauth2Token.AccessToken
+	if c.logger.IsDebug() {
+		c.logger.Debug(commonLoggerText, "access_token", accessToken)
+	}
+
+	// Parse Token Type
+	tokenType := oauth2Token.Type()
+	if c.logger.IsDebug() {
+		c.logger.Debug(commonLoggerText, "token_type", tokenType)
+	}
+
+	// Parse (and format) Token Expiration
+	tokenExpiration := oauth2Token.Expiry.String()
+	if c.logger.IsDebug() {
+		c.logger.Debug(commonLoggerText, "expires_in", tokenExpiration)
+	}
+
+	// Parse (and format) Token Expiration
+	refreshToken := oauth2Token.RefreshToken
+	if c.logger.IsDebug() {
+		c.logger.Debug(commonLoggerText, "refresh_token", refreshToken)
+	}
+
+	// create the base JSON Access Token obj
+	jsonAccessTokenResp := &JSONAccessTokenResponse{
+		AccessToken:            accessToken,
+		ExpiresInHumanReadable: tokenExpiration,
+		TokenType:              tokenType,
+		RefreshToken:           refreshToken,
+	}
+
+	// Parsing Extra field
+
+	// Parsing IdToken
+	idToken, ok := oauth2Token.Extra("id_token").(string)
+	if ok {
+		if c.logger.IsDebug() {
+			c.logger.Debug(commonLoggerText, "id_token", idToken)
+		}
+
+		jsonAccessTokenResp.IDToken = idToken
+	}
+
+	// Parsing Nonce
+	nonce, ok := oauth2Token.Extra("nonce").(string)
+	if ok {
+		if c.logger.IsDebug() {
+			c.logger.Debug(commonLoggerText, "nonce", nonce)
+		}
+
+		jsonAccessTokenResp.Nonce = nonce
+	}
+
+	// Parsing Scopes
+	scope, ok := oauth2Token.Extra("scope").(string)
+	if ok {
+		if c.logger.IsDebug() {
+			c.logger.Debug(commonLoggerText, "scope", scope)
+		}
+
+		jsonAccessTokenResp.Scope = scope
+	}
+
+	return jsonAccessTokenResp, nil
 }
 
 func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
@@ -127,7 +210,7 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 		authZCode := r.URL.Query().Get("code")
 		c.logger.Info("Received AuthZ Code", "code", authZCode)
 
-		// Access Token
+		// Access Token Response
 		oauth2Token, err := oAuthConfig.Exchange(ctx, authZCode)
 		if err != nil {
 			c.logger.Error("Failed to get Access Token", "err", err)
@@ -135,86 +218,87 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 			return
 		}
 
-		// c.logger.Info("Received Access Token Response", "oauth2Token", oauth2Token)
-		c.logger.Info("Received Access Token", "AccessToken", oauth2Token.AccessToken)
-
-		// Parsing Token
-		c.logger.Info("Received Access Token Response", "token_type", oauth2Token.Type())
-		c.logger.Info("Received Access Token Response", "expires_in", oauth2Token.Expiry.String())
-
-		respIdToken, ok := oauth2Token.Extra("id_token").(string)
-		if ok {
-			c.logger.Info("Received Access Token Response", "id_token", respIdToken)
-		}
-
-		respRefreshToken, ok := oauth2Token.Extra("refresh_token").(string)
-		if ok {
-			c.logger.Info("Received Access Token Response", "refresh_token", respRefreshToken)
-		}
-
-		respNonce, ok := oauth2Token.Extra("nonce").(string)
-		if ok {
-			c.logger.Info("Received Access Token Response", "nonce", respNonce)
-		}
-
-		respScope, ok := oauth2Token.Extra("scope").(string)
-		if ok {
-			c.logger.Info("Received Access Token Response", "scope", respScope)
-		}
-
-		// ID Token
-		rawIDToken, ok := oauth2Token.Extra("id_token").(string)
-		if !ok {
-			c.logger.Error("Could not parse id_token")
-		}
-		c.logger.Info("Parsed ID Token ", "IDToken", rawIDToken)
-
-		nonce, err := r.Cookie("nonce")
+		// Parse Access Token
+		accessTokenResponse, err := c.parseAccessTokenResponse(oauth2Token)
 		if err != nil {
-			c.logger.Error("Nonce cookie Not found", "err", err)
-			http.Error(w, "nonce not found", http.StatusBadRequest)
+			c.logger.Error("Error Parsing Access Token", "err", err)
+			http.Error(w, "Error Parsing Access Token", http.StatusBadRequest)
 			return
 		}
 
-		idToken, err := verifier.Verify(ctx, rawIDToken)
+		// Print Access Token
+		accessTokenResponseLog, err := json.MarshalIndent(accessTokenResponse, "", "    ")
 		if err != nil {
-			c.logger.Error("ID Token validation failed", "err", err)
-			http.Error(w, "Failed to verify ID Token: "+err.Error(), http.StatusInternalServerError)
-			return
+			c.logger.Error("Error Marchalling access Token Resp", "err", err)
 		}
 
-		if idToken.Nonce != nonce.Value {
-			c.logger.Error("ID Token nonce does not match", "idToken.Nonce", idToken.Nonce, "Cookie.Nonce", nonce.Value)
-			http.Error(w, "nonce did not match", http.StatusBadRequest)
-			return
-		}
-		// Userinfo
+		c.logger.Info("Access Token Response", "Response", string(accessTokenResponseLog))
 
+		// Validate ID Token
+		var idToken *oidc.IDToken
+		idTokenRaw := accessTokenResponse.IDToken
+		if idTokenRaw == "" {
+			c.logger.Error("no ID Token Found")
+		} else {
+
+			// validate signature agains the JWK
+			idToken, err = verifier.Verify(ctx, idTokenRaw)
+			if err != nil {
+				c.logger.Error("ID Token validation failed", "err", err)
+				http.Error(w, "Failed to verify ID Token: "+err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			// retreive the nonce cookie
+			nonceCookie, err := r.Cookie("nonce")
+			if err != nil {
+				c.logger.Error("Nonce cookie Not found", "err", err)
+				http.Error(w, "nonce not found", http.StatusBadRequest)
+				return
+			}
+
+			if idToken.Nonce != nonceCookie.Value {
+				c.logger.Error("ID Token nonce does not match", "idToken.Nonce", idToken.Nonce, "Cookie.Nonce", nonceCookie.Value)
+				http.Error(w, "nonce did not match", http.StatusBadRequest)
+				return
+			}
+		}
+
+		// Fetch Userinfo
+		// NOTE: this will detects based on the Content-Type if the userinfo is application/jwt
+		//       and if it is JWT it will validate signature agains JWK for the provider
 		userInfo, err := provider.UserInfo(ctx, oauth2.StaticTokenSource(oauth2Token))
 		if err != nil {
 			http.Error(w, "Failed to get userinfo: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		resp := struct {
-			OAuth2Token    *oauth2.Token
-			IDTokenClaims  *json.RawMessage
-			UserInfo       *oidc.UserInfo
-			UserInfoClaims *json.RawMessage
-		}{oauth2Token, new(json.RawMessage), userInfo, new(json.RawMessage)}
+		// Prints Retrieved information and  generate JSON HTTP response
 
+		// Create global HTTP response object
+		resp := struct {
+			OAuth2Token     *oauth2.Token
+			AccessTokenResp *JSONAccessTokenResponse
+			IDTokenClaims   *json.RawMessage
+			UserInfo        *oidc.UserInfo
+			UserInfoClaims  *json.RawMessage
+		}{oauth2Token, accessTokenResponse, new(json.RawMessage), userInfo, new(json.RawMessage)}
+
+		// format id Token Claims
 		if err := idToken.Claims(&resp.IDTokenClaims); err != nil {
 			c.logger.Error("Error Parsing ID Token Claims", "err", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
+		// format userinfo Claims
 		if err := userInfo.Claims(&resp.UserInfoClaims); err != nil {
 			c.logger.Error("Error Parsing USerinfo Claims", "err", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
+		// Print ID Token Claims, and User Info
 		idTokenClaims, err := json.MarshalIndent(resp.IDTokenClaims, "", "    ")
 		if err != nil {
 			c.logger.Error("Could not parse idTokenClaims", "err", err)
@@ -227,13 +311,16 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 		c.logger.Info("IDToken Claims", "IDTokenClaims", string(idTokenClaims))
 		c.logger.Info("Userinfo Claims", "UserInfoClaims", string(userinfoClaims))
 
+		// Format in JSON global HTTP response
 		data, err := json.MarshalIndent(resp, "", "    ")
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+		// send the global http response
 		w.Write(data)
 
+		// stop program
 		go func() {
 			c.logger.Info("Stopping server")
 			os.Exit(0)
