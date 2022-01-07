@@ -1,0 +1,91 @@
+# This is an example .goreleaser.yml file with some sensible defaults.
+# Make sure to check the documentation at https://goreleaser.com
+before:
+  hooks:
+    # You may remove this if you don't use go modules.
+    - go mod tidy
+builds:
+
+  - main: "./main.go"
+    binary: oidc-client
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+      # - arm
+      # - 386
+    ldflags:
+      ## auto inject commit and version at build time
+      ## TODO: 
+      - -X main.GitCommit={{ .ShortCommit }} -X main.Version={{ .Version }} 
+archives:
+  - 
+    replacements:
+      ## Rewrite Archive name 
+      darwin: Darwin
+      linux: Linux
+      windows: Windows
+      386: i386
+      amd64: x86_64
+    ## use zip for windows release
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+    - LICENSE
+
+## create MacOS universal binary
+universal_binaries:
+## set to true to ONLY generate a universal binary 
+- replace: false
+
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      ## ignore commits from change log that starts with
+      - '^docs:'
+      - '^test:'
+      - '^typo:'
+      - '^ignore:'
+  # Group commits messages by given regex and title.
+  # Order value defines the order of the groups.
+  # Proving no regex means all commits will be grouped under the default group.
+  # Groups are disabled when using github-native, as it already groups things by itself.
+  #
+  # Default is no groups.
+  groups:
+    - title: Features
+      regexp: "^.*feat[(\\w)]*:+.*$"
+      order: 0
+    - title: 'Bug fixes'
+      regexp: "^.*fix[(\\w)]*:+.*$"
+      order: 1
+    - title: Others
+      order: 999
+
+
+# release:
+#   ## set github header and footer
+#   header: |
+#     ## My Custom Header
+
+#     some text
+
+#   # Footer template for the release body.
+#   # Defaults to empty.
+#   footer: |
+#     ## Thanks!
+
+#     Those were the changes on {{ .Tag }}!
