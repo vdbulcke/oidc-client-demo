@@ -21,7 +21,6 @@ builds:
       # - 386
     ldflags:
       ## auto inject commit and version at build time
-      ## TODO: 
       -  -X github.com/vdbulcke/oidc-client-demo/cmd.GitCommit={{ .ShortCommit }} -X github.com/vdbulcke/oidc-client-demo/cmd.Version={{ .Version }}   -X github.com/vdbulcke/oidc-client-demo/cmd.Date={{ .CommitDate }} -X github.com/vdbulcke/oidc-client-demo/cmd.BuiltBy=goreleaser
 archives:
   - 
@@ -36,8 +35,8 @@ archives:
     format_overrides:
       - goos: windows
         format: zip
-    files:
-    - LICENSE
+    # files:
+    # - LICENSE
 
 ## create MacOS universal binary
 universal_binaries:
