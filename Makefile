@@ -25,3 +25,9 @@ release-snapshot:
 .PHONY: lint
 lint: 
 	golangci-lint run ./... 
+
+
+.PHONY: changelog
+changelog: 
+	git-chglog -o CHANGELOG.md 
+

@@ -1,0 +1,33 @@
+style: github
+template: CHANGELOG.tpl.md
+info:
+  title: CHANGELOG
+  repository_url: https://github.com/vdbulcke/test
+options:
+  commits:
+    filters:
+      Type:
+        - feat
+        - fix
+        - perf
+        - refactor
+  commit_groups:
+    title_maps:
+      feat: Features
+      fix: Bug Fixes
+      perf: Performance Improvements
+      refactor: Code Refactoring
+  header:
+    pattern: "^(\\w*)\\:\\s(.*)$"
+    pattern_maps:
+      - Type
+      - Subject
+  ## Adds a Notes section with the Changelog
+  ## WARNING: keywords MUST be in a filter commit 
+  ##          (e.g. a commit that starts with fix)
+  ##           Otherwise notes gets discarded
+  ## WARNING: Keywords MUST ends with ':' semicolon
+  notes:
+    keywords:
+      - BREAKING CHANGE
+      - NOTE
