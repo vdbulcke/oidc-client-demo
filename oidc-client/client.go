@@ -49,6 +49,36 @@ func (c *OIDCClient) setCallbackCookie(w http.ResponseWriter, r *http.Request, n
 	http.SetCookie(w, cookie)
 }
 
+func (c *OIDCClient) validateAMR(idToken *oidc.IDToken) bool {
+
+	c.logger.Debug("Starting AMR validation")
+
+	// check if need to validate amr values
+	if len(c.config.AMRWhitelist) == 0 {
+		return true
+	}
+
+	// parse amr claims
+	var claims struct {
+		Amr []string `json:"amr"`
+	}
+	if err := idToken.Claims(&claims); err != nil {
+		c.logger.Error("Error parsing amr claims", "id_token", idToken, "err", err)
+		return false
+	}
+
+	// check if at least one of the whitelisted
+	// amr is in the claims
+	for _, amr := range c.config.AMRWhitelist {
+		if stringInSlice(amr, claims.Amr) {
+			return true
+		}
+	}
+
+	return false
+
+}
+
 func (c *OIDCClient) parseAccessTokenResponse(oauth2Token *oauth2.Token) (*JSONAccessTokenResponse, error) {
 	// common logger text
 	commonLoggerText := "Access Token Response"
@@ -137,8 +167,9 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 	}
 
 	oidcConfig := &oidc.Config{
-		ClientID:             c.config.ClientID,
-		SupportedSigningAlgs: []string{c.config.TokenSigningAlg},
+		ClientID: c.config.ClientID,
+		// SupportedSigningAlgs: []string{c.config.TokenSigningAlg},
+		SupportedSigningAlgs: c.config.TokenSigningAlg,
 	}
 	verifier := provider.Verifier(oidcConfig)
 
@@ -274,6 +305,11 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 				c.logger.Error("ID Token nonce does not match", "idToken.Nonce", idToken.Nonce, "Cookie.Nonce", nonceCookie.Value)
 				http.Error(w, "nonce did not match", http.StatusBadRequest)
 				return
+			}
+
+			// validate AMR Values
+			if !c.validateAMR(idToken) {
+				c.logger.Error("Amr not valid", "amrs", c.config.AMRWhitelist)
 			}
 		}
 

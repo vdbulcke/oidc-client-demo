@@ -31,3 +31,7 @@ lint:
 changelog: 
 	git-chglog -o CHANGELOG.md 
 
+.PHONY: test
+test: 
+	go test -run '' ./oidc-client/
+

@@ -1,22 +1,56 @@
 ---
-### Client ID
+## Client Credentials: (Mandatory)
+### NOTE: those client_id/client_secret can be passed
+###       as environment variables with: 
+###
+###    export OIDC_CLIENT_ID=my_client_id
+###    export OIDC_CLIENT_SECRET=my_client_id
+###
 client_id: 
 client_secret: 
 
+## Scopes: (Mandatory)
 scopes:
-  - openid
-  - profile
-  - egovnrn
+- openid
+- profile
+- egovnrn
+# - roles
+# - enterprise
 
-acr_values: "urn:be:fedict:iam:fas:citizen:Level300"
+## Token Signature Alg: (Mandatory)
+###   List allowed signing algorithm for token validation
+token_signing_alg: 
+- "RS256"
 
-issuer: "https://idp.iamfas.ta.belgium.be/fas/oauth2"
+
+## IDP Config: (Mandatory)
+### NOTE: this 'issuer' will be used to find the ./well-known/openid-configuration 
+###       by adding ./well-known/openid-configuration after the issuer base url 
+issuer: "https://idp.iamfas.int.belgium.be/fas/oauth2"
+
+## Override Token endpoint: (Optional)
+###   You can override some endpoints after they are fetched from ./well-known/openid-configuration
+### 
+# token_endpoint: "https://idp.iamfas.int.belgium.be/fas/oauth2/access_token"
+# authorize_endpoint: "https://idp.iamfas.int.belgium.be/fas/oauth2/authorize"
+# userinfo_endpoint: "https://idp.iamfas.int.belgium.be/fas/oauth2/userinfo"
 
 
-# token_endpoint: "https://idp.iamfas.ta.belgium.be/fas/oauth2/access_token"
-# authorize_endpoint:  "https://idp.iamfas.ta.belgium.be/fas/oauth2/authorize"
-# userinfo_endpoint: "https://idp.iamfas.ta.belgium.be/fas/oauth2/userinfo"
-# jwks_endpoint: 
-token_signing_alg: "RS256"
+## Acr Values: (Optional)
+# acr_values: "urn:be:fedict:iam:fas:citizen:Level100"
 
-skip_tls_verification: true
+## AMR List: (Optional)
+###  List of allowed amr value, the validation
+###  will be successful if a least one of the amr
+###  in the list if present in the token
+# amr_list: 
+# - eid
+# - bmid
+# - urn:be:fedict:iam:fas:Level500
+
+
+## TLS Setting: (Optional)
+###   Disable TLS certificate validation
+# skip_tls_verification: true
+
+

@@ -23,7 +23,9 @@ type OIDCClientConfig struct {
 	UserinfoEndpoint  string `yaml:"userinfo_endpoint" `
 	// JwksEndpoint      string `yaml:"jwks_endpoint"`
 
-	TokenSigningAlg string `yaml:"token_signing_alg"`
+	TokenSigningAlg []string `yaml:"token_signing_alg" validate:"required"`
+
+	AMRWhitelist []string `yaml:"amr_list"`
 
 	RedirectUri string
 
