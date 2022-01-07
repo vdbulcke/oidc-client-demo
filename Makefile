@@ -35,3 +35,7 @@ changelog:
 test: 
 	go test -run '' ./oidc-client/
 
+
+.PHONY: gen-doc
+gen-doc: 
+	dist/oidc-client-demo_linux_amd64/oidc-client documentation --dir ./doc
