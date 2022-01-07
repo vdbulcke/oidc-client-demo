@@ -318,6 +318,7 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 			return
 		}
 		// send the global http response
+		//nolint
 		w.Write(data)
 
 		// stop program

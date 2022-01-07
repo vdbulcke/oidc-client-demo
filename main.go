@@ -14,10 +14,10 @@ import (
 var GitCommit string
 
 // Version
-var version = "0.0.2"
+var Version string
 
 // HumanVersion version with commit
-var HumanVersion = fmt.Sprintf("%s-(%s)", version, GitCommit)
+var HumanVersion = fmt.Sprintf("%s-(%s)", Version, GitCommit)
 
 func main() {
 	// Parse argument
@@ -31,7 +31,7 @@ func main() {
 		if GitCommit != "" {
 			fmt.Println(HumanVersion)
 		} else {
-			fmt.Println(version)
+			fmt.Println(Version)
 		}
 
 		os.Exit(0)
@@ -67,11 +67,15 @@ func main() {
 		v = HumanVersion
 
 	} else {
-		v = version
+		v = Version
 	}
 	appLogger.Info("Starting OIDC Client", "version", v)
 	client.Info()
 
-	client.OIDCAuthorizationCodeFlow()
+	err = client.OIDCAuthorizationCodeFlow()
+	if err != nil {
+		appLogger.Error("Error initializing client", "error", err)
+		os.Exit(1)
+	}
 
 }
