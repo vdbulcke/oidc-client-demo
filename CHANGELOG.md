@@ -4,6 +4,9 @@
 
 <a name="v0.1.0"></a>
 ## v0.1.0 - 2022-01-07
+### Bug Fixes
+- 8b8d37e - goreleaser release config
+
 ### Features
 - 6acaf4e - Add amr validation
 - ead0c22 - Add Cobra  cli
