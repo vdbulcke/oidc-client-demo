@@ -39,3 +39,7 @@ test:
 .PHONY: gen-doc
 gen-doc: 
 	dist/oidc-client-demo_linux_amd64/oidc-client documentation --dir ./doc
+
+.PHONY: test-site
+test-site: 
+	podman  run --rm -it -p 8000:8000 -v ${PWD}/www:/docs:z squidfunk/mkdocs-material 
