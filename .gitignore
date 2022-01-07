@@ -1,4 +1,8 @@
 bin/*
 releases/*
 
+
+## goreleaser
+dist/
 .envrc
+
