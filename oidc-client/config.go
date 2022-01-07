@@ -9,8 +9,6 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-var RedirectUri = "http://127.0.0.1:5556/auth/callback"
-
 type OIDCClientConfig struct {
 	ClientID     string   `yaml:"client_id"  validate:"required"`
 	ClientSecret string   `yaml:"client_secret" validate:"required"`
@@ -31,6 +29,11 @@ type OIDCClientConfig struct {
 
 	// NOTE: default is false
 	SkipTLSVerification bool `yaml:"skip_tls_verification"`
+
+	// Listen Address
+	ListenAddress string
+	// Listen Port
+	ListenPort int
 }
 
 // ValidateConfig validate config
@@ -74,9 +77,6 @@ func ParseConfig(configFile string) (*OIDCClientConfig, error) {
 
 	// override properties with env variable if declared
 	parseEnv(&config)
-
-	// Setting default redirect URI
-	config.RedirectUri = RedirectUri
 
 	// return Parse config struct
 	return &config, nil

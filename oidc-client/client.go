@@ -6,12 +6,15 @@ import (
 	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
+	"os/signal"
 	"time"
 
 	"github.com/coreos/go-oidc/v3/oidc"
+	"github.com/hashicorp/go-hclog"
 	"golang.org/x/oauth2"
 )
 
@@ -169,37 +172,47 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 		return err
 	}
 
-	// setting Authorize call options
-	authNonceOption := oauth2.SetAuthURLParam("nonce", nonce)
+	mux := http.DefaultServeMux
 
-	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
-
-		if err != nil {
-			http.Error(w, "Internal error", http.StatusInternalServerError)
-			return
-		}
+	// http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
+		// setting nonce and state as cookies
+		// that will be validate against callback response
 		c.setCallbackCookie(w, r, "state", state)
 		c.setCallbackCookie(w, r, "nonce", nonce)
 
 		// authorize URL
 		var authorizeURL string
+
+		// setting Authorize call options (&nonce=...)
+		authNonceOption := oauth2.SetAuthURLParam("nonce", nonce)
+
+		// if need acr_values
 		if c.config.AcrValues != "" {
+			// setting Authorize call options (&acr_values=...)
 			acrValuesOption := oauth2.SetAuthURLParam("acr_values", c.config.AcrValues)
+
+			// add &state=... and &nonce=...&acr_values=... to authorize request url
 			authorizeURL = oAuthConfig.AuthCodeURL(state, authNonceOption, acrValuesOption)
 		} else {
+			// add &state=... and &nonce=... to authorize request url
 			authorizeURL = oAuthConfig.AuthCodeURL(state, authNonceOption)
 		}
 
+		// redirect to authorization URL
 		http.Redirect(w, r, authorizeURL, http.StatusFound)
 	})
 
-	http.HandleFunc("/auth/callback", func(w http.ResponseWriter, r *http.Request) {
+	// http.HandleFunc("/auth/callback", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/auth/callback", func(w http.ResponseWriter, r *http.Request) {
+		// read back the state cookie
 		stateCookie, err := r.Cookie("state")
 		if err != nil {
 			c.logger.Error("state not found", "err", err)
 			http.Error(w, "state not found", http.StatusBadRequest)
 			return
 		}
+		// validate against callback state query_string param
 		if r.URL.Query().Get("state") != stateCookie.Value {
 			c.logger.Error("state did not match", "cookie_state", stateCookie.Value, "query_state", r.URL.Query().Get("state"))
 			http.Error(w, "state did not match", http.StatusBadRequest)
@@ -328,9 +341,52 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 		}()
 	})
 
-	c.logger.Info("Go to http://127.0.0.1:5556/login")
-	err = http.ListenAndServe("127.0.0.1:5556", nil)
-	c.logger.Error("Error", "err", err)
+	localAddress := fmt.Sprintf("%s:%d", c.config.ListenAddress, c.config.ListenPort)
+	c.logger.Info(fmt.Sprintf("Go to http://%s:%d/login", c.config.ListenAddress, c.config.ListenPort))
+	// create a new server
+	httpServer := http.Server{
+		Addr:     localAddress,                                            // configure the bind address
+		Handler:  mux,                                                     // set the default handler
+		ErrorLog: c.logger.StandardLogger(&hclog.StandardLoggerOptions{}), // set the logger for the server
+		// ReadTimeout:  5 * time.Second,                                          // max time to read request from the client
+		// WriteTimeout: 10 * time.Second,                                         // max time to write response to the client
+		// IdleTimeout:  120 * time.Second,                                        // max time for connections using TCP Keep-Alive
+	}
+
+	// start the server
+	go func() {
+
+		err := httpServer.ListenAndServe()
+		if err != nil {
+			if err == http.ErrServerClosed {
+				c.logger.Info("Server is shuting down", "error", err)
+				os.Exit(0)
+			}
+			c.logger.Error("Error starting server", "error", err)
+			os.Exit(1)
+		}
+	}()
+
+	// trap sigterm or interupt and gracefully shutdown the server
+	close := make(chan os.Signal, 1)
+	signal.Notify(close, os.Interrupt)
+	// signal.Notify(c, os.Kill)
+
+	// Block until a signal is received.
+	sig := <-close
+	c.logger.Info("Got signal", "sig", sig)
+
+	// gracefully shutdown the server, waiting max 30 seconds for current operations to complete
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer func() {
+		// extra handling here
+		cancel()
+	}()
+
+	err = httpServer.Shutdown(ctx)
+	if err != nil {
+		c.logger.Error("failure while shutting down server", "error", err)
+	}
 
 	return nil
 

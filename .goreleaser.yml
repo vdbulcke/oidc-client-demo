@@ -22,7 +22,7 @@ builds:
     ldflags:
       ## auto inject commit and version at build time
       ## TODO: 
-      - -X main.GitCommit={{ .ShortCommit }} -X main.Version={{ .Version }} 
+      -  -X github.com/vdbulcke/oidc-client-demo/cmd.GitCommit={{ .ShortCommit }} -X github.com/vdbulcke/oidc-client-demo/cmd.Version={{ .Version }}   -X github.com/vdbulcke/oidc-client-demo/cmd.Date={{ .CommitDate }} -X github.com/vdbulcke/oidc-client-demo/cmd.BuiltBy=goreleaser
 archives:
   - 
     replacements:
