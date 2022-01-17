@@ -9,6 +9,14 @@
 client_id: 
 client_secret: 
 
+
+## Client Auth Method: (Mandatory)
+###  Since version v0.2.0
+### Supported Auth Method
+###  * client_secret_basic (Using Basic Auth Header)
+###  * client_secret_post  (Using POST request)
+auth_method: client_secret_basic
+
 ## Scopes: (Mandatory)
 scopes:
 - openid

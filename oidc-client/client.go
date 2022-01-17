@@ -190,6 +190,16 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 		oAuthConfig.Endpoint.TokenURL = c.config.TokenEndpoint
 	}
 
+	// setting auth method
+	switch c.config.AuthMethod {
+	case "client_secret_basic":
+		oAuthConfig.Endpoint.AuthStyle = oauth2.AuthStyleInHeader
+
+	case "client_secret_post":
+		oAuthConfig.Endpoint.AuthStyle = oauth2.AuthStyleInParams
+
+	}
+
 	// generate state and none
 	state, err := c.randString(6)
 	if err != nil {

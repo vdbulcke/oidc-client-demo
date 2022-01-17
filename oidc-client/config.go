@@ -10,9 +10,11 @@ import (
 )
 
 type OIDCClientConfig struct {
-	ClientID     string   `yaml:"client_id"  validate:"required"`
-	ClientSecret string   `yaml:"client_secret" validate:"required"`
-	Scopes       []string `yaml:"scopes"  validate:"required"`
+	ClientID     string `yaml:"client_id"  validate:"required"`
+	ClientSecret string `yaml:"client_secret" validate:"required"`
+	AuthMethod   string `yaml:"auth_method"  validate:"required,oneof=client_secret_basic client_secret_post"`
+
+	Scopes []string `yaml:"scopes"  validate:"required"`
 
 	AcrValues string `yaml:"acr_values"`
 

@@ -13,6 +13,12 @@ func TestHttpClientGetCert(t *testing.T) {
 		t.Fail()
 	}
 
+	config.ClientID = "foo"
+	config.ClientSecret = "bar"
+
+	if !ValidateConfig(config) {
+		t.Fail()
+	}
 	t.Logf("Config %v", config)
 
 	// t.Fail()

@@ -49,6 +49,12 @@ func runClient(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
+	// validate config
+	if !oidcclient.ValidateConfig(config) {
+		appLogger.Error("Could not validate config")
+		os.Exit(1)
+	}
+
 	// setting the redirect URI
 	config.ListenAddress = DefaultListeningAddress
 	config.ListenPort = port
