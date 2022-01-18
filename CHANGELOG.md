@@ -2,8 +2,18 @@
 ## [Unreleased]
 
 
+<a name="v0.2.0"></a>
+## [v0.2.0] - 2022-01-18
+### Bug Fixes
+- 1a670e3 - git-chglog github url in config
+
+### Features
+- 17610ac - Add refresh-token command [#2](https://github.com/vdbulcke/oidc-client-demo/issues/2)
+- ddcca06 - Add client_secret_post auth option [#1](https://github.com/vdbulcke/oidc-client-demo/issues/1)
+
+
 <a name="v0.1.0"></a>
-## v0.1.0 - 2022-01-07
+## [v0.1.0] - 2022-01-07
 ### Bug Fixes
 - 8b8d37e - goreleaser release config
 
@@ -16,4 +26,13 @@
 - 0de3798 - Add addtoken output + cleanup log
 
 
-[Unreleased]: https://github.com/vdbulcke/test/compare/v0.1.0...HEAD
+<a name="v0.0.2"></a>
+## [v0.0.2] - 2021-07-23
+
+<a name="v0.0.1"></a>
+## v0.0.1 - 2021-07-23
+
+[Unreleased]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.2.0...HEAD
+[v0.2.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.1.0...v0.2.0
+[v0.1.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.0.2...v0.1.0
+[v0.0.2]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.0.1...v0.0.2
