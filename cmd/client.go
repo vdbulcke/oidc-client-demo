@@ -61,7 +61,12 @@ func runClient(cmd *cobra.Command, args []string) {
 	config.RedirectUri = fmt.Sprintf("http://%s:%d/auth/callback", DefaultListeningAddress, port)
 
 	// Make a new OIDC Client
-	client := oidcclient.NewOIDCClient(config, appLogger)
+	client, err := oidcclient.NewOIDCClient(config, appLogger)
+	if err != nil {
+		appLogger.Error("Error creating client", "error", err)
+		os.Exit(1)
+	}
+
 	// display info about the current client
 	client.Info()
 
