@@ -10,7 +10,7 @@ build:
 
 .PHONY: build-snapshot
 build-snapshot: 
-	goreleaser build --rm-dist --snapshot
+	goreleaser build --rm-dist --snapshot --single-target
 
 
 .PHONY: release-skip-publish
