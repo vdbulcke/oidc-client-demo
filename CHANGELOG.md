@@ -2,6 +2,15 @@
 ## [Unreleased]
 
 
+<a name="v0.3.0"></a>
+## [v0.3.0] - 2022-01-24
+### Bug Fixes
+- 00d78ee - Remove ignored Userinfo  references [#5](https://github.com/vdbulcke/oidc-client-demo/issues/5)
+
+### Features
+- e801e24 - Add option to override jwk [#6](https://github.com/vdbulcke/oidc-client-demo/issues/6)
+
+
 <a name="v0.2.0"></a>
 ## [v0.2.0] - 2022-01-18
 ### Bug Fixes
@@ -32,7 +41,8 @@
 <a name="v0.0.1"></a>
 ## v0.0.1 - 2021-07-23
 
-[Unreleased]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.3.0...HEAD
+[v0.3.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.2.0...v0.3.0
 [v0.2.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.1.0...v0.2.0
 [v0.1.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.0.2...v0.1.0
 [v0.0.2]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.0.1...v0.0.2
