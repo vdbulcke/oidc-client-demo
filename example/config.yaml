@@ -42,7 +42,7 @@ issuer: "https://idp.iamfas.int.belgium.be/fas/oauth2"
 # token_endpoint: "https://idp.iamfas.int.belgium.be/fas/oauth2/access_token"
 # authorize_endpoint: "https://idp.iamfas.int.belgium.be/fas/oauth2/authorize"
 # userinfo_endpoint: "https://idp.iamfas.int.belgium.be/fas/oauth2/userinfo"
-
+# jwks_endpoint: "https://iamapps-public.int.belgium.be/oidc/jwk_uri.json"
 
 ## Acr Values: (Optional)
 # acr_values: "urn:be:fedict:iam:fas:citizen:Level100"

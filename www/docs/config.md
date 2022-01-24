@@ -95,7 +95,7 @@ If you need to override some endpoints from the discovery `.well-known/openid-co
 
 * `token_endpoint`: endpoint used for getting Access Token
 * `authorize_endpoint`: endpoint used for the Authorization code flow
-* `userinfo_endpoint`: endpoint used for getting user profile information
+* `jwks_endpoint`: endpoint used for getting JSON Web Keys for signature validation
 
 ```yaml
 ## Override Token endpoint: (Optional)
@@ -103,7 +103,7 @@ If you need to override some endpoints from the discovery `.well-known/openid-co
 ### 
 # token_endpoint: "https://example.com/oauth2/access_token"
 # authorize_endpoint: "https://example.com/oauth2/authorize"
-# userinfo_endpoint: "https://example.com/oauth2/userinfo"
+# jwks_endpoint: "https://example.com/oauth2/jwk.json"
 ```
 
 ## Security 
