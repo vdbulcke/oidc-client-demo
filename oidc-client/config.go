@@ -23,7 +23,7 @@ type OIDCClientConfig struct {
 	TokenEndpoint     string `yaml:"token_endpoint"  `
 	AuthorizeEndpoint string `yaml:"authorize_endpoint"  `
 	UserinfoEndpoint  string `yaml:"userinfo_endpoint" `
-	// JwksEndpoint      string `yaml:"jwks_endpoint"`
+	JwksEndpoint      string `yaml:"jwks_endpoint"`
 
 	TokenSigningAlg []string `yaml:"token_signing_alg" validate:"required"`
 

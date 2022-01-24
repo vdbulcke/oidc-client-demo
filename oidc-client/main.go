@@ -54,7 +54,19 @@ func NewOIDCClient(c *OIDCClientConfig, l hclog.Logger) (*OIDCClient, error) {
 		SupportedSigningAlgs: c.TokenSigningAlg,
 	}
 
-	verifier := provider.Verifier(oidcConfig)
+	var verifier *oidc.IDTokenVerifier
+	if c.JwksEndpoint != "" {
+
+		keySet := oidc.NewRemoteKeySet(ctx, c.JwksEndpoint)
+		verifier = oidc.NewVerifier(c.Issuer, keySet, oidcConfig)
+
+		if l.IsDebug() {
+			l.Debug("Using Custom JWK endpoint", "jwk_endpoint", c.JwksEndpoint)
+		}
+
+	} else {
+		verifier = provider.Verifier(oidcConfig)
+	}
 
 	// new OAuth2 Config
 	oAuthConfig := oauth2.Config{
