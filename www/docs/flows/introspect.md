@@ -3,7 +3,7 @@
 !!! warning
   For the `introspect` subcommand the `introspect_endpoint:` is mandatory.
 
-  See [configuration](/config/) for more details.
+  See [configuration](/oidc-client-demo/config/) for more details.
 
 ## tl;dr
 

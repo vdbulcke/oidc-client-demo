@@ -90,7 +90,7 @@ issuer: "https://example.com"
 !!! warning 
     Mandatory setting for the `oidc-client introspect` subcommand. 
 
-    See [Token Introspection](/flows/introspect/) for more info.
+    See [Token Introspection](/oidc-client-demo/flows/introspect/) for more info.
 
 You must specify the `introspect_endpoint` setting that will be used for token introspection request to the Authorization Server.
 ```yaml
