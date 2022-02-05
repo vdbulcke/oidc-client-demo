@@ -37,6 +37,7 @@ nav:
 - Flows:
   - flows/authorization_code.md
   - flows/refresh_token.md
+  - flows/introspect.md
   - flows/end_session.md
 - troubleshooting.md
 - Contributing: 

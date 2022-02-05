@@ -85,6 +85,21 @@ You must specify the `issuer` setting that will be used for construct the OpenID
 issuer: "https://example.com"
 ```
 
+### Token Introspection Endpoint
+
+!!! warning 
+    Mandatory setting for the `oidc-client introspect` subcommand. 
+
+    See [Token Introspection](/flows/introspect/) for more info.
+
+You must specify the `introspect_endpoint` setting that will be used for token introspection request to the Authorization Server.
+```yaml
+## Introspect: (Mandatory for 'introspect sub command')
+## 
+introspect_endpoint: "https://example.com/introspect"
+```
+
+
 
 ### Overriding Authorization Server Endpoints
 
