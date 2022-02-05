@@ -2,6 +2,15 @@
 ## [Unreleased]
 
 
+<a name="v0.4.0"></a>
+## [v0.4.0] - 2022-02-05
+### Code Refactoring
+- b65ae79 - refresh token, warning on skip TLS
+
+### Features
+- 0880017 - Add introspect command [#3](https://github.com/vdbulcke/oidc-client-demo/issues/3)
+
+
 <a name="v0.3.0"></a>
 ## [v0.3.0] - 2022-01-24
 ### Bug Fixes
@@ -41,7 +50,8 @@
 <a name="v0.0.1"></a>
 ## v0.0.1 - 2021-07-23
 
-[Unreleased]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.4.0...HEAD
+[v0.4.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.3.0...v0.4.0
 [v0.3.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.2.0...v0.3.0
 [v0.2.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.1.0...v0.2.0
 [v0.1.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.0.2...v0.1.0
