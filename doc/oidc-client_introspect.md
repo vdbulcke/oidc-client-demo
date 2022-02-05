@@ -1,20 +1,17 @@
-## oidc-client documentation
+## oidc-client introspect
 
-Generate Markdown doc for oidc-client
-
-### Synopsis
-
-Generate Markdown in ./doc
+Introspect token
 
 ```
-oidc-client documentation [flags]
+oidc-client introspect [flags]
 ```
 
 ### Options
 
 ```
-      --dir string   Directory where to generate the doc (default "./doc")
-  -h, --help         help for documentation
+  -c, --config string   oidc client config file
+  -h, --help            help for introspect
+      --token string    Token to introspect
 ```
 
 ### Options inherited from parent commands
