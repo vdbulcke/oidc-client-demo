@@ -36,12 +36,17 @@ token_signing_alg:
 ###       by adding ./well-known/openid-configuration after the issuer base url 
 issuer: "https://idp.iamfas.int.belgium.be/fas/oauth2"
 
+## Introspect: (Mandatory for 'introspect sub command')
+## 
+introspect_endpoint: "https://idp.iamfas.int.belgium.be/fas/oauth2/introspect"
+
 ## Override Token endpoint: (Optional)
 ###   You can override some endpoints after they are fetched from ./well-known/openid-configuration
 ### 
 # token_endpoint: "https://idp.iamfas.int.belgium.be/fas/oauth2/access_token"
 # authorize_endpoint: "https://idp.iamfas.int.belgium.be/fas/oauth2/authorize"
 # jwks_endpoint: "https://iamapps-public.int.belgium.be/oidc/jwk_uri.json"
+
 
 ## Acr Values: (Optional)
 # acr_values: "urn:be:fedict:iam:fas:citizen:Level100"
