@@ -36,6 +36,10 @@ func NewOIDCClient(c *OIDCClientConfig, l hclog.Logger) (*OIDCClient, error) {
 
 	ctx := context.Background()
 
+	if c.SkipTLSVerification {
+		l.Warn("TLS Validation is disabled")
+	}
+
 	// skipping the TLS verification endpoint could be self signed
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{
 		InsecureSkipVerify: c.SkipTLSVerification,
