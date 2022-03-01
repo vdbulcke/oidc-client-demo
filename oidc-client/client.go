@@ -242,14 +242,13 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 		c.logger.Info("Access Token Response", "Response", string(accessTokenResponseLog))
 
 		// Validate ID Token
-		var idToken *oidc.IDToken
 		idTokenRaw := accessTokenResponse.IDToken
 		if idTokenRaw == "" {
 			c.logger.Error("no ID Token Found")
 		} else {
 
 			// validate signature agains the JWK
-			idToken, err = c.verifier.Verify(c.ctx, idTokenRaw)
+			idToken, err := c.processIdToken(c.ctx, idTokenRaw)
 			if err != nil {
 				c.logger.Error("ID Token validation failed", "err", err)
 				http.Error(w, "Failed to verify ID Token: "+err.Error(), http.StatusInternalServerError)
@@ -270,58 +269,20 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 				return
 			}
 
-			// validate AMR Values
-			if !c.validateAMR(idToken) {
-				c.logger.Error("Amr not valid", "amrs", c.config.AMRWhitelist)
-			}
 		}
 
 		// Fetch Userinfo
-		// NOTE: this will detects based on the Content-Type if the userinfo is application/jwt
-		//       and if it is JWT it will validate signature agains JWK for the provider
-		userInfo, err := c.provider.UserInfo(c.ctx, oauth2.StaticTokenSource(oauth2Token))
+		err = c.userinfo(oauth2Token)
 		if err != nil {
 			http.Error(w, "Failed to get userinfo: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		// Prints Retrieved information and  generate JSON HTTP response
-
 		// Create global HTTP response object
 		resp := struct {
 			OAuth2Token     *oauth2.Token
 			AccessTokenResp *JSONAccessTokenResponse
-			IDTokenClaims   *json.RawMessage
-			UserInfo        *oidc.UserInfo
-			UserInfoClaims  *json.RawMessage
-		}{oauth2Token, accessTokenResponse, new(json.RawMessage), userInfo, new(json.RawMessage)}
-
-		// format id Token Claims
-		if err := idToken.Claims(&resp.IDTokenClaims); err != nil {
-			c.logger.Error("Error Parsing ID Token Claims", "err", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		// format userinfo Claims
-		if err := userInfo.Claims(&resp.UserInfoClaims); err != nil {
-			c.logger.Error("Error Parsing USerinfo Claims", "err", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		// Print ID Token Claims, and User Info
-		idTokenClaims, err := json.MarshalIndent(resp.IDTokenClaims, "", "    ")
-		if err != nil {
-			c.logger.Error("Could not parse idTokenClaims", "err", err)
-		}
-		userinfoClaims, err := json.MarshalIndent(resp.UserInfoClaims, "", "    ")
-		if err != nil {
-			c.logger.Error("Could not parse idTokenClaims", "err", err)
-		}
-
-		c.logger.Info("IDToken Claims", "IDTokenClaims", string(idTokenClaims))
-		c.logger.Info("Userinfo Claims", "UserInfoClaims", string(userinfoClaims))
+		}{oauth2Token, accessTokenResponse}
 
 		// Format in JSON global HTTP response
 		data, err := json.MarshalIndent(resp, "", "    ")

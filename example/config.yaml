@@ -60,6 +60,9 @@ introspect_endpoint: "https://idp.iamfas.int.belgium.be/fas/oauth2/introspect"
 # - bmid
 # - urn:be:fedict:iam:fas:Level500
 
+## Skip Userinfo: (Optional)
+###   Disable call to userinfo endpoint
+# skip_userinfo_call: true
 
 ## TLS Setting: (Optional)
 ###   Disable TLS certificate validation

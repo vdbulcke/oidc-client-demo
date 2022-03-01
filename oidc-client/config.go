@@ -34,6 +34,9 @@ type OIDCClientConfig struct {
 	// NOTE: default is false
 	SkipTLSVerification bool `yaml:"skip_tls_verification"`
 
+	// NOTE: default is false
+	SkipUserinfo bool `yaml:"skip_userinfo_call"`
+
 	// Listen Address
 	ListenAddress string
 	// Listen Port

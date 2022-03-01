@@ -9,7 +9,7 @@ import (
 
 // args var
 var refreshToken string
-var skipUserinfo bool
+
 var skipIdTokenVerification bool
 
 func init() {
@@ -18,7 +18,6 @@ func init() {
 	// add flags to sub command
 	refreshTokenCmd.Flags().StringVarP(&configFilename, "config", "c", "", "oidc client config file")
 	refreshTokenCmd.Flags().StringVarP(&refreshToken, "refresh-token", "", "", "Refresh Token")
-	refreshTokenCmd.Flags().BoolVarP(&skipUserinfo, "skip-userinfo", "", false, "Skip fetching Userinfo after renewing tokens")
 	refreshTokenCmd.Flags().BoolVarP(&skipIdTokenVerification, "skip-id-token-verification", "", false, "Skip validation of id_token after renewing tokens")
 
 	// required flags
@@ -57,6 +56,12 @@ func runRefreshToken(cmd *cobra.Command, args []string) {
 
 	// NOTE: Redirect URI is not need for refresh token grant
 
+	// override config if flag is passed as args
+	if skipUserinfo {
+		appLogger.Warn("Skipping Userinfo")
+		config.SkipUserinfo = skipUserinfo
+	}
+
 	// Make a new OIDC Client
 	client, err := oidcclient.NewOIDCClient(config, appLogger)
 	if err != nil {
@@ -66,7 +71,7 @@ func runRefreshToken(cmd *cobra.Command, args []string) {
 	// display info about the current client
 	client.Info()
 
-	err = client.RefreshTokenFlow(refreshToken, skipUserinfo, skipIdTokenVerification)
+	err = client.RefreshTokenFlow(refreshToken, skipIdTokenVerification)
 	if err != nil {
 		appLogger.Error("Error during Refresh Token", "error", err)
 		os.Exit(1)

@@ -10,12 +10,14 @@ import (
 
 var Debug bool
 var noColor bool
+var skipUserinfo bool
 
 func init() {
 
 	// add global("persistent") flag
 	rootCmd.PersistentFlags().BoolVarP(&Debug, "debug", "d", false, "debug mode enabled")
 	rootCmd.PersistentFlags().BoolVarP(&noColor, "no-color", "", false, "disable color output")
+	rootCmd.PersistentFlags().BoolVarP(&skipUserinfo, "skip-userinfo", "", false, "Skip fetching Userinfo")
 
 }
 

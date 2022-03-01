@@ -60,6 +60,12 @@ func runClient(cmd *cobra.Command, args []string) {
 	config.ListenPort = port
 	config.RedirectUri = fmt.Sprintf("http://%s:%d/auth/callback", DefaultListeningAddress, port)
 
+	// override config if flag is passed as args
+	if skipUserinfo {
+		appLogger.Warn("Skipping Userinfo")
+		config.SkipUserinfo = skipUserinfo
+	}
+
 	// Make a new OIDC Client
 	client, err := oidcclient.NewOIDCClient(config, appLogger)
 	if err != nil {
