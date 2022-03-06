@@ -74,11 +74,15 @@ func NewOIDCClient(c *OIDCClientConfig, l hclog.Logger) (*OIDCClient, error) {
 
 	// new OAuth2 Config
 	oAuthConfig := oauth2.Config{
-		ClientID:     c.ClientID,
-		ClientSecret: c.ClientSecret,
-		Endpoint:     provider.Endpoint(),
-		RedirectURL:  c.RedirectUri,
-		Scopes:       c.Scopes,
+		ClientID:    c.ClientID,
+		Endpoint:    provider.Endpoint(),
+		RedirectURL: c.RedirectUri,
+		Scopes:      c.Scopes,
+	}
+
+	// only set client secret if not PKCE
+	if !c.UsePKCE {
+		oAuthConfig.ClientSecret = c.ClientSecret
 	}
 
 	// override setting from well-known endpoint

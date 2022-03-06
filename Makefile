@@ -33,13 +33,14 @@ changelog:
 
 .PHONY: test
 test: 
-	go test -run '' ./oidc-client/
+	go test -run '' ./oidc-client/ -v
+	go test -run '' ./oidc-client/internal/ -v 
 
 
 .PHONY: gen-doc
 gen-doc: 
 	dist/oidc-client-demo_linux_amd64/oidc-client documentation --dir ./doc
 
-.PHONY: test-site
-test-site: 
+.PHONY: doc-site
+doc-site: 
 	podman  run --rm -it -p 8000:8000 -v ${PWD}/www:/docs:z squidfunk/mkdocs-material 

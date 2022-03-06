@@ -14,6 +14,7 @@ import (
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/hashicorp/go-hclog"
+	"github.com/vdbulcke/oidc-client-demo/oidc-client/internal"
 	"golang.org/x/oauth2"
 )
 
@@ -166,6 +167,26 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 		return err
 	}
 
+	// pkce flow
+	var codeVerifier, challenge string
+	if c.config.UsePKCE {
+
+		// generate new code
+		codeVerifier, err = internal.NewCodeVerifier(c.config.PKCECodeLength)
+		if err != nil {
+			c.logger.Error("Fail to generate PKCE code", "error", err)
+			return err
+		}
+
+		// generate challenge
+		challenge, err = internal.NewCodeChallenge(codeVerifier, c.config.PKCEChallengeMethod)
+		if err != nil {
+			c.logger.Error("Fail to generate PKCE Challenge", "code", codeVerifier, "error", err)
+			return err
+		}
+
+	}
+
 	mux := http.DefaultServeMux
 
 	// http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
@@ -178,20 +199,33 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 		// authorize URL
 		var authorizeURL string
 
+		// Extra parameter for authorize endpoint
+		var authorizeOtps []oauth2.AuthCodeOption
+
 		// setting Authorize call options (&nonce=...)
 		authNonceOption := oauth2.SetAuthURLParam("nonce", nonce)
+		authorizeOtps = append(authorizeOtps, authNonceOption)
 
 		// if need acr_values
 		if c.config.AcrValues != "" {
 			// setting Authorize call options (&acr_values=...)
 			acrValuesOption := oauth2.SetAuthURLParam("acr_values", c.config.AcrValues)
-
-			// add &state=... and &nonce=...&acr_values=... to authorize request url
-			authorizeURL = c.oAuthConfig.AuthCodeURL(state, authNonceOption, acrValuesOption)
-		} else {
-			// add &state=... and &nonce=... to authorize request url
-			authorizeURL = c.oAuthConfig.AuthCodeURL(state, authNonceOption)
+			authorizeOtps = append(authorizeOtps, acrValuesOption)
 		}
+
+		// handle pkce paramater
+		if c.config.UsePKCE {
+
+			pkceOption := oauth2.SetAuthURLParam("code_challenge", challenge)
+			authorizeOtps = append(authorizeOtps, pkceOption)
+
+			pkceMethodOption := oauth2.SetAuthURLParam("code_challenge_method", c.config.PKCEChallengeMethod)
+			authorizeOtps = append(authorizeOtps, pkceMethodOption)
+
+		}
+
+		// generate the authorize url with the extra options
+		authorizeURL = c.oAuthConfig.AuthCodeURL(state, authorizeOtps...)
 
 		// redirect to authorization URL
 		http.Redirect(w, r, authorizeURL, http.StatusFound)
@@ -218,11 +252,28 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 		c.logger.Info("Received AuthZ Code", "code", authZCode)
 
 		// Access Token Response
-		oauth2Token, err := c.oAuthConfig.Exchange(c.ctx, authZCode)
-		if err != nil {
-			c.logger.Error("Failed to get Access Token", "err", err)
-			http.Error(w, "Failed to exchange token: "+err.Error(), http.StatusInternalServerError)
-			return
+		var oauth2Token *oauth2.Token
+		if c.config.UsePKCE {
+			// set extra pkce param
+			pkceVerifierOption := oauth2.SetAuthURLParam("code_verifier", codeVerifier)
+
+			c.logger.Debug("using pkce code_verifier for getting access token")
+
+			oauth2Token, err = c.oAuthConfig.Exchange(c.ctx, authZCode, pkceVerifierOption)
+			if err != nil {
+				c.logger.Error("Failed to get Access Token", "err", err)
+				http.Error(w, "Failed to exchange token: "+err.Error(), http.StatusInternalServerError)
+				return
+			}
+		} else {
+
+			// without pkce
+			oauth2Token, err = c.oAuthConfig.Exchange(c.ctx, authZCode)
+			if err != nil {
+				c.logger.Error("Failed to get Access Token", "err", err)
+				http.Error(w, "Failed to exchange token: "+err.Error(), http.StatusInternalServerError)
+				return
+			}
 		}
 
 		// Parse Access Token

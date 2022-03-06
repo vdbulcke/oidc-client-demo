@@ -7,12 +7,18 @@ import (
 
 	"github.com/go-playground/validator"
 	"gopkg.in/yaml.v2"
+
+	"github.com/vdbulcke/oidc-client-demo/oidc-client/internal"
 )
 
 type OIDCClientConfig struct {
 	ClientID     string `yaml:"client_id"  validate:"required"`
-	ClientSecret string `yaml:"client_secret" validate:"required"`
+	ClientSecret string `yaml:"client_secret" `
 	AuthMethod   string `yaml:"auth_method"  validate:"required,oneof=client_secret_basic client_secret_post"`
+
+	UsePKCE             bool   `yaml:"use_pkce"`
+	PKCEChallengeMethod string `yaml:"pkce_challenge_method"`
+	PKCECodeLength      int
 
 	Scopes []string `yaml:"scopes"  validate:"required"`
 
@@ -48,6 +54,18 @@ func ValidateConfig(config *OIDCClientConfig) bool {
 
 	validate := validator.New()
 	errs := validate.Struct(config)
+
+	if config.PKCEChallengeMethod != "" {
+		if config.PKCEChallengeMethod != internal.PKCEMethodPlain && config.PKCEChallengeMethod != internal.PKCEMethodS256 {
+			fmt.Println("Invalid 'pkce_challenge_method' must be one of 'S256' or 'plain'")
+			return false
+		}
+	}
+
+	if !config.UsePKCE && config.ClientSecret == "" {
+		fmt.Println("Error 'client_secret' not set")
+		return false
+	}
 
 	if errs == nil {
 		return true
@@ -85,6 +103,14 @@ func ParseConfig(configFile string) (*OIDCClientConfig, error) {
 	// override properties with env variable if declared
 	parseEnv(&config)
 
+	// Set Default PKCE Method if not set
+	if config.PKCEChallengeMethod == "" {
+		config.PKCEChallengeMethod = internal.PKCEMethodS256
+	}
+
+	// set default PKCE Code length
+	config.PKCECodeLength = 50
+
 	// return Parse config struct
 	return &config, nil
 
@@ -100,7 +126,7 @@ func parseEnv(config *OIDCClientConfig) {
 		config.ClientID = clientID
 	}
 
-	if clientSecret != "" {
+	if clientSecret != "" && !config.UsePKCE {
 		config.ClientSecret = clientSecret
 	}
 

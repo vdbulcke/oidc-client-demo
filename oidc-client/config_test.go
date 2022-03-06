@@ -19,7 +19,7 @@ func TestHttpClientGetCert(t *testing.T) {
 	if !ValidateConfig(config) {
 		t.Fail()
 	}
-	t.Logf("Config %v", config)
+	// t.Logf("Config %v", config)
 
 	// t.Fail()
 }
