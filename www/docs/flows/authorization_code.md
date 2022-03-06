@@ -81,10 +81,10 @@ Flags:
   -p, --port int        oidc client call back port (default 5556)
 
 Global Flags:
-  -d, --debug      debug mode enabled
-      --no-color   disable color output
+  -d, --debug           debug mode enabled
+      --no-color        disable color output
+      --skip-userinfo   Skip fetching Userinfo
+
 
 ```
 
-
-### Overviding 

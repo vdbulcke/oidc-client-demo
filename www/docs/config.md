@@ -121,6 +121,23 @@ If you need to override some endpoints from the discovery `.well-known/openid-co
 # jwks_endpoint: "https://example.com/oauth2/jwk.json"
 ```
 
+### Skip Userinfo Call
+
+!!! note 
+    Optional Settings
+
+Some Authorization Servers returns all the claims directly in the ID Token, or some don't even support the userinfo_endpoint. For those reasons, if you don't need to make the extra userinfo call, you can disable it by setting `skip_userinfo_call: true`.
+
+```yaml
+## Skip Userinfo: (Optional)
+###   Disable call to userinfo endpoint
+# skip_userinfo_call: true
+```
+
+!!!tip
+    This parameter can be overridden at run time by passing `--skip-userinfo` flags for the `oidc-client client` and `oidc-client refresh-token` sub commands. 
+
+
 ## Security 
 
 ### Token Signing Algorithms

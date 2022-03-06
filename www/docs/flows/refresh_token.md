@@ -61,10 +61,10 @@ Flags:
   -h, --help                         help for refresh-token
       --refresh-token string         Refresh Token
       --skip-id-token-verification   Skip validation of id_token after renewing tokens
-      --skip-userinfo                Skip fetching Userinfo after renewing tokens
 
 Global Flags:
-  -d, --debug      debug mode enabled
-      --no-color   disable color output
+  -d, --debug           debug mode enabled
+      --no-color        disable color output
+      --skip-userinfo   Skip fetching Userinfo
 
 ```
