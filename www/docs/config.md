@@ -8,7 +8,9 @@ You can find a complete example of the client configuration in [example/config.y
 ### Client ID and Secret
 
 !!! important 
-    Mandatory (either in config file or ENV variables)
+    Mandatory (either in config file or ENV variables) **unless** using pkce flow. In which case the `client_secret` is not required.
+
+    See section [PKCE](https://vdbulcke.github.io/oidc-client-demo/config/#pkce).
 
 The OIDC client credentials can be passed either in the main `config.yaml` config file, or as environment variables. 
 
@@ -52,6 +54,37 @@ Client authentication method MUST be one of
 ###  * client_secret_basic (Using Basic Auth Header)
 ###  * client_secret_post  (Using POST request)
 auth_method: client_secret_basic
+```
+
+## PKCE
+
+!!! note 
+    Optional Settings
+
+Set `use_pkce: true` to enable the Authorization Code Flow with PKCE. 
+
+
+```yaml
+## PKCE Flow: (Optional)
+### Since version v0.5.0
+### Enabled PKCE Flow
+# use_pkce: true
+```
+
+!!! info
+    More information about pkce can be found [https://www.oauth.com/oauth2-servers/pkce/](https://www.oauth.com/oauth2-servers/pkce/).
+
+#### Pkce Challenge Method
+
+!!! note 
+    Optional Settings
+
+
+```yaml
+### Supported challenge method 
+###  * S256 (Recommended) Default if not specified
+###  * plain 
+# pkce_challenge_method: S256
 ```
 
 ## Scopes
