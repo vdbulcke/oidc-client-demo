@@ -238,3 +238,41 @@ If your Authorization Server supports multiple authentication methods, and sets 
 # - urn:be:fedict:iam:fas:Level500
 # - urn:be:fedict:iam:fas:Level450
 ```
+
+### Stateless (JWT) Access Token
+
+!!! note 
+    Optional Settings
+
+
+Stateless Access Token are in JWT format that contains some information, and thus do not need to be introspected.
+
+By setting `access_token_jwt: true` the `oidc-client` will attempt to validate the Access Token jwt signature against the JWKS endpoint of the Authorization Server, and then print the content of the Access Token.
+
+```yaml
+##  Access Token JWT: (Optional)
+###   Parse and Validate access token jwt
+# access_token_jwt: true
+```
+
+!!! warning
+    Unlike for the ID Token, only basic JWT signature and issuer (`iss`) are validated
+
+### Stateless (JWT) Refresh Token
+
+!!! note 
+    Optional Settings
+
+
+Stateless Refresh Token are in JWT format that contains some information, and thus do not need to be introspected.
+
+By setting `refresh_token_jwt: true` the `oidc-client` will attempt to validate the Refresh Token jwt signature against the JWKS endpoint of the Authorization Server, and then print the content of the Refresh Token.
+
+```yaml
+##  Refresh Token JWT: (Optional)
+###   Parse and Validate refresh token jwt
+# refresh_token_jwt: true
+```
+
+!!! warning
+    Unlike for the ID Token, only basic JWT signature and issuer (`iss`) are validated

@@ -84,6 +84,6 @@ introspect_endpoint: "https://idp.iamfas.int.belgium.be/fas/oauth2/introspect"
 ###   Parse and Validate access token jwt
 # access_token_jwt: true
 
-#  Refresh Token JWT: (Optional)
-##   Parse and Validate refresh token jwt
+##  Refresh Token JWT: (Optional)
+###   Parse and Validate refresh token jwt
 # refresh_token_jwt: true
