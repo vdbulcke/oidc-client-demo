@@ -2,6 +2,23 @@
 ## [Unreleased]
 
 
+<a name="v0.6.0"></a>
+## [v0.6.0] - 2022-03-08
+### Features
+- 44302cd - Parse Refresh token jwt ([#11](https://github.com/vdbulcke/oidc-client-demo/issues/11))
+- 58f4247 - Add decoding and verification of access token as stateless token ([#11](https://github.com/vdbulcke/oidc-client-demo/issues/11))
+
+### NOTE
+
+
+> Refresh Token validation does not check audience 'aud' claim
+
+
+
+> Access token validation does not check audience 'aud' claim
+
+
+
 <a name="v0.5.0"></a>
 ## [v0.5.0] - 2022-03-06
 ### Features
@@ -57,7 +74,8 @@
 <a name="v0.0.1"></a>
 ## v0.0.1 - 2021-07-23
 
-[Unreleased]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.6.0...HEAD
+[v0.6.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.5.0...v0.6.0
 [v0.5.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.4.0...v0.5.0
 [v0.4.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.3.0...v0.4.0
 [v0.3.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.2.0...v0.3.0
