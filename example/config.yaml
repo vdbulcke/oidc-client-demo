@@ -80,3 +80,6 @@ introspect_endpoint: "https://idp.iamfas.int.belgium.be/fas/oauth2/introspect"
 # skip_tls_verification: true
 
 
+##  Access Token JWT: (Optional)
+###   Parse and Validate access token jwt
+# access_token_jwt: true

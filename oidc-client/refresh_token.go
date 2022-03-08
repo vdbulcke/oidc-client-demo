@@ -57,6 +57,23 @@ func (c *OIDCClient) RefreshTokenFlow(refreshToken string, skipIdTokenVerificati
 
 	}
 
+	// Validate Access Token if JWT
+	// and print claims
+	if c.config.AccessTokenJwt {
+		// try to parse access token as JWT
+		accessTokenRaw := accessTokenResponse.AccessToken
+		if accessTokenRaw == "" {
+			c.logger.Error("no Access Token Found")
+		} else {
+			// validate signature against the JWK
+			_, err := c.processAccessToken(c.ctx, accessTokenRaw)
+			if err != nil {
+				c.logger.Error("Access Token validation failed", "err", err)
+				return err
+			}
+		}
+	}
+
 	// Fetch Userinfo
 	err = c.userinfo(oauth2Token)
 	if err != nil {
@@ -100,6 +117,39 @@ func (c *OIDCClient) processIdToken(ctx context.Context, idTokenRaw string) (*oi
 	c.logger.Info("IDToken Claims", "IDTokenClaims", string(idTokenClaimsByte))
 
 	return idToken, nil
+}
+
+// processAccessToken Handle accessToken call
+func (c *OIDCClient) processAccessToken(ctx context.Context, accessTokenRaw string) (*oidc.IDToken, error) {
+	return c.processGenericToken(ctx, accessTokenRaw)
+}
+
+func (c *OIDCClient) processGenericToken(ctx context.Context, tokenRaw string) (*oidc.IDToken, error) {
+	// validate signature against the JWK
+	jwtToken, err := c.jwkVerifier.Verify(c.ctx, tokenRaw)
+	if err != nil {
+		c.logger.Error("Access Token validation failed", "err", err)
+
+		return nil, err
+	}
+
+	// Print token
+	var accessTokenClaims *json.RawMessage
+
+	// format access Token Claims
+	if err := jwtToken.Claims(&accessTokenClaims); err != nil {
+		c.logger.Error("Error Parsing Access Token Claims", "err", err)
+		return nil, err
+	}
+
+	// Print Access Token Claims, and User Info
+	accessTokenClaimsByte, err := json.MarshalIndent(accessTokenClaims, "", "    ")
+	if err != nil {
+		c.logger.Error("Could not parse AccessTokenClaims", "err", err)
+	}
+	c.logger.Info("Access Token Claims", "AccessTokenClaims", string(accessTokenClaimsByte))
+
+	return jwtToken, nil
 }
 
 // userinfo Handle userinfo call

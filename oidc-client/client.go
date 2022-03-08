@@ -322,6 +322,36 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 
 		}
 
+		if c.config.AccessTokenJwt {
+			// try to parse access token as JWT
+			accessTokenRaw := accessTokenResponse.AccessToken
+			if accessTokenRaw == "" {
+				c.logger.Error("no Access Token Found")
+			} else {
+				// validate signature against the JWK
+				accessToken, err := c.processAccessToken(c.ctx, accessTokenRaw)
+				if err != nil {
+					c.logger.Error("Access Token validation failed", "err", err)
+					http.Error(w, "Failed to verify Access Token: "+err.Error(), http.StatusInternalServerError)
+					return
+				}
+
+				// retrieve the nonce cookie
+				nonceCookie, err := r.Cookie("nonce")
+				if err != nil {
+					c.logger.Error("Nonce cookie Not found", "err", err)
+					http.Error(w, "nonce not found", http.StatusBadRequest)
+					return
+				}
+
+				if accessToken.Nonce != nonceCookie.Value {
+					c.logger.Error("ID Token nonce does not match", "accessToken.Nonce", accessToken.Nonce, "Cookie.Nonce", nonceCookie.Value)
+					http.Error(w, "nonce did not match", http.StatusBadRequest)
+					return
+				}
+			}
+		}
+
 		// Fetch Userinfo
 		err = c.userinfo(oauth2Token)
 		if err != nil {

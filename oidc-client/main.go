@@ -27,6 +27,9 @@ type OIDCClient struct {
 	// OIDC verifier
 	verifier *oidc.IDTokenVerifier
 
+	// JWT Verifier
+	jwkVerifier *oidc.IDTokenVerifier
+
 	// OAauth2 Config
 	oAuthConfig oauth2.Config
 }
@@ -58,11 +61,21 @@ func NewOIDCClient(c *OIDCClientConfig, l hclog.Logger) (*OIDCClient, error) {
 		SupportedSigningAlgs: c.TokenSigningAlg,
 	}
 
-	var verifier *oidc.IDTokenVerifier
+	jwtConfig := &oidc.Config{
+		ClientID: c.ClientID,
+		// SupportedSigningAlgs: []string{c.config.TokenSigningAlg},
+		SupportedSigningAlgs: c.TokenSigningAlg,
+		SkipClientIDCheck:    true, // Disable check Audience == clientID
+		SkipIssuerCheck:      false, // Check Issuser
+	}
+
+	var verifier, jwkVerifier *oidc.IDTokenVerifier
+
 	if c.JwksEndpoint != "" {
 
 		keySet := oidc.NewRemoteKeySet(ctx, c.JwksEndpoint)
 		verifier = oidc.NewVerifier(c.Issuer, keySet, oidcConfig)
+		jwkVerifier = oidc.NewVerifier(c.Issuer, keySet, jwtConfig)
 
 		if l.IsDebug() {
 			l.Debug("Using Custom JWK endpoint", "jwk_endpoint", c.JwksEndpoint)
@@ -70,6 +83,7 @@ func NewOIDCClient(c *OIDCClientConfig, l hclog.Logger) (*OIDCClient, error) {
 
 	} else {
 		verifier = provider.Verifier(oidcConfig)
+		jwkVerifier = provider.Verifier(jwtConfig)
 	}
 
 	// new OAuth2 Config
@@ -111,5 +125,6 @@ func NewOIDCClient(c *OIDCClientConfig, l hclog.Logger) (*OIDCClient, error) {
 		verifier:    verifier,
 		oAuthConfig: oAuthConfig,
 		provider:    provider,
+		jwkVerifier: jwkVerifier,
 	}, nil
 }
