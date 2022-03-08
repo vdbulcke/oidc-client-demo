@@ -102,6 +102,36 @@ func (c *OIDCClient) processIdToken(ctx context.Context, idTokenRaw string) (*oi
 	return idToken, nil
 }
 
+// processAccessToken Handle accessToken call
+func (c *OIDCClient) processAccessToken(ctx context.Context, accessTokenRaw string) (*oidc.IDToken, error) {
+
+	// validate signature against the JWK
+	accessToken, err := c.verifier.Verify(c.ctx, accessTokenRaw)
+	if err != nil {
+		c.logger.Error("Access Token validation failed", "err", err)
+
+		return nil, err
+	}
+
+	// Print IDToken
+	var accessTokenClaims *json.RawMessage
+
+	// format access Token Claims
+	if err := accessToken.Claims(&accessTokenClaims); err != nil {
+		c.logger.Error("Error Parsing Access Token Claims", "err", err)
+		return nil, err
+	}
+
+	// Print Access Token Claims, and User Info
+	accessTokenClaimsByte, err := json.MarshalIndent(accessTokenClaims, "", "    ")
+	if err != nil {
+		c.logger.Error("Could not parse AccessTokenClaims", "err", err)
+	}
+	c.logger.Info("Access Token Claims", "AccessTokenClaims", string(accessTokenClaimsByte))
+
+	return accessToken, nil
+}
+
 // userinfo Handle userinfo call
 func (c *OIDCClient) userinfo(oauth2Token *oauth2.Token) error {
 	// Fetch Userinfo
