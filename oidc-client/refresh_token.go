@@ -3,6 +3,7 @@ package oidcclient
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/coreos/go-oidc/v3/oidc"
@@ -60,6 +61,22 @@ func (c *OIDCClient) RefreshTokenFlow(refreshToken string, skipIdTokenVerificati
 	// Validate Access Token if JWT
 	// and print claims
 	if c.config.AccessTokenJwt {
+		refreshTokenRaw := accessTokenResponse.RefreshToken
+		if refreshTokenRaw == "" {
+			c.logger.Error("no Refresh Token Found")
+		} else {
+			// validate signature against the JWK
+			_, err := c.processRefreshToken(c.ctx, refreshTokenRaw)
+			if err != nil {
+				c.logger.Error("Refresh Token validation failed", "err", err)
+				return err
+			}
+		}
+	}
+
+	// Validate Access Token if JWT
+	// and print claims
+	if c.config.RefreshTokenJwt {
 		// try to parse access token as JWT
 		accessTokenRaw := accessTokenResponse.AccessToken
 		if accessTokenRaw == "" {
@@ -119,16 +136,21 @@ func (c *OIDCClient) processIdToken(ctx context.Context, idTokenRaw string) (*oi
 	return idToken, nil
 }
 
-// processAccessToken Handle accessToken call
+// processAccessToken Handle accessToken JWT validation
 func (c *OIDCClient) processAccessToken(ctx context.Context, accessTokenRaw string) (*oidc.IDToken, error) {
-	return c.processGenericToken(ctx, accessTokenRaw)
+	return c.processGenericToken(ctx, accessTokenRaw, "Access")
 }
 
-func (c *OIDCClient) processGenericToken(ctx context.Context, tokenRaw string) (*oidc.IDToken, error) {
+// processRefreshToken Handle Refresh Token JWT validation
+func (c *OIDCClient) processRefreshToken(ctx context.Context, refreshTokenRaw string) (*oidc.IDToken, error) {
+	return c.processGenericToken(ctx, refreshTokenRaw, "Refresh")
+}
+
+func (c *OIDCClient) processGenericToken(ctx context.Context, tokenRaw string, tokenType string) (*oidc.IDToken, error) {
 	// validate signature against the JWK
 	jwtToken, err := c.jwkVerifier.Verify(c.ctx, tokenRaw)
 	if err != nil {
-		c.logger.Error("Access Token validation failed", "err", err)
+		c.logger.Error(fmt.Sprintf("%s Token validation failed", tokenType), "err", err)
 
 		return nil, err
 	}
@@ -138,16 +160,16 @@ func (c *OIDCClient) processGenericToken(ctx context.Context, tokenRaw string) (
 
 	// format access Token Claims
 	if err := jwtToken.Claims(&accessTokenClaims); err != nil {
-		c.logger.Error("Error Parsing Access Token Claims", "err", err)
+		c.logger.Error(fmt.Sprintf("Error Parsing %s Token Claims", tokenType), "err", err)
 		return nil, err
 	}
 
 	// Print Access Token Claims, and User Info
 	accessTokenClaimsByte, err := json.MarshalIndent(accessTokenClaims, "", "    ")
 	if err != nil {
-		c.logger.Error("Could not parse AccessTokenClaims", "err", err)
+		c.logger.Error(fmt.Sprintf("Could not parse %sToken Claims", tokenType), "err", err)
 	}
-	c.logger.Info("Access Token Claims", "AccessTokenClaims", string(accessTokenClaimsByte))
+	c.logger.Info(fmt.Sprintf("%s Token Claims", tokenType), "TokenClaims", string(accessTokenClaimsByte))
 
 	return jwtToken, nil
 }

@@ -329,26 +329,30 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 				c.logger.Error("no Access Token Found")
 			} else {
 				// validate signature against the JWK
-				accessToken, err := c.processAccessToken(c.ctx, accessTokenRaw)
+				_, err := c.processAccessToken(c.ctx, accessTokenRaw)
 				if err != nil {
 					c.logger.Error("Access Token validation failed", "err", err)
 					http.Error(w, "Failed to verify Access Token: "+err.Error(), http.StatusInternalServerError)
 					return
 				}
 
-				// retrieve the nonce cookie
-				nonceCookie, err := r.Cookie("nonce")
+			}
+		}
+
+		if c.config.RefreshTokenJwt {
+			// try to parse refresh token as JWT
+			refreshTokenRaw := accessTokenResponse.RefreshToken
+			if refreshTokenRaw == "" {
+				c.logger.Error("no Refresh Token Found")
+			} else {
+				// validate signature against the JWK
+				_, err := c.processRefreshToken(c.ctx, refreshTokenRaw)
 				if err != nil {
-					c.logger.Error("Nonce cookie Not found", "err", err)
-					http.Error(w, "nonce not found", http.StatusBadRequest)
+					c.logger.Error("Refresh Token validation failed", "err", err)
+					http.Error(w, "Failed to verify Refresh Token: "+err.Error(), http.StatusInternalServerError)
 					return
 				}
 
-				if accessToken.Nonce != nonceCookie.Value {
-					c.logger.Error("ID Token nonce does not match", "accessToken.Nonce", accessToken.Nonce, "Cookie.Nonce", nonceCookie.Value)
-					http.Error(w, "nonce did not match", http.StatusBadRequest)
-					return
-				}
 			}
 		}
 

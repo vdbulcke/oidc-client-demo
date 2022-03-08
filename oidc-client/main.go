@@ -63,10 +63,9 @@ func NewOIDCClient(c *OIDCClientConfig, l hclog.Logger) (*OIDCClient, error) {
 
 	jwtConfig := &oidc.Config{
 		ClientID: c.ClientID,
-		// SupportedSigningAlgs: []string{c.config.TokenSigningAlg},
 		SupportedSigningAlgs: c.TokenSigningAlg,
-		SkipClientIDCheck:    true, // Disable check Audience == clientID
-		SkipIssuerCheck:      false, // Check Issuser
+		SkipClientIDCheck:    true,  // Disable check Audience == clientID
+		SkipIssuerCheck:      false, // Check Issuer
 	}
 
 	var verifier, jwkVerifier *oidc.IDTokenVerifier
