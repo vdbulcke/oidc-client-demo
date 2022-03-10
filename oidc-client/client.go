@@ -154,6 +154,11 @@ func (c *OIDCClient) parseAccessTokenResponse(oauth2Token *oauth2.Token) (*JSONA
 // set handler for performing the Authorization code flow
 func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 
+	// trap sigterm or interupt and gracefully shutdown the server
+	close := make(chan os.Signal, 1)
+	signal.Notify(close, os.Interrupt)
+	// signal.Notify(c, os.Kill)
+
 	// generate state and none
 	state, err := c.randString(6)
 	if err != nil {
@@ -382,7 +387,7 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 		// stop program
 		go func() {
 			c.logger.Info("Stopping server")
-			os.Exit(0)
+			close <- os.Interrupt
 		}()
 	})
 
@@ -411,11 +416,6 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 			os.Exit(1)
 		}
 	}()
-
-	// trap sigterm or interupt and gracefully shutdown the server
-	close := make(chan os.Signal, 1)
-	signal.Notify(close, os.Interrupt)
-	// signal.Notify(c, os.Kill)
 
 	// Block until a signal is received.
 	sig := <-close
