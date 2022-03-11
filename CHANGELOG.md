@@ -2,6 +2,12 @@
 ## [Unreleased]
 
 
+<a name="v0.6.1"></a>
+## [v0.6.1] - 2022-03-11
+### Bug Fixes
+- 843f6e3 - Graceful shutdown of local http server [#14](https://github.com/vdbulcke/oidc-client-demo/issues/14)
+
+
 <a name="v0.6.0"></a>
 ## [v0.6.0] - 2022-03-08
 ### Features
@@ -74,7 +80,8 @@
 <a name="v0.0.1"></a>
 ## v0.0.1 - 2021-07-23
 
-[Unreleased]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.6.1...HEAD
+[v0.6.1]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.6.0...v0.6.1
 [v0.6.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.5.0...v0.6.0
 [v0.5.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.4.0...v0.5.0
 [v0.4.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.3.0...v0.4.0
