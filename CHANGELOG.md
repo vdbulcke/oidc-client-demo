@@ -2,6 +2,12 @@
 ## [Unreleased]
 
 
+<a name="v0.7.0"></a>
+## [v0.7.0] - 2022-03-28
+### Features
+- b180bab - Add --localhost flag for Azure AD [#16](https://github.com/vdbulcke/oidc-client-demo/issues/16)
+
+
 <a name="v0.6.1"></a>
 ## [v0.6.1] - 2022-03-11
 ### Bug Fixes
@@ -80,7 +86,8 @@
 <a name="v0.0.1"></a>
 ## v0.0.1 - 2021-07-23
 
-[Unreleased]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.6.1...HEAD
+[Unreleased]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.7.0...HEAD
+[v0.7.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.6.1...v0.7.0
 [v0.6.1]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.6.0...v0.6.1
 [v0.6.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.5.0...v0.6.0
 [v0.5.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.4.0...v0.5.0
