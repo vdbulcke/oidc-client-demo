@@ -16,7 +16,7 @@ You MUST provide the same setting as for your local `config.yaml` (see [Client C
 Default: `http://127.0.0.1:5556/auth/callback`
 
 !!! warning
-    You can change the port number of the local client using the `--port` flag. If you do so, you will need to update the redirect_uri on the Authorization Server configuration as well
+    You can change the port number of the local client using the `--port` or using a hostname instead of ip using `--localhost` flag. If you do so, you will need to update the redirect_uri on the Authorization Server configuration as well
 
 
 
