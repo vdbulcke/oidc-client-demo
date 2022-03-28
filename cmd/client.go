@@ -12,6 +12,7 @@ import (
 // args var
 var configFilename string
 var port int
+var useLocalhost bool
 
 // default
 var DefaultListeningAddress = "127.0.0.1"
@@ -23,6 +24,7 @@ func init() {
 	// add flags to sub command
 	clientCmd.Flags().StringVarP(&configFilename, "config", "c", "", "oidc client config file")
 	clientCmd.Flags().IntVarP(&port, "port", "p", DefaultListeningPost, "oidc client call back port")
+	clientCmd.Flags().BoolVarP(&useLocalhost, "localhost", "", false, "use localhost instead of 127.0.0.1")
 
 	// required flags
 	//nolint
@@ -56,9 +58,14 @@ func runClient(cmd *cobra.Command, args []string) {
 	}
 
 	// setting the redirect URI
-	config.ListenAddress = DefaultListeningAddress
+	if useLocalhost {
+		config.ListenAddress = "localhost"
+	} else {
+		config.ListenAddress = DefaultListeningAddress
+	}
+
 	config.ListenPort = port
-	config.RedirectUri = fmt.Sprintf("http://%s:%d/auth/callback", DefaultListeningAddress, port)
+	config.RedirectUri = fmt.Sprintf("http://%s:%d/auth/callback", config.ListenAddress, port)
 
 	// override config if flag is passed as args
 	if skipUserinfo {
