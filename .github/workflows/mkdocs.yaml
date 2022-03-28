@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'www/*'
+      - 'www/docs/*'
       - '.github/workflows/mkdocs.yaml'
 jobs:
   deploy:
