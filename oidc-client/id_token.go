@@ -42,7 +42,8 @@ func (c *OIDCClient) processIdToken(idTokenRaw string) (*oidc.IDToken, error) {
 	// Save sub from ID Token into context
 	// for Userinfo validation
 	sub := idToken.Subject
-	c.ctx = context.WithValue(c.ctx, "sub", sub)
+	k := subCtxKey("sub")
+	c.ctx = context.WithValue(c.ctx, k, sub)
 
 	return idToken, nil
 }

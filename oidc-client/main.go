@@ -34,6 +34,9 @@ type OIDCClient struct {
 	oAuthConfig oauth2.Config
 }
 
+// subCtxKey key to store 'sub' in context
+type subCtxKey string
+
 // OIDCClient create a new OIDC Client
 func NewOIDCClient(c *OIDCClientConfig, l hclog.Logger) (*OIDCClient, error) {
 
@@ -62,7 +65,7 @@ func NewOIDCClient(c *OIDCClientConfig, l hclog.Logger) (*OIDCClient, error) {
 	}
 
 	jwtConfig := &oidc.Config{
-		ClientID: c.ClientID,
+		ClientID:             c.ClientID,
 		SupportedSigningAlgs: c.TokenSigningAlg,
 		SkipClientIDCheck:    true,  // Disable check Audience == clientID
 		SkipIssuerCheck:      false, // Check Issuer

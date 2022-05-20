@@ -25,7 +25,8 @@ func (c *OIDCClient) userinfo(oauth2Token *oauth2.Token) error {
 		}
 
 		// fetch id_token 'sub' from context
-		idTokenSub := c.ctx.Value("sub")
+		k := subCtxKey("sub")
+		idTokenSub := c.ctx.Value(k)
 		if idTokenSub != nil {
 
 			// userinfo 'sub' must match id_token 'sub'
