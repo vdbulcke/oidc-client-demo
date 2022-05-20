@@ -51,7 +51,7 @@ func (c *OIDCClient) RefreshTokenFlow(refreshToken string, skipIdTokenVerificati
 		c.logger.Error("no ID Token Found")
 	} else if !skipIdTokenVerification {
 		// verify and print idToken
-		_, err = c.processIdToken(c.ctx, idTokenRaw)
+		_, err = c.processIdToken( idTokenRaw)
 		if err != nil {
 			return err
 		}
@@ -101,40 +101,6 @@ func (c *OIDCClient) RefreshTokenFlow(refreshToken string, skipIdTokenVerificati
 
 }
 
-// processIdToken Handle idToken call
-func (c *OIDCClient) processIdToken(ctx context.Context, idTokenRaw string) (*oidc.IDToken, error) {
-
-	// validate signature agains the JWK
-	idToken, err := c.verifier.Verify(c.ctx, idTokenRaw)
-	if err != nil {
-		c.logger.Error("ID Token validation failed", "err", err)
-
-		return nil, err
-	}
-
-	// validate AMR Values
-	if !c.validateAMR(idToken) {
-		c.logger.Error("Amr not valid", "amrs", c.config.AMRWhitelist)
-	}
-
-	// Print IDToken
-	var idTokenClaims *json.RawMessage
-
-	// format id Token Claims
-	if err := idToken.Claims(&idTokenClaims); err != nil {
-		c.logger.Error("Error Parsing ID Token Claims", "err", err)
-		return nil, err
-	}
-
-	// Print ID Token Claims, and User Info
-	idTokenClaimsByte, err := json.MarshalIndent(idTokenClaims, "", "    ")
-	if err != nil {
-		c.logger.Error("Could not parse idTokenClaims", "err", err)
-	}
-	c.logger.Info("IDToken Claims", "IDTokenClaims", string(idTokenClaimsByte))
-
-	return idToken, nil
-}
 
 // processAccessToken Handle accessToken JWT validation
 func (c *OIDCClient) processAccessToken(ctx context.Context, accessTokenRaw string) (*oidc.IDToken, error) {
@@ -172,34 +138,4 @@ func (c *OIDCClient) processGenericToken(ctx context.Context, tokenRaw string, t
 	c.logger.Info(fmt.Sprintf("%s Token Claims", tokenType), "TokenClaims", string(accessTokenClaimsByte))
 
 	return jwtToken, nil
-}
-
-// userinfo Handle userinfo call
-func (c *OIDCClient) userinfo(oauth2Token *oauth2.Token) error {
-	// Fetch Userinfo
-	if !c.config.SkipUserinfo {
-		// NOTE: this will detects based on the Content-Type if the userinfo is application/jwt
-		//       and if it is JWT it will validate signature agains JWK for the provider
-		userInfo, err := c.provider.UserInfo(c.ctx, oauth2.StaticTokenSource(oauth2Token))
-		if err != nil {
-			return err
-		}
-
-		var userInfoClaims *json.RawMessage
-		// format userinfo Claims
-		if err := userInfo.Claims(&userInfoClaims); err != nil {
-			c.logger.Error("Error Parsing USerinfo Claims", "err", err)
-			return err
-		}
-
-		userInfoClaimsByte, err := json.MarshalIndent(userInfoClaims, "", "    ")
-		if err != nil {
-			c.logger.Error("Could not parse idTokenClaims", "err", err)
-		}
-
-		c.logger.Info("Userinfo Claims", "UserInfoClaims", string(userInfoClaimsByte))
-
-	}
-
-	return nil
 }

@@ -304,7 +304,7 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 		} else {
 
 			// validate signature agains the JWK
-			idToken, err := c.processIdToken(c.ctx, idTokenRaw)
+			idToken, err := c.processIdToken(idTokenRaw)
 			if err != nil {
 				c.logger.Error("ID Token validation failed", "err", err)
 				http.Error(w, "Failed to verify ID Token: "+err.Error(), http.StatusInternalServerError)
