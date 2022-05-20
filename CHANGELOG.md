@@ -2,6 +2,12 @@
 ## [Unreleased]
 
 
+<a name="v0.7.1"></a>
+## [v0.7.1] - 2022-05-20
+### Features
+- 54f875d - Add userinfo validation ([#18](https://github.com/vdbulcke/oidc-client-demo/issues/18))
+
+
 <a name="v0.7.0"></a>
 ## [v0.7.0] - 2022-03-28
 ### Features
@@ -86,7 +92,8 @@
 <a name="v0.0.1"></a>
 ## v0.0.1 - 2021-07-23
 
-[Unreleased]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.7.1...HEAD
+[v0.7.1]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.7.0...v0.7.1
 [v0.7.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.6.1...v0.7.0
 [v0.6.1]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.6.0...v0.6.1
 [v0.6.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.5.0...v0.6.0
