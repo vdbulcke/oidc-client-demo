@@ -12,3 +12,4 @@
 * (optional) Acr Values
 * (optional) Amr Whitelist
 * Refresh Token Flow
+* Userinfo Response Validation
