@@ -51,7 +51,7 @@ func (c *OIDCClient) RefreshTokenFlow(refreshToken string, skipIdTokenVerificati
 		c.logger.Error("no ID Token Found")
 	} else if !skipIdTokenVerification {
 		// verify and print idToken
-		_, err = c.processIdToken( idTokenRaw)
+		_, err = c.processIdToken(idTokenRaw)
 		if err != nil {
 			return err
 		}
@@ -61,22 +61,6 @@ func (c *OIDCClient) RefreshTokenFlow(refreshToken string, skipIdTokenVerificati
 	// Validate Access Token if JWT
 	// and print claims
 	if c.config.AccessTokenJwt {
-		refreshTokenRaw := accessTokenResponse.RefreshToken
-		if refreshTokenRaw == "" {
-			c.logger.Error("no Refresh Token Found")
-		} else {
-			// validate signature against the JWK
-			_, err := c.processRefreshToken(c.ctx, refreshTokenRaw)
-			if err != nil {
-				c.logger.Error("Refresh Token validation failed", "err", err)
-				return err
-			}
-		}
-	}
-
-	// Validate Access Token if JWT
-	// and print claims
-	if c.config.RefreshTokenJwt {
 		// try to parse access token as JWT
 		accessTokenRaw := accessTokenResponse.AccessToken
 		if accessTokenRaw == "" {
@@ -91,6 +75,22 @@ func (c *OIDCClient) RefreshTokenFlow(refreshToken string, skipIdTokenVerificati
 		}
 	}
 
+	// Validate Access Token if JWT
+	// and print claims
+	if c.config.RefreshTokenJwt {
+		refreshTokenRaw := accessTokenResponse.RefreshToken
+		if refreshTokenRaw == "" {
+			c.logger.Error("no Refresh Token Found")
+		} else {
+			// validate signature against the JWK
+			_, err := c.processRefreshToken(c.ctx, refreshTokenRaw)
+			if err != nil {
+				c.logger.Error("Refresh Token validation failed", "err", err)
+				return err
+			}
+		}
+	}
+
 	// Fetch Userinfo
 	err = c.userinfo(oauth2Token)
 	if err != nil {
@@ -100,7 +100,6 @@ func (c *OIDCClient) RefreshTokenFlow(refreshToken string, skipIdTokenVerificati
 	return nil
 
 }
-
 
 // processAccessToken Handle accessToken JWT validation
 func (c *OIDCClient) processAccessToken(ctx context.Context, accessTokenRaw string) (*oidc.IDToken, error) {

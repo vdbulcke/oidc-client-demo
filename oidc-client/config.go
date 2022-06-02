@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/go-playground/validator"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 
 	"github.com/vdbulcke/oidc-client-demo/oidc-client/internal"
 )
