@@ -239,6 +239,33 @@ If your Authorization Server supports multiple authentication methods, and sets 
 # - urn:be:fedict:iam:fas:Level450
 ```
 
+### ACR Validation
+
+!!! note 
+    Optional Settings
+
+If your Authorization Server supports Authentication Context Class Reference, and sets the `acr` field in the id_token, you can validate allowed value with the `acr_list` setting. The client will validate that the value of the `acr` claim in the id_token is present in the `amr_list`. 
+
+
+```yaml
+## ACR List: (Optional)
+### Since v0.8.0
+###  List of allowed acr value, the validation
+###  will be successful if 'acr' claim from id_token
+###  is present in this list
+###
+# acr_list: 
+# - "0" ## detault when acr are not implemented 
+# - urn:be:fedict:iam:fas:Level500
+# - urn:be:fedict:iam:fas:Level450
+# - urn:be:fedict:iam:fas:Level400
+# - urn:be:fedict:iam:fas:Level350
+# - urn:be:fedict:iam:fas:Level200
+# - urn:be:fedict:iam:fas:Level100
+
+```
+
+
 ### Stateless (JWT) Access Token
 
 !!! note 
