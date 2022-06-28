@@ -13,6 +13,7 @@ import (
 var configFilename string
 var port int
 var useLocalhost bool
+var acrValueOverride string
 
 // default
 var DefaultListeningAddress = "127.0.0.1"
@@ -25,6 +26,7 @@ func init() {
 	clientCmd.Flags().StringVarP(&configFilename, "config", "c", "", "oidc client config file")
 	clientCmd.Flags().IntVarP(&port, "port", "p", DefaultListeningPost, "oidc client call back port")
 	clientCmd.Flags().BoolVarP(&useLocalhost, "localhost", "", false, "use localhost instead of 127.0.0.1")
+	clientCmd.Flags().StringVarP(&acrValueOverride, "acr-values", "a", "", "override 'acr_values' from config")
 
 	// required flags
 	//nolint
@@ -71,6 +73,11 @@ func runClient(cmd *cobra.Command, args []string) {
 	if skipUserinfo {
 		appLogger.Warn("Skipping Userinfo")
 		config.SkipUserinfo = skipUserinfo
+	}
+
+	// override acr_values
+	if acrValueOverride != "" {
+		config.AcrValues = acrValueOverride
 	}
 
 	// Make a new OIDC Client
