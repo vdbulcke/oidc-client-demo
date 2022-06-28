@@ -12,7 +12,6 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/hashicorp/go-hclog"
 	"github.com/vdbulcke/oidc-client-demo/oidc-client/internal"
 	"golang.org/x/oauth2"
@@ -47,36 +46,6 @@ func (c *OIDCClient) setCallbackCookie(w http.ResponseWriter, r *http.Request, n
 		HttpOnly: true,
 	}
 	http.SetCookie(w, cookie)
-}
-
-func (c *OIDCClient) validateAMR(idToken *oidc.IDToken) bool {
-
-	c.logger.Debug("Starting AMR validation")
-
-	// check if need to validate amr values
-	if len(c.config.AMRWhitelist) == 0 {
-		return true
-	}
-
-	// parse amr claims
-	var claims struct {
-		Amr []string `json:"amr"`
-	}
-	if err := idToken.Claims(&claims); err != nil {
-		c.logger.Error("Error parsing amr claims", "id_token", idToken, "err", err)
-		return false
-	}
-
-	// check if at least one of the whitelisted
-	// amr is in the claims
-	for _, amr := range c.config.AMRWhitelist {
-		if stringInSlice(amr, claims.Amr) {
-			return true
-		}
-	}
-
-	return false
-
 }
 
 func (c *OIDCClient) parseAccessTokenResponse(oauth2Token *oauth2.Token) (*JSONAccessTokenResponse, error) {

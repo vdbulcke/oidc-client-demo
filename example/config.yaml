@@ -71,6 +71,23 @@ introspect_endpoint: "https://idp.iamfas.int.belgium.be/fas/oauth2/introspect"
 # - bmid
 # - urn:be:fedict:iam:fas:Level500
 
+## ACR List: (Optional)
+### Since v0.8.0
+###  List of allowed acr value, the validation
+###  will be successful if 'acr' claim from id_token
+###  is present in this list
+###
+# acr_list: 
+# - "0" ## detault when acr are not implemented 
+# - urn:be:fedict:iam:fas:Level500
+# - urn:be:fedict:iam:fas:Level450
+# - urn:be:fedict:iam:fas:Level400
+# - urn:be:fedict:iam:fas:Level350
+# - urn:be:fedict:iam:fas:Level200
+# - urn:be:fedict:iam:fas:Level100
+
+
+
 ## Skip Userinfo: (Optional)
 ###   Disable call to userinfo endpoint
 # skip_userinfo_call: true

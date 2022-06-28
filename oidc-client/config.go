@@ -37,6 +37,7 @@ type OIDCClientConfig struct {
 	TokenSigningAlg []string `yaml:"token_signing_alg" validate:"required"`
 
 	AMRWhitelist []string `yaml:"amr_list"`
+	ACRWhitelist []string `yaml:"acr_list"`
 
 	RedirectUri string
 

@@ -12,5 +12,7 @@ func (c *OIDCClient) Info() {
 
 	advanced := fmt.Sprintf("AcrValues: %s\nTokenEndpoint: %s\nAuthorizeEndpoint: %s\nTokenSigningAlg: %s\nSkipTLSVerification: %t\nJwksEndpoint: %s", c.config.AcrValues, c.config.TokenEndpoint, c.config.AuthorizeEndpoint, c.config.TokenSigningAlg, c.config.SkipTLSVerification, c.config.JwksEndpoint)
 
-	c.logger.Info("OIDC Client", "Config", conf, "Advanced", advanced, "Amrs", c.config.AMRWhitelist)
+	validation := fmt.Sprintf("AmrWhitelist: %s\nAcrWhitelist: %s", c.config.AMRWhitelist, c.config.ACRWhitelist)
+
+	c.logger.Info("OIDC Client", "Config", conf, "Advanced", advanced, "Validation", validation)
 }

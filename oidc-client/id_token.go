@@ -23,6 +23,11 @@ func (c *OIDCClient) processIdToken(idTokenRaw string) (*oidc.IDToken, error) {
 		c.logger.Error("Amr not valid", "amrs", c.config.AMRWhitelist)
 	}
 
+	// validate AMR Values
+	if !c.validateACR(idToken) {
+		c.logger.Error("Acr not valid", "ArcList", c.config.ACRWhitelist)
+	}
+
 	// Print IDToken
 	var idTokenClaims *json.RawMessage
 
