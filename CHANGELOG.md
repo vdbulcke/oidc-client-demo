@@ -2,6 +2,19 @@
 ## [Unreleased]
 
 
+<a name="v0.8.0"></a>
+## [v0.8.0] - 2022-06-28
+### Features
+- 8f1ec6d - add acr validation check ([#23](https://github.com/vdbulcke/oidc-client-demo/issues/23))
+- f3895ad - add --acr-values override flag ([#22](https://github.com/vdbulcke/oidc-client-demo/issues/22))
+
+
+<a name="v0.7.2"></a>
+## [v0.7.2] - 2022-06-02
+### Bug Fixes
+- 0feda69 - Refresh/Access token jwt decode swap ([#20](https://github.com/vdbulcke/oidc-client-demo/issues/20))
+
+
 <a name="v0.7.1"></a>
 ## [v0.7.1] - 2022-05-20
 ### Features
@@ -92,7 +105,9 @@
 <a name="v0.0.1"></a>
 ## v0.0.1 - 2021-07-23
 
-[Unreleased]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.7.1...HEAD
+[Unreleased]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.8.0...HEAD
+[v0.8.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.7.2...v0.8.0
+[v0.7.2]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.7.1...v0.7.2
 [v0.7.1]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.7.0...v0.7.1
 [v0.7.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.6.1...v0.7.0
 [v0.6.1]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.6.0...v0.6.1
