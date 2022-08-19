@@ -72,6 +72,8 @@ Set `use_pkce: true` to enable the Authorization Code Flow with PKCE.
 ```
 
 !!! info
+    `auth_method` needs to be set to `client_secret_post` when using PKCE.
+
     More information about pkce can be found [https://www.oauth.com/oauth2-servers/pkce/](https://www.oauth.com/oauth2-servers/pkce/).
 
 #### Pkce Challenge Method
