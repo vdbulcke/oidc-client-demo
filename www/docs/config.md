@@ -109,7 +109,7 @@ scopes:
 !!! important 
     Mandatory setting
 
-You must specify the `issuer` setting that will be used for construct the OpenID Connect Discovery Configuration (`/.well-known/openid-configuration`).
+You must specify the `issuer` setting that will be used to construct the OpenID Connect Discovery Configuration (`/.well-known/openid-configuration`).
 
 ```yaml
 ## IDP Config: (Mandatory)
