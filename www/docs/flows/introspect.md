@@ -1,9 +1,9 @@
 # Token Introspection
 
 !!! warning
-  For the `introspect` subcommand the `introspect_endpoint:` is mandatory.
+    For the `introspect` subcommand the `introspect_endpoint:` is mandatory.
 
-  See [configuration](/oidc-client-demo/config/) for more details.
+    See [configuration](/oidc-client-demo/config/) for more details.
 
 ## tl;dr
 
@@ -45,9 +45,9 @@ The CLI client sends the token introspection request to the Authorization Server
 It will parse the JSON response according to the [rfc7662](https://datatracker.ietf.org/doc/html/rfc7662#section-2.2) and outputs them in `Introspect Response:`. 
 
 !!! note
-  `expiry`, `issued_at` and `not_before` are _not_ standard fields, but they are human readable forms of the corresponding standard fields `exp`, `iat`, `nbf` (respectively) that are expressed at Unix Timestamps.
+    `expiry`, `issued_at` and `not_before` are _not_ standard fields, but they are human readable forms of the corresponding standard fields `exp`, `iat`, `nbf` (respectively) that are expressed as Unix Timestamps.
 
-In some case the Authorization can choose to include additional fields in the token introspection response. For that the _raw_ Introspection Response is displayed under ` Introspect Raw:`. 
+In some case the Authorization Server can choose to include additional fields in the token introspection response. For that the _raw_ Introspection Response is displayed under ` Introspect Raw:`. 
 
 ## CLI Usage
 
