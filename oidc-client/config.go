@@ -19,6 +19,7 @@ type OIDCClientConfig struct {
 	UsePKCE             bool   `yaml:"use_pkce"`
 	PKCEChallengeMethod string `yaml:"pkce_challenge_method"`
 	PKCECodeLength      int
+	FakePKCEVerifier    bool
 
 	AccessTokenJwt  bool `yaml:"access_token_jwt"`
 	RefreshTokenJwt bool `yaml:"refresh_token_jwt"`

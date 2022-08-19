@@ -228,6 +228,14 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 		// Access Token Response
 		var oauth2Token *oauth2.Token
 		if c.config.UsePKCE {
+
+			// if fake-pkce-verifier flags is set
+			// replace the codeVerifier by a dummy value
+			// to see how the Authorization Server handle the request
+			if c.config.FakePKCEVerifier {
+				codeVerifier = "dummy"
+			}
+
 			// set extra pkce param
 			pkceVerifierOption := oauth2.SetAuthURLParam("code_verifier", codeVerifier)
 

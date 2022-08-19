@@ -14,6 +14,7 @@ var configFilename string
 var port int
 var useLocalhost bool
 var acrValueOverride string
+var fakePKCEVerifier bool
 
 // default
 var DefaultListeningAddress = "127.0.0.1"
@@ -27,6 +28,7 @@ func init() {
 	clientCmd.Flags().IntVarP(&port, "port", "p", DefaultListeningPost, "oidc client call back port")
 	clientCmd.Flags().BoolVarP(&useLocalhost, "localhost", "", false, "use localhost instead of 127.0.0.1")
 	clientCmd.Flags().StringVarP(&acrValueOverride, "acr-values", "a", "", "override 'acr_values' from config")
+	clientCmd.Flags().BoolVarP(&fakePKCEVerifier, "fake-pkce-verifier", "", false, "send a dummy pkce 'code_verifier'")
 
 	// required flags
 	//nolint
@@ -78,6 +80,11 @@ func runClient(cmd *cobra.Command, args []string) {
 	// override acr_values
 	if acrValueOverride != "" {
 		config.AcrValues = acrValueOverride
+	}
+
+	// fail PKCE
+	if fakePKCEVerifier {
+		config.FakePKCEVerifier = true
 	}
 
 	// Make a new OIDC Client
