@@ -96,8 +96,8 @@ func NewOIDCClient(c *OIDCClientConfig, l hclog.Logger) (*OIDCClient, error) {
 		Scopes:      c.Scopes,
 	}
 
-	// only set client secret if not PKCE
-	if !c.UsePKCE {
+	// only set client secret if defined
+	if c.ClientSecret != "" {
 		oAuthConfig.ClientSecret = c.ClientSecret
 	}
 

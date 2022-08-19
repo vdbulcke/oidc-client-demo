@@ -130,7 +130,7 @@ func parseEnv(config *OIDCClientConfig) {
 		config.ClientID = clientID
 	}
 
-	if clientSecret != "" && !config.UsePKCE {
+	if clientSecret != "" {
 		config.ClientSecret = clientSecret
 	}
 
