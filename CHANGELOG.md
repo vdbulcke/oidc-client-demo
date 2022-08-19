@@ -2,6 +2,13 @@
 ## [Unreleased]
 
 
+<a name="v0.9.0"></a>
+## [v0.9.0] - 2022-08-19
+### Features
+- dee346e - add fake-pkce-verifier flag  ([#25](https://github.com/vdbulcke/oidc-client-demo/issues/25))
+- bfb5350 - send client_secret with pkce if defined ([#25](https://github.com/vdbulcke/oidc-client-demo/issues/25))
+
+
 <a name="v0.8.0"></a>
 ## [v0.8.0] - 2022-06-28
 ### Features
@@ -105,7 +112,8 @@
 <a name="v0.0.1"></a>
 ## v0.0.1 - 2021-07-23
 
-[Unreleased]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.9.0...HEAD
+[v0.9.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.8.0...v0.9.0
 [v0.8.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.7.2...v0.8.0
 [v0.7.2]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.7.1...v0.7.2
 [v0.7.1]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.7.0...v0.7.1
