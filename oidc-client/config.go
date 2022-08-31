@@ -42,6 +42,16 @@ type OIDCClientConfig struct {
 
 	RedirectUri string
 
+	// Output
+	OutputEnabled       bool
+	OutputDir           string
+	AccessTokenRespFile string
+	IDTokenFile         string
+	AccessTokenFile     string
+	RefreshTokenFile    string
+	UserinfoFile        string
+	IntrospectFile      string
+
 	// NOTE: default is false
 	SkipTLSVerification bool `yaml:"skip_tls_verification"`
 

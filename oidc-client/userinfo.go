@@ -51,6 +51,12 @@ func (c *OIDCClient) userinfo(oauth2Token *oauth2.Token) error {
 		}
 
 		c.logger.Info("Userinfo Claims", "UserInfoClaims", string(userInfoClaimsByte))
+		if c.config.OutputEnabled {
+			err = c.writeOutput(userInfoClaimsByte, c.config.UserinfoFile)
+			if err != nil {
+				c.logger.Error("Error Writing Userinfo file", "error", err)
+			}
+		}
 
 	}
 

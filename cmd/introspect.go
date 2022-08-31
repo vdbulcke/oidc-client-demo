@@ -57,12 +57,19 @@ func runIntrospectToken(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
+	// set output flag
+	config.OutputEnabled = output
+	config.OutputDir = outputDir
+
 	// Make a new OIDC Client
 	client, err := oidcclient.NewOIDCClient(config, appLogger)
 	if err != nil {
 		appLogger.Error("Error creating client", "error", err)
 		os.Exit(1)
 	}
+
+	// set default output
+	client.SetDefaultOutput()
 
 	err = client.IntrospectToken(token)
 	if err != nil {

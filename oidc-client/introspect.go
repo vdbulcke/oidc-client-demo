@@ -109,6 +109,13 @@ func (c *OIDCClient) IntrospectToken(token string) error {
 
 	c.logger.Info("Introspect Raw", "raw", string(introspectRaw))
 
+	if c.config.OutputEnabled {
+		err = c.writeOutput(introspectRaw, c.config.IntrospectFile)
+		if err != nil {
+			c.logger.Error("Error Writing introspect file", "error", err)
+		}
+	}
+
 	return nil
 }
 

@@ -44,6 +44,13 @@ func (c *OIDCClient) processIdToken(idTokenRaw string) (*oidc.IDToken, error) {
 	}
 	c.logger.Info("IDToken Claims", "IDTokenClaims", string(idTokenClaimsByte))
 
+	if c.config.OutputEnabled {
+		err = c.writeOutput(idTokenClaimsByte, c.config.IDTokenFile)
+		if err != nil {
+			c.logger.Error("Error Writing IDToken file", "error", err)
+		}
+	}
+
 	// Save sub from ID Token into context
 	// for Userinfo validation
 	sub := idToken.Subject

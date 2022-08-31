@@ -273,6 +273,12 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 		}
 
 		c.logger.Info("Access Token Response", "Response", string(accessTokenResponseLog))
+		if c.config.OutputEnabled {
+			err = c.writeOutput(accessTokenResponseLog, c.config.AccessTokenRespFile)
+			if err != nil {
+				c.logger.Error("Error Writing Access Token Response file", "error", err)
+			}
+		}
 
 		// Validate ID Token
 		idTokenRaw := accessTokenResponse.IDToken

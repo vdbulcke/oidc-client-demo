@@ -6,3 +6,11 @@ releases/*
 dist/
 .envrc
 
+## Outputs
+output/*
+access_token_resp.json
+id_token.json
+userinfo.json
+access_token.json
+refresh_token.json
+introspect.json

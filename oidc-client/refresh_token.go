@@ -136,5 +136,19 @@ func (c *OIDCClient) processGenericToken(ctx context.Context, tokenRaw string, t
 	}
 	c.logger.Info(fmt.Sprintf("%s Token Claims", tokenType), "TokenClaims", string(accessTokenClaimsByte))
 
+	if c.config.OutputEnabled {
+		var file string
+		if tokenType == "Access" {
+			file = c.config.AccessTokenFile
+		} else {
+			file = c.config.RefreshTokenFile
+		}
+
+		err = c.writeOutput(accessTokenClaimsByte, file)
+		if err != nil {
+			c.logger.Error(fmt.Sprintf("Error writing %s Token ", tokenType), "error", err)
+		}
+	}
+
 	return jwtToken, nil
 }
