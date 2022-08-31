@@ -2,6 +2,12 @@
 ## [Unreleased]
 
 
+<a name="v0.10.0"></a>
+## [v0.10.0] - 2022-08-31
+### Features
+- d49c0a1 - add json output option ([#29](https://github.com/vdbulcke/oidc-client-demo/issues/29))
+
+
 <a name="v0.9.0"></a>
 ## [v0.9.0] - 2022-08-19
 ### Features
@@ -112,7 +118,8 @@
 <a name="v0.0.1"></a>
 ## v0.0.1 - 2021-07-23
 
-[Unreleased]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.10.0...HEAD
+[v0.10.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.9.0...v0.10.0
 [v0.9.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.8.0...v0.9.0
 [v0.8.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.7.2...v0.8.0
 [v0.7.2]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.7.1...v0.7.2
