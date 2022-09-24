@@ -34,7 +34,7 @@ changelog:
 .PHONY: test
 test: 
 	go test -run '' ./oidc-client/ -v
-	go test -run '' ./oidc-client/internal/ -v 
+	go test -run '' ./oidc-client/internal/pkce/ -v 
 
 
 .PHONY: gen-doc

@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-hclog"
-	"github.com/vdbulcke/oidc-client-demo/oidc-client/internal"
+	pkce "github.com/vdbulcke/oidc-client-demo/oidc-client/internal/pkce"
 	"golang.org/x/oauth2"
 )
 
@@ -146,14 +146,14 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 	if c.config.UsePKCE {
 
 		// generate new code
-		codeVerifier, err = internal.NewCodeVerifier(c.config.PKCECodeLength)
+		codeVerifier, err = pkce.NewCodeVerifier(c.config.PKCECodeLength)
 		if err != nil {
 			c.logger.Error("Fail to generate PKCE code", "error", err)
 			return err
 		}
 
 		// generate challenge
-		challenge, err = internal.NewCodeChallenge(codeVerifier, c.config.PKCEChallengeMethod)
+		challenge, err = pkce.NewCodeChallenge(codeVerifier, c.config.PKCEChallengeMethod)
 		if err != nil {
 			c.logger.Error("Fail to generate PKCE Challenge", "code", codeVerifier, "error", err)
 			return err

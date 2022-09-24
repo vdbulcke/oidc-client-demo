@@ -8,7 +8,7 @@ import (
 	"github.com/go-playground/validator"
 	"gopkg.in/yaml.v3"
 
-	"github.com/vdbulcke/oidc-client-demo/oidc-client/internal"
+	"github.com/vdbulcke/oidc-client-demo/oidc-client/internal/pkce"
 )
 
 type OIDCClientConfig struct {
@@ -71,7 +71,7 @@ func ValidateConfig(config *OIDCClientConfig) bool {
 	errs := validate.Struct(config)
 
 	if config.PKCEChallengeMethod != "" {
-		if config.PKCEChallengeMethod != internal.PKCEMethodPlain && config.PKCEChallengeMethod != internal.PKCEMethodS256 {
+		if config.PKCEChallengeMethod != pkce.PKCEMethodPlain && config.PKCEChallengeMethod != pkce.PKCEMethodS256 {
 			fmt.Println("Invalid 'pkce_challenge_method' must be one of 'S256' or 'plain'")
 			return false
 		}
@@ -120,7 +120,7 @@ func ParseConfig(configFile string) (*OIDCClientConfig, error) {
 
 	// Set Default PKCE Method if not set
 	if config.PKCEChallengeMethod == "" {
-		config.PKCEChallengeMethod = internal.PKCEMethodS256
+		config.PKCEChallengeMethod = pkce.PKCEMethodS256
 	}
 
 	// set default PKCE Code length
