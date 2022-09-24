@@ -89,6 +89,60 @@ Set `use_pkce: true` to enable the Authorization Code Flow with PKCE.
 # pkce_challenge_method: S256
 ```
 
+## Pushed Authorization Request (PAR)
+
+!!! note 
+    Optional Settings (default disable)
+
+Set `use_par: true` to send the Pushed Authorization Request to the Authorization Server, when doing the Authorization Code Flow. 
+
+```yaml
+## PAR (optional)
+###  since v0.11.0
+###  Sends a Pushed Authorization Request to 
+###  Authorization Server, and redirect the user 
+###  to the Authorization endpoint with a 'request_uri'.
+### 
+###  By default, the par endpoint is discovered from the 
+###  well-known endpoint 'pushed_authorization_request_endpoint'.
+###
+###  reference: rfc9126
+### Enable PAR
+# use_par: true 
+### Override PAR endpoint
+# par_endpoint: "https://example.com/par"
+### Custom key (other than 'pushed_authorization_request_endpoint') on well known endpoint 
+# par_endpoint_wellknown_key: "par_endpoint"
+### Arbitrary Key/Value parameters to include in PAR request
+# par_additional_parameters: 
+#   foo:  bar 
+#   hello: world
+
+```
+
+By default, the PAR endpoint of the Authorization Server is derived from the Well Known endpoint via the `pushed_authorization_request_endpoint` property ([rfc9126#section-5](https://datatracker.ietf.org/doc/html/rfc9126#section-5)).
+
+The PAR request sent by `oidc-client` contains the same parameters as the typical Authorization request (including extensions like PKCE, ACR Values). The `oidc-client` will display the PAR response (`request_uri`, and `expires_in`) on the terminal, and will **only** sends the received `request_uri` and `client_id` when redirecting the user to the Authorization endpoint (going to `http://127.0.0.1:5556/login`).
+
+### Non Standard PAR Endpoint
+
+If your Authorization Server uses another property than `pushed_authorization_request_endpoint` on its Well Known endpoint, you can set `par_endpoint_wellknown_key: "custom_par_endpoint_property"`. 
+
+If your Authorization Server does not exposes the PAR endpoint at all on its Well Known endpoint, you can specify it via `par_endpoint: "https://example.com/par"`. 
+
+### Additional Parameters In PAR Request
+
+If your Authorization Server supports additional parameters on its PAR endpoints, you can specify a map of Key/Value with
+
+```yaml
+## Format Map[string]string
+par_additional_parameters: 
+  foo:  bar 
+  hello: world
+```
+
+
+
 ## Scopes
 
 !!! important 
@@ -119,6 +173,24 @@ You must specify the `issuer` setting that will be used to construct the OpenID 
 ###       by adding /.well-known/openid-configuration after the issuer base url 
 issuer: "https://example.com"
 ```
+
+### Alternative Well Known 
+
+!!! note 
+    Optional Settings 
+
+If you Authorization Server exposes a non compliant Well Known endpoint (i.e. not on the same domain as the `issuer`), you can specify an alternative urls via `alternative_wellknown_endpoint`, and you can disable Well Known endpoint validation with `insecure_wellknown_endpoint: true`.
+
+```yaml
+## Alternative Well-Known (Optional)
+###  since v0.11.0 
+### 
+# alternative_wellknown_endpoint: ""
+### Disable well known endpoint validation
+# insecure_wellknown_endpoint: true
+
+```
+
 
 ### Token Introspection Endpoint
 
