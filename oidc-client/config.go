@@ -30,10 +30,12 @@ type OIDCClientConfig struct {
 
 	Issuer string `yaml:"issuer"  validate:"required"`
 
-	TokenEndpoint      string `yaml:"token_endpoint"  `
-	AuthorizeEndpoint  string `yaml:"authorize_endpoint"  `
-	JwksEndpoint       string `yaml:"jwks_endpoint"`
-	IntrospectEndpoint string `yaml:"introspect_endpoint"`
+	TokenEndpoint                string `yaml:"token_endpoint"  `
+	AuthorizeEndpoint            string `yaml:"authorize_endpoint"  `
+	JwksEndpoint                 string `yaml:"jwks_endpoint"`
+	IntrospectEndpoint           string `yaml:"introspect_endpoint"`
+	AlternativeWellKnownEndpoint string `yaml:"alternative_wellknown_endpoint"`
+	InsecureWellKnownEndpoint    bool   `yaml:"insecure_wellknown_endpoint"`
 
 	TokenSigningAlg []string `yaml:"token_signing_alg" validate:"required"`
 

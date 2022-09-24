@@ -47,6 +47,15 @@ token_signing_alg:
 ###       by adding ./well-known/openid-configuration after the issuer base url 
 issuer: "https://idp.iamfas.int.belgium.be/fas/oauth2"
 
+
+## Alternative Well-Known (Optional)
+###  since v0.11.0 
+### 
+# alternative_wellknown_endpoint: ""
+### Disable well known endpoint validation
+# insecure_wellknown_endpoint: true
+
+
 ## Introspect: (Mandatory for 'introspect sub command')
 ## 
 introspect_endpoint: "https://idp.iamfas.int.belgium.be/fas/oauth2/introspect"

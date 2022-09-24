@@ -3,10 +3,13 @@ package oidcclient
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/hashicorp/go-hclog"
+	"github.com/vdbulcke/oidc-client-demo/oidc-client/internal/oidc/discovery"
 	"golang.org/x/oauth2"
 )
 
@@ -51,8 +54,38 @@ func NewOIDCClient(c *OIDCClientConfig, l hclog.Logger) (*OIDCClient, error) {
 		InsecureSkipVerify: c.SkipTLSVerification,
 	}
 
-	// provider := c.newProvider(ctx)
-	provider, err := oidc.NewProvider(ctx, c.Issuer)
+	// construct well-known from Issuer, and discover well known
+	wellKnown := strings.TrimSuffix(c.Issuer, "/") + "/.well-known/openid-configuration"
+
+	if c.AlternativeWellKnownEndpoint != "" {
+		// override wellknown if an alternative is provided
+		wellKnown = c.AlternativeWellKnownEndpoint
+		l.Warn("Using Alternative wellknown", "url", c.AlternativeWellKnownEndpoint)
+	}
+
+	wk, err := discovery.NewWellKnown(wellKnown)
+	if err != nil {
+		l.Error("Could not get WellKnown endpoint", "err", err)
+		return nil, err
+	}
+
+	if !c.InsecureWellKnownEndpoint {
+		if !discovery.ValidWellKnown(wk, c.Issuer, l) {
+			return nil, errors.New("Wellknown validation error")
+		}
+	}
+
+	// Create a oidc Provider Config manually
+	providerConfig := &oidc.ProviderConfig{
+		IssuerURL:   c.Issuer,
+		AuthURL:     wk.AuthorizationEndpoint,
+		TokenURL:    wk.TokenEndpoint,
+		UserInfoURL: wk.UserinfoEndpoint,
+		JWKSURL:     wk.JwksUri,
+		Algorithms:  wk.IDTokenSigningAlgValuesSupported,
+	}
+
+	provider := providerConfig.NewProvider(ctx)
 	if err != nil {
 		l.Error("Could create OIDC provider form WellKnown endpoint", "err", err)
 		return nil, err
