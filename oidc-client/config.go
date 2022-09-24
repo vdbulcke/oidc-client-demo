@@ -34,8 +34,13 @@ type OIDCClientConfig struct {
 	AuthorizeEndpoint            string `yaml:"authorize_endpoint"  `
 	JwksEndpoint                 string `yaml:"jwks_endpoint"`
 	IntrospectEndpoint           string `yaml:"introspect_endpoint"`
+	PAREndpoint                  string `yaml:"par_endpoint"`
 	AlternativeWellKnownEndpoint string `yaml:"alternative_wellknown_endpoint"`
 	InsecureWellKnownEndpoint    bool   `yaml:"insecure_wellknown_endpoint"`
+
+	UsePAR                            bool              `yaml:"use_par"`
+	PARIntrospectEndpointWellKnownKey string            `yaml:"par_endpoint_wellknown_key"`
+	PARAdditionalParameter            map[string]string `yaml:"par_additional_parameters"`
 
 	TokenSigningAlg []string `yaml:"token_signing_alg" validate:"required"`
 

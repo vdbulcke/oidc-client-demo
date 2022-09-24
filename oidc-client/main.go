@@ -75,6 +75,41 @@ func NewOIDCClient(c *OIDCClientConfig, l hclog.Logger) (*OIDCClient, error) {
 		}
 	}
 
+	// if Well Known Requires PAR
+	if wk.RequirePushedAuthorizationRequests {
+		c.UsePAR = true
+	}
+
+	// if no explicit 'par_endpoint'
+	if c.UsePAR && c.PAREndpoint == "" {
+
+		// try to get it from standard Well Known endpoint property
+		if wk.PushedAuthorizationRequestEndpoint != "" {
+			c.PAREndpoint = wk.PushedAuthorizationRequestEndpoint
+
+		} else if c.PARIntrospectEndpointWellKnownKey != "" {
+			// if alternative key on well known is defined
+			par := wk.WellKnownRaw[c.PARIntrospectEndpointWellKnownKey]
+			if par == nil {
+				l.Error("could not find PAR endpoint on well-known", "key", c.PARIntrospectEndpointWellKnownKey)
+
+			} else {
+				//nolint
+				switch par.(type) {
+				case string:
+					c.PAREndpoint = par.(string)
+				}
+
+			}
+		}
+
+		if c.PAREndpoint == "" {
+			l.Error("no PAR endpoint defined with 'use_par: true'")
+			return nil, errors.New("Invalid config")
+		}
+
+	}
+
 	// Create a oidc Provider Config manually
 	providerConfig := &oidc.ProviderConfig{
 		IssuerURL:   c.Issuer,

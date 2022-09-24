@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"os/signal"
 	"time"
@@ -161,6 +162,17 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 
 	}
 
+	var parResp *PARResponse
+	if c.config.UsePAR {
+		parResp, err = c.DoPARRequest(challenge, nonce, state)
+		if err != nil {
+			c.logger.Error("error doing PAR request", "error", err)
+			return err
+		}
+
+		c.logger.Info("Received PAR Response", "request_uri", parResp.RequestUri, "expires_in", parResp.ExpiresIn)
+	}
+
 	mux := http.DefaultServeMux
 
 	// http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
@@ -176,33 +188,54 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 		// Extra parameter for authorize endpoint
 		var authorizeOtps []oauth2.AuthCodeOption
 
-		// setting Authorize call options (&nonce=...)
-		authNonceOption := oauth2.SetAuthURLParam("nonce", nonce)
-		authorizeOtps = append(authorizeOtps, authNonceOption)
+		// if using PAR
+		// not need for the extra parameter parameters
+		if c.config.UsePAR {
 
-		// if need acr_values
-		if c.config.AcrValues != "" {
-			// setting Authorize call options (&acr_values=...)
-			acrValuesOption := oauth2.SetAuthURLParam("acr_values", c.config.AcrValues)
-			authorizeOtps = append(authorizeOtps, acrValuesOption)
+			url, err := url.Parse(c.oAuthConfig.Endpoint.AuthURL)
+			if err != nil {
+				c.logger.Error("error parsing Authorize url", "error", err)
+			}
+
+			q := url.Query()
+			q.Add("request_uri", parResp.RequestUri)
+			q.Add("client_id", c.config.ClientID)
+			url.RawQuery = q.Encode()
+
+			authorizeURL = url.String()
+			c.logger.Debug("auth URL", "url", authorizeURL)
+
+		} else {
+			// setting Authorize call options (&nonce=...)
+			authNonceOption := oauth2.SetAuthURLParam("nonce", nonce)
+			authorizeOtps = append(authorizeOtps, authNonceOption)
+
+			// if need acr_values
+			if c.config.AcrValues != "" {
+				// setting Authorize call options (&acr_values=...)
+				acrValuesOption := oauth2.SetAuthURLParam("acr_values", c.config.AcrValues)
+				authorizeOtps = append(authorizeOtps, acrValuesOption)
+			}
+
+			// handle pkce paramater
+			if c.config.UsePKCE {
+
+				pkceOption := oauth2.SetAuthURLParam("code_challenge", challenge)
+				authorizeOtps = append(authorizeOtps, pkceOption)
+
+				pkceMethodOption := oauth2.SetAuthURLParam("code_challenge_method", c.config.PKCEChallengeMethod)
+				authorizeOtps = append(authorizeOtps, pkceMethodOption)
+
+			}
+
+			// generate the authorize url with the extra options
+			authorizeURL = c.oAuthConfig.AuthCodeURL(state, authorizeOtps...)
+
 		}
-
-		// handle pkce paramater
-		if c.config.UsePKCE {
-
-			pkceOption := oauth2.SetAuthURLParam("code_challenge", challenge)
-			authorizeOtps = append(authorizeOtps, pkceOption)
-
-			pkceMethodOption := oauth2.SetAuthURLParam("code_challenge_method", c.config.PKCEChallengeMethod)
-			authorizeOtps = append(authorizeOtps, pkceMethodOption)
-
-		}
-
-		// generate the authorize url with the extra options
-		authorizeURL = c.oAuthConfig.AuthCodeURL(state, authorizeOtps...)
 
 		// redirect to authorization URL
 		http.Redirect(w, r, authorizeURL, http.StatusFound)
+
 	})
 
 	// http.HandleFunc("/auth/callback", func(w http.ResponseWriter, r *http.Request) {

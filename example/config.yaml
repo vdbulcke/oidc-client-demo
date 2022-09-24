@@ -56,6 +56,28 @@ issuer: "https://idp.iamfas.int.belgium.be/fas/oauth2"
 # insecure_wellknown_endpoint: true
 
 
+## PAR (optional)
+###  since v0.11.0
+###  Sends a Pushed Authorization Request to 
+###  Authorization Server, and redirect the user 
+###  to the Authorization endpoint with a 'request_uri'.
+### 
+###  By default, the par endpoint is discovered from the 
+###  well-known endpoint 'pushed_authorization_request_endpoint'.
+###
+###  reference: rfc9126
+### Enable PAR
+# use_par: true 
+### Override PAR endpoint
+# par_endpoint: "https://example.com/par"
+### Custom key (other than 'pushed_authorization_request_endpoint') on well known endpoint 
+# par_endpoint_wellknown_key: "par_endpoint"
+### Arbitrary Key/Value parameters to include in PAR request
+# par_additional_parameters: 
+#   foo:  bar 
+#   hello: world
+
+
 ## Introspect: (Mandatory for 'introspect sub command')
 ## 
 introspect_endpoint: "https://idp.iamfas.int.belgium.be/fas/oauth2/introspect"

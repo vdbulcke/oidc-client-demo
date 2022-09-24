@@ -9,14 +9,16 @@ type OIDCWellKnownOpenidConfiguration struct {
 	JwksUri               string `json:"jwks_uri"  validate:"required"`
 
 	// Optional
-	UserinfoEndpoint       string   `json:"userinfo_endpoint"  `
-	RegistrationEndpoint   string   `json:"registration_endpoint"  `
-	ScopesSupported        []string `json:"scopes_supported"  `
-	ResponseTypesSupported []string `json:"response_types_supported"  `
-	ResponseModeSupported  []string `json:"response_modes_supported"  `
-	GrantTypesSupported    []string `json:"grant_types_supported"  `
-	AcrValuesSupported     []string `json:"acr_values_supported"  `
-	SubjectTypesSupported  []string `json:"subject_types_supported"  `
+	// https://www.rfc-editor.org/rfc/rfc9126.html#name-authorization-server-metada
+	PushedAuthorizationRequestEndpoint string   `json:"pushed_authorization_request_endpoint"  `
+	UserinfoEndpoint                   string   `json:"userinfo_endpoint"  `
+	RegistrationEndpoint               string   `json:"registration_endpoint"  `
+	ScopesSupported                    []string `json:"scopes_supported"  `
+	ResponseTypesSupported             []string `json:"response_types_supported"  `
+	ResponseModeSupported              []string `json:"response_modes_supported"  `
+	GrantTypesSupported                []string `json:"grant_types_supported"  `
+	AcrValuesSupported                 []string `json:"acr_values_supported"  `
+	SubjectTypesSupported              []string `json:"subject_types_supported"  `
 
 	IDTokenSigningAlgValuesSupported    []string `json:"id_token_signing_alg_values_supported"  `
 	IDTokenEncryptionAlgValuesSupported []string `json:"id_token_encryption_alg_values_supported"  `
@@ -39,10 +41,11 @@ type OIDCWellKnownOpenidConfiguration struct {
 	ClaimsLocalesSupported []string `json:"claims_locales_supported"  `
 	UILocalesSupported     []string `json:"ui_locales_supported"  `
 
-	ClaimsParameterSupported      bool `json:"claims_parameter_supported"  `
-	RequestParameterSupported     bool `json:"request_parameter_supported"  `
-	RequestURIParameterSupported  bool `json:"request_uri_parameter_supported"  `
-	RequireRequestUriRegistration bool `json:"require_request_uri_registration"  `
+	ClaimsParameterSupported           bool `json:"claims_parameter_supported"  `
+	RequestParameterSupported          bool `json:"request_parameter_supported"  `
+	RequestURIParameterSupported       bool `json:"request_uri_parameter_supported"  `
+	RequireRequestUriRegistration      bool `json:"require_request_uri_registration"  `
+	RequirePushedAuthorizationRequests bool `json:"require_pushed_authorization_requests"  `
 
 	OpPolicyUri          string `json:"op_policy_uri"  `
 	OpTosUri             string `json:"op_tos_uri"  `
