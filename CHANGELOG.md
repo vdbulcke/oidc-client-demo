@@ -2,6 +2,20 @@
 ## [Unreleased]
 
 
+<a name="v0.12.0"></a>
+## [v0.12.0] - 2022-09-28
+### Features
+- 5ccf50b - Add mock request capabilities ([#35](https://github.com/vdbulcke/oidc-client-demo/issues/35))
+- 1ebd288 - Add additional param on authorize ([#33](https://github.com/vdbulcke/oidc-client-demo/issues/33))
+
+
+<a name="v0.11.0"></a>
+## [v0.11.0] - 2022-09-24
+### Features
+- 0cd5b18 - Add PAR support ([#31](https://github.com/vdbulcke/oidc-client-demo/issues/31))
+- f01908e - add alternative well known ([#31](https://github.com/vdbulcke/oidc-client-demo/issues/31))
+
+
 <a name="v0.10.0"></a>
 ## [v0.10.0] - 2022-08-31
 ### Features
@@ -118,7 +132,9 @@
 <a name="v0.0.1"></a>
 ## v0.0.1 - 2021-07-23
 
-[Unreleased]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.10.0...HEAD
+[Unreleased]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.12.0...HEAD
+[v0.12.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.11.0...v0.12.0
+[v0.11.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.10.0...v0.11.0
 [v0.10.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.9.0...v0.10.0
 [v0.9.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.8.0...v0.9.0
 [v0.8.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.7.2...v0.8.0
