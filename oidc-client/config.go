@@ -41,6 +41,7 @@ type OIDCClientConfig struct {
 	UsePAR                            bool              `yaml:"use_par"`
 	PARIntrospectEndpointWellKnownKey string            `yaml:"par_endpoint_wellknown_key"`
 	PARAdditionalParameter            map[string]string `yaml:"par_additional_parameters"`
+	AuthorizeAdditionalParameter      map[string]string `yaml:"authorize_additional_parameters"`
 
 	TokenSigningAlg []string `yaml:"token_signing_alg" validate:"required"`
 

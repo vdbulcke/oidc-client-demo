@@ -78,6 +78,14 @@ issuer: "https://idp.iamfas.int.belgium.be/fas/oauth2"
 #   hello: world
 
 
+## Authorize Request Additional Param (optional)
+### since version 0.12.0
+### 
+### Arbitrary Key/Value parameters to include in Authorize request
+### format map[string]string
+# authorize_additional_parameters:
+#   claims: '{"id_token": {"foo": {"values": ["bar", "baz"]}}}'
+
 ## Introspect: (Mandatory for 'introspect sub command')
 ## 
 introspect_endpoint: "https://idp.iamfas.int.belgium.be/fas/oauth2/introspect"
