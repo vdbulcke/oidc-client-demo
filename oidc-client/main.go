@@ -1,3 +1,10 @@
+/**
+ - Authorization request & access token request: authorize.go
+ - Pushed Authorization request: par.go
+ - userinfo request: userinfo.go
+ - introspect request: introspect.go
+ - refresh_token request: refresh_token.go
+**/
 package oidcclient
 
 import (
