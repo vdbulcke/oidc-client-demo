@@ -16,6 +16,10 @@ var useLocalhost bool
 var acrValueOverride string
 var fakePKCEVerifier bool
 
+var mockNonce string
+var mockState string
+var mockCodeVerifier string
+
 // default
 var DefaultListeningAddress = "127.0.0.1"
 var DefaultListeningPost = 5556
@@ -29,6 +33,9 @@ func init() {
 	clientCmd.Flags().BoolVarP(&useLocalhost, "localhost", "", false, "use localhost instead of 127.0.0.1")
 	clientCmd.Flags().StringVarP(&acrValueOverride, "acr-values", "a", "", "override 'acr_values' from config")
 	clientCmd.Flags().BoolVarP(&fakePKCEVerifier, "fake-pkce-verifier", "", false, "send a dummy pkce 'code_verifier'")
+	clientCmd.Flags().StringVarP(&mockNonce, "mock-nonce", "", "", "Use static 'nonce' value")
+	clientCmd.Flags().StringVarP(&mockState, "mock-state", "", "", "Use static 'state' value")
+	clientCmd.Flags().StringVarP(&mockCodeVerifier, "mock-code-verifier", "", "", "Use static pkce 'code_verifier' value")
 
 	// required flags
 	//nolint
@@ -90,6 +97,11 @@ func runClient(cmd *cobra.Command, args []string) {
 	// set output flag
 	config.OutputEnabled = output
 	config.OutputDir = outputDir
+
+	// set mock
+	config.MockCodeVerifier = mockCodeVerifier
+	config.MockNonce = mockNonce
+	config.MockState = mockState
 
 	// Make a new OIDC Client
 	client, err := oidcclient.NewOIDCClient(config, appLogger)

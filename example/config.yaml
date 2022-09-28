@@ -74,6 +74,7 @@ issuer: "https://idp.iamfas.int.belgium.be/fas/oauth2"
 # par_endpoint_wellknown_key: "par_endpoint"
 ### Arbitrary Key/Value parameters to include in PAR request
 # par_additional_parameters: 
+#   claims: '{"id_token": {"foo": {"values": ["bar", "baz"]}}}'
 #   foo:  bar 
 #   hello: world
 

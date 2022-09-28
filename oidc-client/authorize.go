@@ -25,13 +25,13 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 	// signal.Notify(c, os.Kill)
 
 	// generate state and none
-	state, err := c.randString(6)
+	state, err := c.NewState(6)
 	if err != nil {
 		c.logger.Error("Could not generate state", "err", err)
 		return err
 	}
 
-	nonce, err := c.randString(6)
+	nonce, err := c.NewNonce(6)
 	if err != nil {
 		c.logger.Error("Could not generate nonce", "err", err)
 		return err
@@ -42,7 +42,7 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 	if c.config.UsePKCE {
 
 		// generate new code
-		codeVerifier, err = pkce.NewCodeVerifier(c.config.PKCECodeLength)
+		codeVerifier, err = c.NewCodeVerifier(c.config.PKCECodeLength)
 		if err != nil {
 			c.logger.Error("Fail to generate PKCE code", "error", err)
 			return err
@@ -95,6 +95,14 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 			q := url.Query()
 			q.Add("request_uri", parResp.RequestUri)
 			q.Add("client_id", c.config.ClientID)
+
+			// if specified add extra K/V parameter on authorize request
+			if c.config.AuthorizeAdditionalParameter != nil {
+				for k, v := range c.config.AuthorizeAdditionalParameter {
+					q.Add(k, v)
+				}
+			}
+
 			url.RawQuery = q.Encode()
 
 			authorizeURL = url.String()

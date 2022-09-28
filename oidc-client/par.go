@@ -89,9 +89,35 @@ func (c *OIDCClient) generatePARRequest(codeChallenge string, nonce string, stat
 	}
 
 	if c.config.PARAdditionalParameter != nil {
-
+		requestParameter := false
 		for k, v := range c.config.PARAdditionalParameter {
 			parRequestBody[k] = v
+
+			if k == "request" {
+				requestParameter = true
+			}
+
+		}
+
+		if requestParameter {
+			// apply special handling for 'request' parameter
+			// https://www.rfc-editor.org/rfc/rfc9126.html#section-3
+			paramToKeep := []string{
+				"request",
+				"client_id",
+				"client_secret",
+				"client_assertion_type",
+				"client_assertion",
+			}
+
+			//nolint
+			for k, _ := range parRequestBody {
+				// not an allowed parameter
+				// delete from request
+				if !stringInSlice(k, paramToKeep) {
+					delete(parRequestBody, k)
+				}
+			}
 		}
 
 	}
@@ -100,6 +126,10 @@ func (c *OIDCClient) generatePARRequest(codeChallenge string, nonce string, stat
 	if err != nil {
 		c.logger.Error("error formatting PAR request", "error", err)
 		return nil, err
+	}
+
+	if c.logger.IsDebug() {
+		c.logger.Debug("par Request payload", "request", string(payloadRaw))
 	}
 
 	req, err := http.NewRequest(http.MethodPost, c.config.PAREndpoint, bytes.NewBuffer(payloadRaw))

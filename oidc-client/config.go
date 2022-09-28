@@ -50,6 +50,11 @@ type OIDCClientConfig struct {
 
 	RedirectUri string
 
+	// Mock
+	MockState        string
+	MockNonce        string
+	MockCodeVerifier string
+
 	// Output
 	OutputEnabled       bool
 	OutputDir           string
