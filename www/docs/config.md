@@ -141,7 +141,11 @@ par_additional_parameters:
   hello: world
 ```
 
+!!!important
+    As defined in [rfc9126#section-3](https://datatracker.ietf.org/doc/html/rfc9126#section-3), if the `request` parameter is specified as `par_additional_parameters` all others parameter than `["request", "client_id", "client_secret", "client_assertion_type", "client_assertion"]` will be removed from the PAR request. 
 
+!!!Info
+    Use the `--debug` to see the PAR request payload.
 
 ## Scopes
 
@@ -291,6 +295,26 @@ If your Authorization Server supports multiple authentication methods, you speci
 ```
 
 
+### Additional Parameters In Authorization Request
+!!! note 
+    Optional Settings
+
+
+
+If your Authorization Server supports additional parameters on its authorization endpoint, you can specify a map of Key/Value with
+
+```yaml
+## Authorize Request Additional Param (optional)
+### since version 0.12.0
+### 
+### Arbitrary Key/Value parameters to include in Authorize request
+### format map[string]string
+authorize_additional_parameters:
+  claims: '{"id_token": {"foo": {"values": ["bar", "baz"]}}}'
+```
+
+!!!tip
+    You can also use this to override default generated parameter (like `redirect_uri`). 
 
 
 ### AMR Validation
