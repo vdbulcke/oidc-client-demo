@@ -10,6 +10,15 @@ import (
 // processIdToken Handle idToken call
 func (c *OIDCClient) processIdToken(idTokenRaw string) (*oidc.IDToken, error) {
 
+	// parse header
+	header, err := c.parseJWTHeader(idTokenRaw)
+	if err != nil {
+		c.logger.Error("error ID Token parsing header", "error", err)
+	} else {
+		// pretty print header
+		c.logger.Info("IDToken header", "header", header)
+	}
+
 	// validate signature agains the JWK
 	idToken, err := c.verifier.Verify(c.ctx, idTokenRaw)
 	if err != nil {

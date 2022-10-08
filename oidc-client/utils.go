@@ -1,6 +1,13 @@
 package oidcclient
 
-import pkce "github.com/vdbulcke/oidc-client-demo/oidc-client/internal/pkce"
+import (
+	"encoding/base64"
+	"encoding/json"
+	"fmt"
+	"strings"
+
+	pkce "github.com/vdbulcke/oidc-client-demo/oidc-client/internal/pkce"
+)
 
 func stringInSlice(a string, list []string) bool {
 	for _, b := range list {
@@ -42,4 +49,28 @@ func (c *OIDCClient) NewCodeVerifier(length int) (string, error) {
 
 	// else generate random string
 	return pkce.NewCodeVerifier(length)
+}
+
+func (c *OIDCClient) parseJWTHeader(rawToken string) (string, error) {
+
+	parts := strings.Split(rawToken, ".")
+	// header must be the first part
+	header, err := base64.RawURLEncoding.DecodeString(parts[0])
+	if err != nil {
+		return "", fmt.Errorf(" malformed jwt header: %v", err)
+	}
+
+	var parsedHeader map[string]string
+	if err := json.Unmarshal(header, &parsedHeader); err != nil {
+		return "", fmt.Errorf("failed to unmarshal jwt header: %v", err)
+	}
+
+	// pretty output
+	parsedHeaderByte, err := json.MarshalIndent(parsedHeader, "", "    ")
+	if err != nil {
+		c.logger.Error("Could not marshal jwt header", "err", err)
+		return "", err
+	}
+
+	return string(parsedHeaderByte), nil
 }
