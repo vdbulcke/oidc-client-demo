@@ -3,6 +3,7 @@ package oidcclient
 import (
 	"crypto/rand"
 	"encoding/base64"
+	"encoding/json"
 	"io"
 	"net/http"
 	"time"
@@ -110,4 +111,21 @@ func (c *OIDCClient) parseAccessTokenResponse(oauth2Token *oauth2.Token) (*JSONA
 	}
 
 	return jsonAccessTokenResp, nil
+}
+
+func (c *OIDCClient) processAccessTokenResponse(accessTokenResponse *JSONAccessTokenResponse) {
+
+	accessTokenResponseLog, err := json.MarshalIndent(accessTokenResponse, "", "    ")
+	if err != nil {
+		c.logger.Error("Error Marchalling access Token Resp", "err", err)
+	}
+
+	c.logger.Info("Access Token Response", "Response", string(accessTokenResponseLog))
+	if c.config.OutputEnabled {
+		err = c.writeOutput(accessTokenResponseLog, c.config.AccessTokenRespFile)
+		if err != nil {
+			c.logger.Error("Error Writing Access Token Response file", "error", err)
+		}
+	}
+
 }

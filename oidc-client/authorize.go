@@ -211,19 +211,8 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 		}
 
 		// Print Access Token
-		accessTokenResponseLog, err := json.MarshalIndent(accessTokenResponse, "", "    ")
-		if err != nil {
-			c.logger.Error("Error Marchalling access Token Resp", "err", err)
-		}
-
-		c.logger.Info("Access Token Response", "Response", string(accessTokenResponseLog))
-		if c.config.OutputEnabled {
-			err = c.writeOutput(accessTokenResponseLog, c.config.AccessTokenRespFile)
-			if err != nil {
-				c.logger.Error("Error Writing Access Token Response file", "error", err)
-			}
-		}
-
+		c.processAccessTokenResponse(accessTokenResponse)
+		
 		// Validate ID Token
 		idTokenRaw := accessTokenResponse.IDToken
 		if idTokenRaw == "" {

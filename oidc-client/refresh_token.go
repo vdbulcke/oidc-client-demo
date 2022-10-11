@@ -2,7 +2,6 @@ package oidcclient
 
 import (
 	"context"
-	"encoding/json"
 	"time"
 
 	"golang.org/x/oauth2"
@@ -36,12 +35,7 @@ func (c *OIDCClient) RefreshTokenFlow(refreshToken string, skipIdTokenVerificati
 	}
 
 	// Print Access Token
-	accessTokenResponseLog, err := json.MarshalIndent(accessTokenResponse, "", "    ")
-	if err != nil {
-		c.logger.Error("Error Marchalling access Token Resp", "err", err)
-	}
-
-	c.logger.Info("Access Token Response", "Response", string(accessTokenResponseLog))
+	c.processAccessTokenResponse(accessTokenResponse)
 
 	// Validate ID Token
 	idTokenRaw := accessTokenResponse.IDToken
