@@ -1,0 +1,1431 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="CLI took for testing OIDC integration">
+      
+      
+      
+      
+        <link rel="prev" href="../install/">
+      
+      
+        <link rel="next" href="../server_config/">
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-9.1.0">
+    
+    
+      
+        <title>Client Configuration - OIDC Client Demo</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.402914a4.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.a0c5b2b5.min.css">
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="" data-md-color-accent="">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#client-configuration" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="OIDC Client Demo" class="md-header__button md-logo" aria-label="OIDC Client Demo" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            OIDC Client Demo
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Client Configuration
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      <form class="md-header__option" data-md-component="palette">
+        
+          
+          <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="" data-md-color-accent=""  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+          
+            <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_2" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3Z"/></svg>
+            </label>
+          
+        
+          
+          <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="light-blue" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_2">
+          
+            <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 6H7c-3.31 0-6 2.69-6 6s2.69 6 6 6h10c3.31 0 6-2.69 6-6s-2.69-6-6-6zm0 10H7c-2.21 0-4-1.79-4-4s1.79-4 4-4h10c2.21 0 4 1.79 4 4s-1.79 4-4 4zM7 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+            </label>
+          
+        
+      </form>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/vdbulcke/oidc-client-demo" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    vdbulcke/oidc-client-demo
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="OIDC Client Demo" class="md-nav__button md-logo" aria-label="OIDC Client Demo" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    OIDC Client Demo
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/vdbulcke/oidc-client-demo" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    vdbulcke/oidc-client-demo
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../install/" class="md-nav__link">
+        Install
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Client Configuration
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Client Configuration
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#client-authentication-settings" class="md-nav__link">
+    Client Authentication Settings
+  </a>
+  
+    <nav class="md-nav" aria-label="Client Authentication Settings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#client-id-and-secret" class="md-nav__link">
+    Client ID and Secret
+  </a>
+  
+    <nav class="md-nav" aria-label="Client ID and Secret">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#config-file" class="md-nav__link">
+    Config File
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#env-variables" class="md-nav__link">
+    Env Variables
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#client-authentication-method" class="md-nav__link">
+    Client Authentication Method
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pkce" class="md-nav__link">
+    PKCE
+  </a>
+  
+    <nav class="md-nav" aria-label="PKCE">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pkce-challenge-method" class="md-nav__link">
+    Pkce Challenge Method
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pushed-authorization-request-par" class="md-nav__link">
+    Pushed Authorization Request (PAR)
+  </a>
+  
+    <nav class="md-nav" aria-label="Pushed Authorization Request (PAR)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#non-standard-par-endpoint" class="md-nav__link">
+    Non Standard PAR Endpoint
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#additional-parameters-in-par-request" class="md-nav__link">
+    Additional Parameters In PAR Request
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scopes" class="md-nav__link">
+    Scopes
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#authorization-server" class="md-nav__link">
+    Authorization Server
+  </a>
+  
+    <nav class="md-nav" aria-label="Authorization Server">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#issuer-and-well-known-configuration" class="md-nav__link">
+    Issuer (and well-known configuration)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#alternative-well-known" class="md-nav__link">
+    Alternative Well Known
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#token-introspection-endpoint" class="md-nav__link">
+    Token Introspection Endpoint
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#overriding-authorization-server-endpoints" class="md-nav__link">
+    Overriding Authorization Server Endpoints
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skip-userinfo-call" class="md-nav__link">
+    Skip Userinfo Call
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security" class="md-nav__link">
+    Security
+  </a>
+  
+    <nav class="md-nav" aria-label="Security">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#token-signing-algorithms" class="md-nav__link">
+    Token Signing Algorithms
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tls-settings" class="md-nav__link">
+    TLS Settings
+  </a>
+  
+    <nav class="md-nav" aria-label="TLS Settings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#skip-tls-validation" class="md-nav__link">
+    Skip TLS Validation
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-settings" class="md-nav__link">
+    Advanced Settings
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Settings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#acr-values" class="md-nav__link">
+    ACR Values
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#additional-parameters-in-authorization-request" class="md-nav__link">
+    Additional Parameters In Authorization Request
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#amr-validation" class="md-nav__link">
+    AMR Validation
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#acr-validation" class="md-nav__link">
+    ACR Validation
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stateless-jwt-access-token" class="md-nav__link">
+    Stateless (JWT) Access Token
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stateless-jwt-refresh-token" class="md-nav__link">
+    Stateless (JWT) Refresh Token
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../server_config/" class="md-nav__link">
+        Server Configuration
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          Flows
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Flows
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../flows/authorization_code/" class="md-nav__link">
+        Authorization Code Flow
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../flows/refresh_token/" class="md-nav__link">
+        Refresh Token
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../flows/introspect/" class="md-nav__link">
+        Token Introspection
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../flows/end_session/" class="md-nav__link">
+        End Session
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        Troubleshooting
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+          Contributing
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_7">
+          <span class="md-nav__icon md-icon"></span>
+          Contributing
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/contributing/" class="md-nav__link">
+        Contributing
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/tooling/" class="md-nav__link">
+        Tooling
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/git/" class="md-nav__link">
+        Git
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../changelog/" class="md-nav__link">
+        Changelog
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#client-authentication-settings" class="md-nav__link">
+    Client Authentication Settings
+  </a>
+  
+    <nav class="md-nav" aria-label="Client Authentication Settings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#client-id-and-secret" class="md-nav__link">
+    Client ID and Secret
+  </a>
+  
+    <nav class="md-nav" aria-label="Client ID and Secret">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#config-file" class="md-nav__link">
+    Config File
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#env-variables" class="md-nav__link">
+    Env Variables
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#client-authentication-method" class="md-nav__link">
+    Client Authentication Method
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pkce" class="md-nav__link">
+    PKCE
+  </a>
+  
+    <nav class="md-nav" aria-label="PKCE">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pkce-challenge-method" class="md-nav__link">
+    Pkce Challenge Method
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pushed-authorization-request-par" class="md-nav__link">
+    Pushed Authorization Request (PAR)
+  </a>
+  
+    <nav class="md-nav" aria-label="Pushed Authorization Request (PAR)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#non-standard-par-endpoint" class="md-nav__link">
+    Non Standard PAR Endpoint
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#additional-parameters-in-par-request" class="md-nav__link">
+    Additional Parameters In PAR Request
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scopes" class="md-nav__link">
+    Scopes
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#authorization-server" class="md-nav__link">
+    Authorization Server
+  </a>
+  
+    <nav class="md-nav" aria-label="Authorization Server">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#issuer-and-well-known-configuration" class="md-nav__link">
+    Issuer (and well-known configuration)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#alternative-well-known" class="md-nav__link">
+    Alternative Well Known
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#token-introspection-endpoint" class="md-nav__link">
+    Token Introspection Endpoint
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#overriding-authorization-server-endpoints" class="md-nav__link">
+    Overriding Authorization Server Endpoints
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skip-userinfo-call" class="md-nav__link">
+    Skip Userinfo Call
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security" class="md-nav__link">
+    Security
+  </a>
+  
+    <nav class="md-nav" aria-label="Security">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#token-signing-algorithms" class="md-nav__link">
+    Token Signing Algorithms
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tls-settings" class="md-nav__link">
+    TLS Settings
+  </a>
+  
+    <nav class="md-nav" aria-label="TLS Settings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#skip-tls-validation" class="md-nav__link">
+    Skip TLS Validation
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-settings" class="md-nav__link">
+    Advanced Settings
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Settings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#acr-values" class="md-nav__link">
+    ACR Values
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#additional-parameters-in-authorization-request" class="md-nav__link">
+    Additional Parameters In Authorization Request
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#amr-validation" class="md-nav__link">
+    AMR Validation
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#acr-validation" class="md-nav__link">
+    ACR Validation
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stateless-jwt-access-token" class="md-nav__link">
+    Stateless (JWT) Access Token
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stateless-jwt-refresh-token" class="md-nav__link">
+    Stateless (JWT) Refresh Token
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="client-configuration">Client Configuration<a class="headerlink" href="#client-configuration" title="Permanent link">&para;</a></h1>
+<p>You can find a complete example of the client configuration in <a href="https://github.com/vdbulcke/oidc-client-demo/blob/main/example/config.yaml">example/config.yaml</a>.</p>
+<h2 id="client-authentication-settings">Client Authentication Settings<a class="headerlink" href="#client-authentication-settings" title="Permanent link">&para;</a></h2>
+<h3 id="client-id-and-secret">Client ID and Secret<a class="headerlink" href="#client-id-and-secret" title="Permanent link">&para;</a></h3>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Mandatory (either in config file or ENV variables) <strong>unless</strong> using pkce flow. In which case the <code>client_secret</code> is not required.</p>
+<p>See section <a href="https://vdbulcke.github.io/oidc-client-demo/config/#pkce">PKCE</a>.</p>
+</div>
+<p>The OIDC client credentials can be passed either in the main <code>config.yaml</code> config file, or as environment variables. </p>
+<h4 id="config-file">Config File<a class="headerlink" href="#config-file" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="c1">## Client Credentials: (Mandatory)</span>
+<span class="c1">### NOTE: those client_id/client_secret can be passed</span>
+<span class="c1">###       as environment variables with: </span>
+<span class="c1">###</span>
+<span class="c1">###    export OIDC_CLIENT_ID=my_client_id</span>
+<span class="c1">###    export OIDC_CLIENT_SECRET=my_client_secret</span>
+<span class="c1">###</span>
+<span class="nt">client_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_client_id</span>
+<span class="nt">client_secret</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_client_secret</span>
+</code></pre></div>
+<h4 id="env-variables">Env Variables<a class="headerlink" href="#env-variables" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">OIDC_CLIENT_ID</span><span class="o">=</span>my_client_id
+<span class="nb">export</span><span class="w"> </span><span class="nv">OIDC_CLIENT_SECRET</span><span class="o">=</span>my_client_secret
+</code></pre></div>
+<h3 id="client-authentication-method">Client Authentication Method<a class="headerlink" href="#client-authentication-method" title="Permanent link">&para;</a></h3>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Mandatory setting</p>
+</div>
+<p>Client authentication method MUST be one of </p>
+<ul>
+<li><code>client_secret_basic</code>: ClientID/ClientSecret are passed as Basic Authentication Header.</li>
+<li><code>client_secret_post</code>: ClientID/ClientSecret are passed in the POST body as <code>application/x-www-form-urlencoded</code> parameters.</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1">## Client Auth Method: (Mandatory)</span>
+<span class="c1">###  Since version v0.2.0</span>
+<span class="c1">### Supported Auth Method</span>
+<span class="c1">###  * client_secret_basic (Using Basic Auth Header)</span>
+<span class="c1">###  * client_secret_post  (Using POST request)</span>
+<span class="nt">auth_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">client_secret_basic</span>
+</code></pre></div>
+<h2 id="pkce">PKCE<a class="headerlink" href="#pkce" title="Permanent link">&para;</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Optional Settings</p>
+</div>
+<p>Set <code>use_pkce: true</code> to enable the Authorization Code Flow with PKCE. </p>
+<div class="highlight"><pre><span></span><code><span class="c1">## PKCE Flow: (Optional)</span>
+<span class="c1">### Since version v0.5.0</span>
+<span class="c1">### Enabled PKCE Flow</span>
+<span class="c1"># use_pkce: true</span>
+</code></pre></div>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p><code>auth_method</code> needs to be set to <code>client_secret_post</code> when using PKCE.</p>
+<p>More information about pkce can be found <a href="https://www.oauth.com/oauth2-servers/pkce/">https://www.oauth.com/oauth2-servers/pkce/</a>.</p>
+</div>
+<h4 id="pkce-challenge-method">Pkce Challenge Method<a class="headerlink" href="#pkce-challenge-method" title="Permanent link">&para;</a></h4>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Optional Settings</p>
+</div>
+<div class="highlight"><pre><span></span><code><span class="c1">### Supported challenge method </span>
+<span class="c1">###  * S256 (Recommended) Default if not specified</span>
+<span class="c1">###  * plain </span>
+<span class="c1"># pkce_challenge_method: S256</span>
+</code></pre></div>
+<h2 id="pushed-authorization-request-par">Pushed Authorization Request (PAR)<a class="headerlink" href="#pushed-authorization-request-par" title="Permanent link">&para;</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Optional Settings (default disable)</p>
+</div>
+<p>Set <code>use_par: true</code> to send the Pushed Authorization Request to the Authorization Server, when doing the Authorization Code Flow. </p>
+<div class="highlight"><pre><span></span><code><span class="c1">## PAR (optional)</span>
+<span class="c1">###  since v0.11.0</span>
+<span class="c1">###  Sends a Pushed Authorization Request to </span>
+<span class="c1">###  Authorization Server, and redirect the user </span>
+<span class="c1">###  to the Authorization endpoint with a &#39;request_uri&#39;.</span>
+<span class="c1">### </span>
+<span class="c1">###  By default, the par endpoint is discovered from the </span>
+<span class="c1">###  well-known endpoint &#39;pushed_authorization_request_endpoint&#39;.</span>
+<span class="c1">###</span>
+<span class="c1">###  reference: rfc9126</span>
+<span class="c1">### Enable PAR</span>
+<span class="c1"># use_par: true </span>
+<span class="c1">### Override PAR endpoint</span>
+<span class="c1"># par_endpoint: &quot;https://example.com/par&quot;</span>
+<span class="c1">### Custom key (other than &#39;pushed_authorization_request_endpoint&#39;) on well known endpoint </span>
+<span class="c1"># par_endpoint_wellknown_key: &quot;par_endpoint&quot;</span>
+<span class="c1">### Arbitrary Key/Value parameters to include in PAR request</span>
+<span class="c1"># par_additional_parameters: </span>
+<span class="c1">#   foo:  bar </span>
+<span class="c1">#   hello: world</span>
+</code></pre></div>
+<p>By default, the PAR endpoint of the Authorization Server is derived from the Well Known endpoint via the <code>pushed_authorization_request_endpoint</code> property (<a href="https://datatracker.ietf.org/doc/html/rfc9126#section-5">rfc9126#section-5</a>).</p>
+<p>The PAR request sent by <code>oidc-client</code> contains the same parameters as the typical Authorization request (including extensions like PKCE, ACR Values). The <code>oidc-client</code> will display the PAR response (<code>request_uri</code>, and <code>expires_in</code>) on the terminal, and will <strong>only</strong> sends the received <code>request_uri</code> and <code>client_id</code> when redirecting the user to the Authorization endpoint (going to <code>http://127.0.0.1:5556/login</code>).</p>
+<h3 id="non-standard-par-endpoint">Non Standard PAR Endpoint<a class="headerlink" href="#non-standard-par-endpoint" title="Permanent link">&para;</a></h3>
+<p>If your Authorization Server uses another property than <code>pushed_authorization_request_endpoint</code> on its Well Known endpoint, you can set <code>par_endpoint_wellknown_key: "custom_par_endpoint_property"</code>. </p>
+<p>If your Authorization Server does not exposes the PAR endpoint at all on its Well Known endpoint, you can specify it via <code>par_endpoint: "https://example.com/par"</code>. </p>
+<h3 id="additional-parameters-in-par-request">Additional Parameters In PAR Request<a class="headerlink" href="#additional-parameters-in-par-request" title="Permanent link">&para;</a></h3>
+<p>If your Authorization Server supports additional parameters on its PAR endpoints, you can specify a map of Key/Value with</p>
+<div class="highlight"><pre><span></span><code><span class="c1">## Format Map[string]string</span>
+<span class="nt">par_additional_parameters</span><span class="p">:</span><span class="w"> </span>
+<span class="w">  </span><span class="nt">foo</span><span class="p">:</span><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">bar</span><span class="w"> </span>
+<span class="w">  </span><span class="nt">hello</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">world</span>
+</code></pre></div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>As defined in <a href="https://datatracker.ietf.org/doc/html/rfc9126#section-3">rfc9126#section-3</a>, if the <code>request</code> parameter is specified as <code>par_additional_parameters</code> all others parameter than <code>["request", "client_id", "client_secret", "client_assertion_type", "client_assertion"]</code> will be removed from the PAR request. </p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>Use the <code>--debug</code> to see the PAR request payload.</p>
+</div>
+<h2 id="scopes">Scopes<a class="headerlink" href="#scopes" title="Permanent link">&para;</a></h2>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Mandatory setting</p>
+</div>
+<p>You can update the list of scopes requested using the <code>scopes</code> setting:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">## Scopes: (Mandatory)</span>
+<span class="nt">scopes</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openid</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">profile</span>
+</code></pre></div>
+<h2 id="authorization-server">Authorization Server<a class="headerlink" href="#authorization-server" title="Permanent link">&para;</a></h2>
+<h3 id="issuer-and-well-known-configuration">Issuer (and well-known configuration)<a class="headerlink" href="#issuer-and-well-known-configuration" title="Permanent link">&para;</a></h3>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Mandatory setting</p>
+</div>
+<p>You must specify the <code>issuer</code> setting that will be used to construct the OpenID Connect Discovery Configuration (<code>/.well-known/openid-configuration</code>).</p>
+<div class="highlight"><pre><span></span><code><span class="c1">## IDP Config: (Mandatory)</span>
+<span class="c1">### NOTE: this &#39;issuer&#39; will be used to find the /.well-known/openid-configuration </span>
+<span class="c1">###       by adding /.well-known/openid-configuration after the issuer base url </span>
+<span class="nt">issuer</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://example.com&quot;</span>
+</code></pre></div>
+<h3 id="alternative-well-known">Alternative Well Known<a class="headerlink" href="#alternative-well-known" title="Permanent link">&para;</a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Optional Settings </p>
+</div>
+<p>If you Authorization Server exposes a non compliant Well Known endpoint (i.e. not on the same domain as the <code>issuer</code>), you can specify an alternative urls via <code>alternative_wellknown_endpoint</code>, and you can disable Well Known endpoint validation with <code>insecure_wellknown_endpoint: true</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="c1">## Alternative Well-Known (Optional)</span>
+<span class="c1">###  since v0.11.0 </span>
+<span class="c1">### </span>
+<span class="c1"># alternative_wellknown_endpoint: &quot;&quot;</span>
+<span class="c1">### Disable well known endpoint validation</span>
+<span class="c1"># insecure_wellknown_endpoint: true</span>
+</code></pre></div>
+<h3 id="token-introspection-endpoint">Token Introspection Endpoint<a class="headerlink" href="#token-introspection-endpoint" title="Permanent link">&para;</a></h3>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Mandatory setting for the <code>oidc-client introspect</code> subcommand. </p>
+<p>See <a href="/oidc-client-demo/flows/introspect/">Token Introspection</a> for more info.</p>
+</div>
+<p>You must specify the <code>introspect_endpoint</code> setting that will be used for token introspection request to the Authorization Server.
+<div class="highlight"><pre><span></span><code><span class="c1">## Introspect: (Mandatory for &#39;introspect sub command&#39;)</span>
+<span class="c1">## </span>
+<span class="nt">introspect_endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://example.com/introspect&quot;</span>
+</code></pre></div></p>
+<h3 id="overriding-authorization-server-endpoints">Overriding Authorization Server Endpoints<a class="headerlink" href="#overriding-authorization-server-endpoints" title="Permanent link">&para;</a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Optional Settings</p>
+</div>
+<p>If you need to override some endpoints from the discovery <code>.well-known/openid-configuration</code> build from the issuer, you have the option of setting those endpoints: </p>
+<ul>
+<li><code>token_endpoint</code>: endpoint used for getting Access Token</li>
+<li><code>authorize_endpoint</code>: endpoint used for the Authorization code flow</li>
+<li><code>jwks_endpoint</code>: endpoint used for getting JSON Web Keys for signature validation</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1">## Override Token endpoint: (Optional)</span>
+<span class="c1">###   You can override some endpoints after they are fetched from ./well-known/openid-configuration</span>
+<span class="c1">### </span>
+<span class="c1"># token_endpoint: &quot;https://example.com/oauth2/access_token&quot;</span>
+<span class="c1"># authorize_endpoint: &quot;https://example.com/oauth2/authorize&quot;</span>
+<span class="c1"># jwks_endpoint: &quot;https://example.com/oauth2/jwk.json&quot;</span>
+</code></pre></div>
+<h3 id="skip-userinfo-call">Skip Userinfo Call<a class="headerlink" href="#skip-userinfo-call" title="Permanent link">&para;</a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Optional Settings</p>
+</div>
+<p>Some Authorization Servers returns all the claims directly in the ID Token, or some don't even support the userinfo_endpoint. For those reasons, if you don't need to make the extra userinfo call, you can disable it by setting <code>skip_userinfo_call: true</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="c1">## Skip Userinfo: (Optional)</span>
+<span class="c1">###   Disable call to userinfo endpoint</span>
+<span class="c1"># skip_userinfo_call: true</span>
+</code></pre></div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>This parameter can be overridden at run time by passing <code>--skip-userinfo</code> flags for the <code>oidc-client client</code> and <code>oidc-client refresh-token</code> sub commands. </p>
+</div>
+<h2 id="security">Security<a class="headerlink" href="#security" title="Permanent link">&para;</a></h2>
+<h3 id="token-signing-algorithms">Token Signing Algorithms<a class="headerlink" href="#token-signing-algorithms" title="Permanent link">&para;</a></h3>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Mandatory setting</p>
+</div>
+<p>You can list the signing algorithms that the client support for validating token signatures.</p>
+<div class="highlight"><pre><span></span><code><span class="c1">## Token Signature Alg: (Mandatory)</span>
+<span class="c1">###   List allowed signing algorithm for token validation</span>
+<span class="nt">token_signing_alg</span><span class="p">:</span><span class="w"> </span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;RS256&quot;</span>
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The tokens will be validated against the <code>jwks_uri</code> metadata value from the Authorization Server <code>.well-known/openid-configuration</code></p>
+</div>
+<h3 id="tls-settings">TLS Settings<a class="headerlink" href="#tls-settings" title="Permanent link">&para;</a></h3>
+<h4 id="skip-tls-validation">Skip TLS Validation<a class="headerlink" href="#skip-tls-validation" title="Permanent link">&para;</a></h4>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Optional Settings</p>
+</div>
+<div class="highlight"><pre><span></span><code><span class="c1">## TLS Setting: (Optional)</span>
+<span class="c1">###   Disable TLS certificate validation</span>
+<span class="c1"># skip_tls_verification: true</span>
+</code></pre></div>
+<h2 id="advanced-settings">Advanced Settings<a class="headerlink" href="#advanced-settings" title="Permanent link">&para;</a></h2>
+<h3 id="acr-values">ACR Values<a class="headerlink" href="#acr-values" title="Permanent link">&para;</a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Optional Settings</p>
+</div>
+<p>If your Authorization Server supports multiple authentication methods, you specify <code>acr_values</code> during the authorization endpooint call with:  </p>
+<div class="highlight"><pre><span></span><code><span class="c1">## Acr Values: (Optional)</span>
+<span class="c1"># acr_values: &quot;urn:be:fedict:iam:fas:citizen:Level100&quot;</span>
+</code></pre></div>
+<h3 id="additional-parameters-in-authorization-request">Additional Parameters In Authorization Request<a class="headerlink" href="#additional-parameters-in-authorization-request" title="Permanent link">&para;</a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Optional Settings</p>
+</div>
+<p>If your Authorization Server supports additional parameters on its authorization endpoint, you can specify a map of Key/Value with</p>
+<div class="highlight"><pre><span></span><code><span class="c1">## Authorize Request Additional Param (optional)</span>
+<span class="c1">### since version 0.12.0</span>
+<span class="c1">### </span>
+<span class="c1">### Arbitrary Key/Value parameters to include in Authorize request</span>
+<span class="c1">### format map[string]string</span>
+<span class="nt">authorize_additional_parameters</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">claims</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{&quot;id_token&quot;:</span><span class="nv"> </span><span class="s">{&quot;foo&quot;:</span><span class="nv"> </span><span class="s">{&quot;values&quot;:</span><span class="nv"> </span><span class="s">[&quot;bar&quot;,</span><span class="nv"> </span><span class="s">&quot;baz&quot;]}}}&#39;</span>
+</code></pre></div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>You can also use this to override default generated parameter (like <code>redirect_uri</code>). </p>
+</div>
+<h3 id="amr-validation">AMR Validation<a class="headerlink" href="#amr-validation" title="Permanent link">&para;</a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Optional Settings</p>
+</div>
+<p>If your Authorization Server supports multiple authentication methods, and sets the <code>amr</code> field in the id_token, you can validate allowed value with the <code>amr_list</code> setting. The client will validate that <strong>at least one</strong> of the configured amr value from the <code>amr_list</code> is present in the <code>amr</code> field from the id_token. </p>
+<div class="highlight"><pre><span></span><code><span class="c1">## AMR List: (Optional)</span>
+<span class="c1">###  List of allowed amr value, the validation</span>
+<span class="c1">###  will be successful if a least one of the amr</span>
+<span class="c1">###  in the list if present in the token</span>
+<span class="c1"># amr_list: </span>
+<span class="c1"># - eid</span>
+<span class="c1"># - bmid</span>
+<span class="c1"># - urn:be:fedict:iam:fas:Level500</span>
+<span class="c1"># - urn:be:fedict:iam:fas:Level450</span>
+</code></pre></div>
+<h3 id="acr-validation">ACR Validation<a class="headerlink" href="#acr-validation" title="Permanent link">&para;</a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Optional Settings</p>
+</div>
+<p>If your Authorization Server supports Authentication Context Class Reference, and sets the <code>acr</code> field in the id_token, you can validate allowed value with the <code>acr_list</code> setting. The client will validate that the value of the <code>acr</code> claim in the id_token is present in the <code>amr_list</code>. </p>
+<div class="highlight"><pre><span></span><code><span class="c1">## ACR List: (Optional)</span>
+<span class="c1">### Since v0.8.0</span>
+<span class="c1">###  List of allowed acr value, the validation</span>
+<span class="c1">###  will be successful if &#39;acr&#39; claim from id_token</span>
+<span class="c1">###  is present in this list</span>
+<span class="c1">###</span>
+<span class="c1"># acr_list: </span>
+<span class="c1"># - &quot;0&quot; ## detault when acr are not implemented </span>
+<span class="c1"># - urn:be:fedict:iam:fas:Level500</span>
+<span class="c1"># - urn:be:fedict:iam:fas:Level450</span>
+<span class="c1"># - urn:be:fedict:iam:fas:Level400</span>
+<span class="c1"># - urn:be:fedict:iam:fas:Level350</span>
+<span class="c1"># - urn:be:fedict:iam:fas:Level200</span>
+<span class="c1"># - urn:be:fedict:iam:fas:Level100</span>
+</code></pre></div>
+<h3 id="stateless-jwt-access-token">Stateless (JWT) Access Token<a class="headerlink" href="#stateless-jwt-access-token" title="Permanent link">&para;</a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Optional Settings</p>
+</div>
+<p>Stateless Access Token are in JWT format that contains some information, and thus do not need to be introspected.</p>
+<p>By setting <code>access_token_jwt: true</code> the <code>oidc-client</code> will attempt to validate the Access Token jwt signature against the JWKS endpoint of the Authorization Server, and then print the content of the Access Token.</p>
+<div class="highlight"><pre><span></span><code><span class="c1">##  Access Token JWT: (Optional)</span>
+<span class="c1">###   Parse and Validate access token jwt</span>
+<span class="c1"># access_token_jwt: true</span>
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Unlike for the ID Token, only basic JWT signature and issuer (<code>iss</code>) are validated</p>
+</div>
+<h3 id="stateless-jwt-refresh-token">Stateless (JWT) Refresh Token<a class="headerlink" href="#stateless-jwt-refresh-token" title="Permanent link">&para;</a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Optional Settings</p>
+</div>
+<p>Stateless Refresh Token are in JWT format that contains some information, and thus do not need to be introspected.</p>
+<p>By setting <code>refresh_token_jwt: true</code> the <code>oidc-client</code> will attempt to validate the Refresh Token jwt signature against the JWKS endpoint of the Authorization Server, and then print the content of the Refresh Token.</p>
+<div class="highlight"><pre><span></span><code><span class="c1">##  Refresh Token JWT: (Optional)</span>
+<span class="c1">###   Parse and Validate refresh token jwt</span>
+<span class="c1"># refresh_token_jwt: true</span>
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Unlike for the ID Token, only basic JWT signature and issuer (<code>iss</code>) are validated</p>
+</div>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/vdbulcke/oidc-client-demo" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 512"><!--! Font Awesome Free 6.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M186.1 328.7c0 20.9-10.9 55.1-36.7 55.1s-36.7-34.2-36.7-55.1 10.9-55.1 36.7-55.1 36.7 34.2 36.7 55.1zM480 278.2c0 31.9-3.2 65.7-17.5 95-37.9 76.6-142.1 74.8-216.7 74.8-75.8 0-186.2 2.7-225.6-74.8-14.6-29-20.2-63.1-20.2-95 0-41.9 13.9-81.5 41.5-113.6-5.2-15.8-7.7-32.4-7.7-48.8 0-21.5 4.9-32.3 14.6-51.8 45.3 0 74.3 9 108.8 36 29-6.9 58.8-10 88.7-10 27 0 54.2 2.9 80.4 9.2 34-26.7 63-35.2 107.8-35.2 9.8 19.5 14.6 30.3 14.6 51.8 0 16.4-2.6 32.7-7.7 48.2 27.5 32.4 39 72.3 39 114.2zm-64.3 50.5c0-43.9-26.7-82.6-73.5-82.6-18.9 0-37 3.4-56 6-14.9 2.3-29.8 3.2-45.1 3.2-15.2 0-30.1-.9-45.1-3.2-18.7-2.6-37-6-56-6-46.8 0-73.5 38.7-73.5 82.6 0 87.8 80.4 101.3 150.4 101.3h48.2c70.3 0 150.6-13.4 150.6-101.3zm-82.6-55.1c-25.8 0-36.7 34.2-36.7 55.1s10.9 55.1 36.7 55.1 36.7-34.2 36.7-55.1-10.9-55.1-36.7-55.1z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.ce72ebac.min.js"></script>
+      
+    
+  </body>
+</html>
