@@ -2,6 +2,28 @@
 ## [Unreleased]
 
 
+<a name="v0.14.0"></a>
+## [v0.14.0] - 2023-03-04
+### Bug Fixes
+- a84a3dd - dependabot security issues ([#42](https://github.com/vdbulcke/oidc-client-demo/issues/42))
+
+### Features
+- c4eab5d - add cosign via goreleaser  ([#44](https://github.com/vdbulcke/oidc-client-demo/issues/44))
+- a653cf2 - bump go version 1.20
+
+
+<a name="v0.13.1"></a>
+## [v0.13.1] - 2022-10-11
+### Bug Fixes
+- d61d439 - refresh-token output ([#39](https://github.com/vdbulcke/oidc-client-demo/issues/39))
+
+
+<a name="v0.13.0"></a>
+## [v0.13.0] - 2022-10-08
+### Features
+- 7ab90b6 - print jwt header ([#37](https://github.com/vdbulcke/oidc-client-demo/issues/37))
+
+
 <a name="v0.12.0"></a>
 ## [v0.12.0] - 2022-09-28
 ### Features
@@ -132,7 +154,10 @@
 <a name="v0.0.1"></a>
 ## v0.0.1 - 2021-07-23
 
-[Unreleased]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.12.0...HEAD
+[Unreleased]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.14.0...HEAD
+[v0.14.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.13.1...v0.14.0
+[v0.13.1]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.13.0...v0.13.1
+[v0.13.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.12.0...v0.13.0
 [v0.12.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.11.0...v0.12.0
 [v0.11.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.10.0...v0.11.0
 [v0.10.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.9.0...v0.10.0
