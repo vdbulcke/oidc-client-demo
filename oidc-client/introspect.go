@@ -2,7 +2,7 @@ package oidcclient
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -57,7 +57,7 @@ func (c *OIDCClient) IntrospectToken(token string) error {
 		c.logger.Debug("Raw Introspect Response", "resp", resp)
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	defer resp.Body.Close()
 	if err != nil {
 		c.logger.Error("error reading introspect response", "error", err)
@@ -120,7 +120,8 @@ func (c *OIDCClient) IntrospectToken(token string) error {
 }
 
 // generateIntrospectRequest generate the introspect req based
-//  on configured Auth Method
+//
+//	on configured Auth Method
 func (c *OIDCClient) generateIntrospectRequest(token string) (*http.Request, error) {
 	introspectParamValues := url.Values{}
 	introspectParamValues.Set("token", token)

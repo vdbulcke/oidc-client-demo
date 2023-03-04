@@ -3,7 +3,7 @@ package discovery
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 
@@ -20,7 +20,7 @@ func NewWellKnown(wellKnown string) (*OIDCWellKnownOpenidConfiguration, error) {
 
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("unable to read response body: %v", err)
 	}

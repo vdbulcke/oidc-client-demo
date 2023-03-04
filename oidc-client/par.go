@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -34,7 +34,7 @@ func (c *OIDCClient) DoPARRequest(codeChallenge string, nonce string, state stri
 		c.logger.Debug("Raw PAR Response", "resp", resp)
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	defer resp.Body.Close()
 	if err != nil {
 		c.logger.Error("error reading PAR response", "error", err)
@@ -58,7 +58,8 @@ func (c *OIDCClient) DoPARRequest(codeChallenge string, nonce string, state stri
 }
 
 // generatePARRequest generate the introspect req based
-//  on configured Auth Method
+//
+//	on configured Auth Method
 func (c *OIDCClient) generatePARRequest(codeChallenge string, nonce string, state string) (*http.Request, error) {
 
 	parRequestBody := make(map[string]interface{})
