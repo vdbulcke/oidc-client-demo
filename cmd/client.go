@@ -76,7 +76,9 @@ func runClient(cmd *cobra.Command, args []string) {
 	}
 
 	config.ListenPort = port
-	config.RedirectUri = fmt.Sprintf("http://%s:%d/auth/callback", config.ListenAddress, port)
+	if config.RedirectUri == "" {
+		config.RedirectUri = fmt.Sprintf("http://%s:%d/auth/callback", config.ListenAddress, port)
+	}
 
 	// override config if flag is passed as args
 	if skipUserinfo {

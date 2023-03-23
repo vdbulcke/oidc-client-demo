@@ -48,7 +48,7 @@ type OIDCClientConfig struct {
 	AMRWhitelist []string `yaml:"amr_list"`
 	ACRWhitelist []string `yaml:"acr_list"`
 
-	RedirectUri string
+	RedirectUri string `yaml:"override_redirect_uri"`
 
 	// Mock
 	MockState        string

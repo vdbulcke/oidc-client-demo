@@ -48,6 +48,16 @@ token_signing_alg:
 issuer: "https://idp.iamfas.int.belgium.be/fas/oauth2"
 
 
+
+## Override Redirect URI (optional)
+###  since v0.15.0
+###
+### NOTE: Make sure your custom redirect Uri is forwarded
+###       to '/auth/callback' on the listening port (--port arg) 
+### 
+# override_redirect_uri: https://example.com/foo/bar 
+
+
 ## Alternative Well-Known (Optional)
 ###  since v0.11.0 
 ### 
