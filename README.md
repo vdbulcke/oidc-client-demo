@@ -20,3 +20,29 @@ The complete documentation is hosted [here](https://vdbulcke.github.io/oidc-clie
 * (optional) Pushed Authorization Request ([rfc9126](https://datatracker.ietf.org/doc/html/rfc9126))
 * (optional) Acr Values
 * (optional) Amr Whitelist
+* (optional) Support JWT Access and Refresh Token decoding
+* (optional) Outputs response, decoded JWT as json (see [oidc opa policies](https://github.com/vdbulcke/oidc-client-policies))
+* (optional) Additional authorization parameters: [claims](https://openid.net/specs/openid-connect-core-1_0.html#ClaimsParameter), `ui_locales`, etc.
+
+## Install 
+
+See [Install Documenation](https://vdbulcke.github.io/oidc-client-demo/install/).
+
+### Validate Signature With Cosign
+
+Make sure you have `cosign` installed locally (see [Cosign Install](https://docs.sigstore.dev/cosign/installation/)).
+
+
+Then you can use the `./verify_signature.sh` in this repo: 
+
+```bash
+./verify_signature.sh PATH_TO_DOWNLOADED_ARCHIVE TAG_VERSION
+```
+for example
+```bash
+$ ./verify_signature.sh ~/Downloads/oidc-client-demo_0.15.0_Linux_x86_64.tar.gz v0.15.0
+
+Checking Signature for version: v0.15.0
+Verified OK
+
+```
