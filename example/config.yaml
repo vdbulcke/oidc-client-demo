@@ -53,7 +53,10 @@ issuer: "https://idp.iamfas.int.belgium.be/fas/oauth2"
 ###  since v0.15.0
 ###
 ### NOTE: Make sure your custom redirect Uri is forwarded
-###       to '/auth/callback' on the listening port (--port arg) 
+###       to '/auth/callback' on the listening port (--port arg) .
+###       You will need to adapt the login url (default http://127.0.0.1:5556/login) 
+###       you use to trigger the authorization request to match the same domain as 
+###       your redirect uri (for the cookie domain of 'state' and 'nonce' cookies ).
 ### 
 # override_redirect_uri: https://example.com/foo/bar 
 
