@@ -2,6 +2,15 @@
 ## [Unreleased]
 
 
+<a name="v0.16.0"></a>
+## [v0.16.0] - 2023-09-17
+### Code Refactoring
+- ce3891a - put go code in src/ directory
+
+### Features
+- e99631b - add support for private_key_jwt auth method ([#46](https://github.com/vdbulcke/oidc-client-demo/issues/46)) and signed request parameter ([#47](https://github.com/vdbulcke/oidc-client-demo/issues/47))
+
+
 <a name="v0.15.0"></a>
 ## [v0.15.0] - 2023-03-23
 ### Features
@@ -160,7 +169,8 @@
 <a name="v0.0.1"></a>
 ## v0.0.1 - 2021-07-23
 
-[Unreleased]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.15.0...HEAD
+[Unreleased]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.16.0...HEAD
+[v0.16.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.15.0...v0.16.0
 [v0.15.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.14.0...v0.15.0
 [v0.14.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.13.1...v0.14.0
 [v0.13.1]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.13.0...v0.13.1
