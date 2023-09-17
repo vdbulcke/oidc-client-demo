@@ -23,6 +23,9 @@ The complete documentation is hosted [here](https://vdbulcke.github.io/oidc-clie
 * (optional) Support JWT Access and Refresh Token decoding
 * (optional) Outputs response, decoded JWT as json (see [oidc opa policies](https://github.com/vdbulcke/oidc-client-policies))
 * (optional) Additional authorization parameters: [claims](https://openid.net/specs/openid-connect-core-1_0.html#ClaimsParameter), `ui_locales`, etc.
+* (optional) Signed JWT `request` parameters (#47)
+* (optional) `private_key_jwt` (`client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer`) Auth Method (#46)
+
 
 ## Install 
 
