@@ -8,7 +8,7 @@ import (
 	"github.com/go-playground/validator"
 	"gopkg.in/yaml.v3"
 
-	"github.com/vdbulcke/oidc-client-demo/oidc-client/internal/pkce"
+	"github.com/vdbulcke/oidc-client-demo/src/client/internal/pkce"
 )
 
 type OIDCClientConfig struct {

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	pkce "github.com/vdbulcke/oidc-client-demo/oidc-client/internal/pkce"
+	pkce "github.com/vdbulcke/oidc-client-demo/src/client/internal/pkce"
 )
 
 func stringInSlice(a string, list []string) bool {

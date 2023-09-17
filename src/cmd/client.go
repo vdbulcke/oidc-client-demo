@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/go-hclog"
 	"github.com/spf13/cobra"
-	oidcclient "github.com/vdbulcke/oidc-client-demo/oidc-client"
+	oidcclient "github.com/vdbulcke/oidc-client-demo/src/client"
 )
 
 // args var

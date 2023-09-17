@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-hclog"
-	pkce "github.com/vdbulcke/oidc-client-demo/oidc-client/internal/pkce"
+	pkce "github.com/vdbulcke/oidc-client-demo/src/client/internal/pkce"
 	"golang.org/x/oauth2"
 )
 
@@ -212,7 +212,7 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 
 		// Print Access Token
 		c.processAccessTokenResponse(accessTokenResponse)
-		
+
 		// Validate ID Token
 		idTokenRaw := accessTokenResponse.IDToken
 		if idTokenRaw == "" {

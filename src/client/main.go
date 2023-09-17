@@ -1,10 +1,13 @@
-/**
- - Authorization request & access token request: authorize.go
- - Pushed Authorization request: par.go
- - userinfo request: userinfo.go
- - introspect request: introspect.go
- - refresh_token request: refresh_token.go
-**/
+/*
+*
+  - Authorization request & access token request: authorize.go
+  - Pushed Authorization request: par.go
+  - userinfo request: userinfo.go
+  - introspect request: introspect.go
+  - refresh_token request: refresh_token.go
+
+*
+*/
 package oidcclient
 
 import (
@@ -16,7 +19,7 @@ import (
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/hashicorp/go-hclog"
-	"github.com/vdbulcke/oidc-client-demo/oidc-client/internal/oidc/discovery"
+	"github.com/vdbulcke/oidc-client-demo/src/client/internal/oidc/discovery"
 	"golang.org/x/oauth2"
 )
 
