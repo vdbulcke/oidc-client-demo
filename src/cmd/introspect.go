@@ -5,6 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 	oidcclient "github.com/vdbulcke/oidc-client-demo/src/client"
+	"github.com/vdbulcke/oidc-client-demo/src/client/jwt/signer"
 )
 
 // args var
@@ -16,6 +17,7 @@ func init() {
 	// add flags to sub command
 	introspectCmd.Flags().StringVarP(&configFilename, "config", "c", "", "oidc client config file")
 	introspectCmd.Flags().StringVarP(&token, "token", "", "", "Token to introspect")
+	introspectCmd.Flags().StringVarP(&privateKey, "pem-key", "", "", "private key (pem format) for jwt signature")
 
 	// required flags
 	//nolint
@@ -51,6 +53,22 @@ func runIntrospectToken(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
+	var jwtsigner signer.JwtSigner
+
+	if privateKey != "" {
+		key, err := signer.ParsePrivateKey(privateKey)
+		if err != nil {
+			appLogger.Error("error parsing private key", "key", privateKey, "err", err)
+			os.Exit(1)
+		}
+
+		jwtsigner, err = signer.NewJwtSigner(key, config.JwtSigningAlg)
+		if err != nil {
+			appLogger.Error("error generating jwt signer", "err", err)
+			os.Exit(1)
+		}
+
+	}
 	// Validate introspect url
 	if config.IntrospectEndpoint == "" {
 		appLogger.Error("introspect_endpoint not found")
@@ -62,7 +80,7 @@ func runIntrospectToken(cmd *cobra.Command, args []string) {
 	config.OutputDir = outputDir
 
 	// Make a new OIDC Client
-	client, err := oidcclient.NewOIDCClient(config, appLogger)
+	client, err := oidcclient.NewOIDCClient(config, jwtsigner, appLogger)
 	if err != nil {
 		appLogger.Error("Error creating client", "error", err)
 		os.Exit(1)

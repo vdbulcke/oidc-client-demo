@@ -134,6 +134,20 @@ func (c *OIDCClient) generateIntrospectRequest(token string) (*http.Request, err
 
 	}
 
+	if c.config.AuthMethod == "private_key_jwt" {
+
+		// signedJwt, err := c.GenerateJwtProfile(c.config.IntrospectEndpoint)
+		signedJwt, err := c.GenerateJwtProfile(c.Wellknown.TokenEndpoint)
+		if err != nil {
+			c.logger.Error("Failed to generate jwt client_assertion", "err", err)
+			return nil, err
+		}
+		c.logger.Debug("introspect setting client_assertion", "jwt", signedJwt)
+		introspectParamValues.Set("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
+		introspectParamValues.Set("client_assertion", signedJwt)
+
+	}
+
 	req, err := http.NewRequest(http.MethodPost, c.config.IntrospectEndpoint, strings.NewReader(introspectParamValues.Encode()))
 	if err != nil {
 

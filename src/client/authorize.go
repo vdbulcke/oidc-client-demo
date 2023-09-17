@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-hclog"
-	pkce "github.com/vdbulcke/oidc-client-demo/src/client/internal/pkce"
 	"golang.org/x/oauth2"
 )
 
@@ -49,7 +48,7 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 		}
 
 		// generate challenge
-		challenge, err = pkce.NewCodeChallenge(codeVerifier, c.config.PKCEChallengeMethod)
+		challenge, err = c.NewCodeChallenge(codeVerifier)
 		if err != nil {
 			c.logger.Error("Fail to generate PKCE Challenge", "code", codeVerifier, "error", err)
 			return err
@@ -96,6 +95,10 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 			q.Add("request_uri", parResp.RequestUri)
 			q.Add("client_id", c.config.ClientID)
 
+			// if
+			// q.Add("scope", strings.Join(c.config.Scopes, " "))
+			// q.Add("response_type", "code")
+
 			// if specified add extra K/V parameter on authorize request
 			if c.config.AuthorizeAdditionalParameter != nil {
 				for k, v := range c.config.AuthorizeAdditionalParameter {
@@ -109,6 +112,12 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 			c.logger.Debug("auth URL", "url", authorizeURL)
 
 		} else {
+
+			claims := map[string]interface{}{}
+
+			claims["state"] = state
+			claims["nonce"] = nonce
+
 			// setting Authorize call options (&nonce=...)
 			authNonceOption := oauth2.SetAuthURLParam("nonce", nonce)
 			authorizeOpts = append(authorizeOpts, authNonceOption)
@@ -129,6 +138,8 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 				pkceMethodOption := oauth2.SetAuthURLParam("code_challenge_method", c.config.PKCEChallengeMethod)
 				authorizeOpts = append(authorizeOpts, pkceMethodOption)
 
+				claims["code_challenge"] = challenge
+				claims["code_challenge_method"] = c.config.PKCEChallengeMethod
 			}
 
 			// if specified add extra K/V parameter on authorize request
@@ -137,6 +148,19 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 
 					authorizeOpts = append(authorizeOpts, oauth2.SetAuthURLParam(k, v))
 				}
+			}
+
+			if c.config.UseRequestParameter {
+
+				signedJwt, err := c.GenerateRequestJwt(claims)
+				if err != nil {
+					c.logger.Error("error generating request jwt", err)
+					http.Error(w, "error generating request jwt", http.StatusBadRequest)
+					return
+				}
+
+				c.logger.Debug("generated request jwt", "request", signedJwt)
+				authorizeOpts = append(authorizeOpts, oauth2.SetAuthURLParam("request", signedJwt))
 			}
 
 			// generate the authorize url with the extra options
@@ -169,8 +193,11 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 		authZCode := r.URL.Query().Get("code")
 		c.logger.Info("Received AuthZ Code", "code", authZCode)
 
-		// Access Token Response
-		var oauth2Token *oauth2.Token
+		// Extra parameter for authorize endpoint
+		var tokenOpts []oauth2.AuthCodeOption
+		// var oauth2Token *oauth2.Token
+
+		// pkce flow
 		if c.config.UsePKCE {
 
 			// if fake-pkce-verifier flags is set
@@ -182,24 +209,35 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 
 			// set extra pkce param
 			pkceVerifierOption := oauth2.SetAuthURLParam("code_verifier", codeVerifier)
-
+			tokenOpts = append(tokenOpts, pkceVerifierOption)
 			c.logger.Debug("using pkce code_verifier for getting access token")
 
-			oauth2Token, err = c.oAuthConfig.Exchange(c.ctx, authZCode, pkceVerifierOption)
-			if err != nil {
-				c.logger.Error("Failed to get Access Token", "err", err)
-				http.Error(w, "Failed to exchange token: "+err.Error(), http.StatusInternalServerError)
-				return
-			}
-		} else {
+		}
 
-			// without pkce
-			oauth2Token, err = c.oAuthConfig.Exchange(c.ctx, authZCode)
+		if c.config.AuthMethod == "private_key_jwt" {
+
+			assertionTypeOption := oauth2.SetAuthURLParam("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
+
+			signedJwt, err := c.GenerateJwtProfile(c.Wellknown.TokenEndpoint)
 			if err != nil {
-				c.logger.Error("Failed to get Access Token", "err", err)
-				http.Error(w, "Failed to exchange token: "+err.Error(), http.StatusInternalServerError)
+				c.logger.Error("Failed to generate jwt client_assertion", "err", err)
+				http.Error(w, "Failed to generate jwt client_assertion: "+err.Error(), http.StatusInternalServerError)
 				return
 			}
+
+			assertionOption := oauth2.SetAuthURLParam("client_assertion", signedJwt)
+			c.logger.Debug("generated jwt", "client_assertion", signedJwt)
+			tokenOpts = append(tokenOpts, assertionTypeOption)
+			tokenOpts = append(tokenOpts, assertionOption)
+
+		}
+
+		// Access Token Response
+		oauth2Token, err := c.oAuthConfig.Exchange(c.ctx, authZCode, tokenOpts...)
+		if err != nil {
+			c.logger.Error("Failed to get Access Token", "err", err)
+			http.Error(w, "Failed to exchange token: "+err.Error(), http.StatusInternalServerError)
+			return
 		}
 
 		// Parse Access Token

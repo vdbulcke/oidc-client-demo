@@ -4,8 +4,8 @@ import (
 	"testing"
 )
 
-func TestHttpClientGetCert(t *testing.T) {
-	configFile := "../example/config.yaml"
+func TestConfig(t *testing.T) {
+	configFile := "../../example/config.yaml"
 
 	config, err := ParseConfig(configFile)
 	if err != nil {
@@ -19,7 +19,7 @@ func TestHttpClientGetCert(t *testing.T) {
 	if !ValidateConfig(config) {
 		t.Fail()
 	}
-	// t.Logf("Config %v", config)
+	t.Logf("Config %v", config)
 
 	// t.Fail()
 }

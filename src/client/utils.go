@@ -51,6 +51,12 @@ func (c *OIDCClient) NewCodeVerifier(length int) (string, error) {
 	return pkce.NewCodeVerifier(length)
 }
 
+func (c *OIDCClient) NewCodeChallenge(codeVerifier string) (string, error) {
+
+	// else generate random string
+	return pkce.NewCodeChallenge(codeVerifier, c.config.PKCEChallengeMethod)
+
+}
 func (c *OIDCClient) parseJWTHeader(rawToken string) (string, error) {
 
 	parts := strings.Split(rawToken, ".")

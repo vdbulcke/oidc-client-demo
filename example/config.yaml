@@ -6,8 +6,8 @@
 ###    export OIDC_CLIENT_ID=my_client_id
 ###    export OIDC_CLIENT_SECRET=my_client_id
 ###
-client_id: 
-client_secret: 
+client_id: foo
+client_secret: bar 
 
 
 ## Client Auth Method: (Mandatory)
@@ -15,7 +15,74 @@ client_secret:
 ### Supported Auth Method
 ###  * client_secret_basic (Using Basic Auth Header)
 ###  * client_secret_post  (Using POST request)
+###  * private_key_jwt     (Using POST client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer)
+###    NOTE: private_key_jwt requires '--pem-key' flag
 auth_method: client_secret_basic
+
+
+## Private Key Jwt (Optional)
+###  Since version v0.16.0
+### 
+### Example generating RSA key:
+### 
+###   openssl genrsa 4096 > key.pem
+### 
+### Example generating ecdsa key:
+### 
+###    openssl ecparam -name secp384r1 -genkey -noout -out ecdsa.pem ## generate key
+###    openssl pkcs8 -topk8 -outform PEM -in ecdsa.pem -out key_ec.pem -nocrypt ## format to pkcs8 PEM
+### 
+### NOTE: requires '--pem-key key.pem' flag
+### https://www.rfc-editor.org/rfc/rfc7523
+
+### client_assertion jwt duration 
+### optional: default 5m
+# jwt_profile_token_duration: 15m
+
+### client_assertion jwt 'aud' audiance 
+### optional: default value of token endpoint
+# jwt_profile_token_audiance: https://example.com/custom/audiance
+
+### client_assertion jwt and request jwt signing algorithm 
+###
+### Supported value: RS256 RS384 RS512 ES256 ES384 ES512
+### optional: default RS256
+# jwt_signing_alg: ES256
+
+## Request Jwt parameter (Optional)
+###  Since version v0.16.0
+### 
+### Example generating RSA key:
+### 
+###   openssl genrsa 4096 > key.pem
+### 
+### Example generating ecdsa key:
+### 
+###    openssl ecparam -name secp384r1 -genkey -noout -out ecdsa.pem ## generate key
+###    openssl pkcs8 -topk8 -outform PEM -in ecdsa.pem -out key_ec.pem -nocrypt ## format to pkcs8 PEM
+### 
+### NOTE: requires '--pem-key key.pem' flag
+### https://www.rfc-editor.org/rfc/rfc7523
+
+### generate jwt request paramter
+### optional: default false
+# use_request_parameter: true
+
+### request jwt 'aud' audiance 
+### optional: default value of Issuer
+# jwt_request_token_audiance: https://example.com/custom/audiance
+
+### client_assertion jwt duration 
+### optional: default 5m
+# jwt_profile_token_duration: 15m
+
+
+## JWT Request Additional Param (optional)
+### 
+### Arbitrary Key/Value parameters to include in the jwt request
+### format map[string]string
+# jwt_request_token_additional_parameters:
+#   claims: '{"id_token": {"foo": {"values": ["bar", "baz"]}}}'
 
 
 ## PKCE Flow: (Optional)

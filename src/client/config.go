@@ -4,7 +4,11 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"reflect"
+	"strings"
+	"time"
 
+	"github.com/creasty/defaults"
 	"github.com/go-playground/validator"
 	"gopkg.in/yaml.v3"
 
@@ -14,7 +18,7 @@ import (
 type OIDCClientConfig struct {
 	ClientID     string `yaml:"client_id"  validate:"required"`
 	ClientSecret string `yaml:"client_secret" `
-	AuthMethod   string `yaml:"auth_method"  validate:"required,oneof=client_secret_basic client_secret_post"`
+	AuthMethod   string `yaml:"auth_method"  validate:"required,oneof=client_secret_basic client_secret_post private_key_jwt"`
 
 	UsePKCE             bool   `yaml:"use_pkce"`
 	PKCEChallengeMethod string `yaml:"pkce_challenge_method"`
@@ -50,6 +54,14 @@ type OIDCClientConfig struct {
 
 	RedirectUri string `yaml:"override_redirect_uri"`
 
+	UseRequestParameter           bool              `yaml:"use_request_parameter" default:"false"`
+	JwtProfileTokenDuration       time.Duration     `yaml:"jwt_profile_token_duration" default:"5m"`
+	JwtProfileAudiance            string            `yaml:"jwt_profile_token_audiance" `
+	JwtRequestTokenDuration       time.Duration     `yaml:"jwt_request_token_duration" default:"5m"`
+	JwtRequestAudiance            string            `yaml:"jwt_request_token_audiance" `
+	JwtRequestAdditionalParameter map[string]string `yaml:"jwt_request_token_additional_parameters"`
+	JwtSigningAlg                 string            `yaml:"jwt_signing_alg" default:"RS256" validate:"required,oneof=ES256 ES384 ES512 RS256 RS384 RS512"`
+
 	// Mock
 	MockState        string
 	MockNonce        string
@@ -77,10 +89,37 @@ type OIDCClientConfig struct {
 	ListenPort int
 }
 
+func (c *OIDCClientConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	// source: https://stackoverflow.com/questions/56049589/what-is-the-way-to-set-default-values-on-keys-in-lists-when-unmarshalling-yaml-i
+	// set default
+	err := defaults.Set(c)
+	if err != nil {
+		return err
+	}
+
+	type plain OIDCClientConfig
+
+	if err := unmarshal((*plain)(c)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // ValidateConfig validate config
 func ValidateConfig(config *OIDCClientConfig) bool {
 
 	validate := validator.New()
+	validate.RegisterTagNameFunc(func(fld reflect.StructField) string {
+		name := strings.SplitN(fld.Tag.Get("yaml"), ",", 2)[0]
+
+		if name == "-" {
+			return ""
+		}
+
+		return name
+	})
+
 	errs := validate.Struct(config)
 
 	if config.PKCEChallengeMethod != "" {

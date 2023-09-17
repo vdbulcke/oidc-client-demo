@@ -20,6 +20,7 @@ import (
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/hashicorp/go-hclog"
 	"github.com/vdbulcke/oidc-client-demo/src/client/internal/oidc/discovery"
+	"github.com/vdbulcke/oidc-client-demo/src/client/jwt/signer"
 	"golang.org/x/oauth2"
 )
 
@@ -45,13 +46,23 @@ type OIDCClient struct {
 
 	// OAauth2 Config
 	oAuthConfig oauth2.Config
+
+	// oidc well-known
+	Wellknown *discovery.OIDCWellKnownOpenidConfiguration
+
+	// jwt signer
+	jwtsigner signer.JwtSigner
 }
 
 // subCtxKey key to store 'sub' in context
 type subCtxKey string
 
 // OIDCClient create a new OIDC Client
-func NewOIDCClient(c *OIDCClientConfig, l hclog.Logger) (*OIDCClient, error) {
+func NewOIDCClient(c *OIDCClientConfig, jwtsigner signer.JwtSigner, l hclog.Logger) (*OIDCClient, error) {
+
+	if c.AuthMethod == "private_key_jwt" && jwtsigner == nil {
+		return nil, errors.New(" '--pem-key' is required for 'private_key_jwt' auth method")
+	}
 
 	ctx := context.Background()
 
@@ -81,12 +92,13 @@ func NewOIDCClient(c *OIDCClientConfig, l hclog.Logger) (*OIDCClient, error) {
 
 	if !c.InsecureWellKnownEndpoint {
 		if !discovery.ValidWellKnown(wk, c.Issuer, l) {
-			return nil, errors.New("Wellknown validation error")
+			return nil, errors.New("wellknown validation error")
 		}
 	}
 
 	// if Well Known Requires PAR
 	if wk.RequirePushedAuthorizationRequests {
+		l.Warn("Pushed Authorization Request is required")
 		c.UsePAR = true
 	}
 
@@ -105,9 +117,9 @@ func NewOIDCClient(c *OIDCClientConfig, l hclog.Logger) (*OIDCClient, error) {
 
 			} else {
 				//nolint
-				switch par.(type) {
+				switch par := par.(type) {
 				case string:
-					c.PAREndpoint = par.(string)
+					c.PAREndpoint = par
 				}
 
 			}
@@ -115,9 +127,16 @@ func NewOIDCClient(c *OIDCClientConfig, l hclog.Logger) (*OIDCClient, error) {
 
 		if c.PAREndpoint == "" {
 			l.Error("no PAR endpoint defined with 'use_par: true'")
-			return nil, errors.New("Invalid config")
+			return nil, errors.New("invalid config")
 		}
 
+	}
+	// override setting from well-known endpoint
+	if c.AuthorizeEndpoint != "" {
+		wk.AuthorizationEndpoint = c.AuthorizeEndpoint
+	}
+	if c.TokenEndpoint != "" {
+		wk.TokenEndpoint = c.TokenEndpoint
 	}
 
 	// Create a oidc Provider Config manually
@@ -179,14 +198,6 @@ func NewOIDCClient(c *OIDCClientConfig, l hclog.Logger) (*OIDCClient, error) {
 		oAuthConfig.ClientSecret = c.ClientSecret
 	}
 
-	// override setting from well-known endpoint
-	if c.AuthorizeEndpoint != "" {
-		oAuthConfig.Endpoint.AuthURL = c.AuthorizeEndpoint
-	}
-	if c.TokenEndpoint != "" {
-		oAuthConfig.Endpoint.TokenURL = c.TokenEndpoint
-	}
-
 	// setting auth method
 	switch c.AuthMethod {
 	case "client_secret_basic":
@@ -197,7 +208,6 @@ func NewOIDCClient(c *OIDCClientConfig, l hclog.Logger) (*OIDCClient, error) {
 
 	}
 
-	provider.Endpoint()
 	return &OIDCClient{
 		config:      c,
 		logger:      l,
@@ -206,5 +216,7 @@ func NewOIDCClient(c *OIDCClientConfig, l hclog.Logger) (*OIDCClient, error) {
 		oAuthConfig: oAuthConfig,
 		provider:    provider,
 		jwkVerifier: jwkVerifier,
+		Wellknown:   wk,
+		jwtsigner:   jwtsigner,
 	}, nil
 }

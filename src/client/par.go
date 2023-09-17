@@ -70,11 +70,29 @@ func (c *OIDCClient) generatePARRequest(codeChallenge string, nonce string, stat
 	parRequestBody["nonce"] = nonce
 	parRequestBody["state"] = state
 
+	claims := map[string]interface{}{}
+
+	claims["state"] = state
+	claims["nonce"] = nonce
 	// add client_id client_secret param if client_secret_post
 	if c.config.AuthMethod == "client_secret_post" {
 		c.logger.Debug("par setting client_secret_post")
 
 		parRequestBody["client_secret"] = c.config.ClientSecret
+
+	}
+	if c.config.AuthMethod == "private_key_jwt" {
+
+		// TODO: is this a AM bug ?
+		// signedJwt, err := c.GenerateJwtProfile(c.Wellknown.PushedAuthorizationRequestEndpoint)
+		signedJwt, err := c.GenerateJwtProfile(c.Wellknown.TokenEndpoint)
+		if err != nil {
+			c.logger.Error("Failed to generate jwt client_assertion", "err", err)
+			return nil, err
+		}
+		c.logger.Debug("par setting client_assertion", "jwt", signedJwt)
+		parRequestBody["client_assertion_type"] = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"
+		parRequestBody["client_assertion"] = signedJwt
 
 	}
 
@@ -83,6 +101,8 @@ func (c *OIDCClient) generatePARRequest(codeChallenge string, nonce string, stat
 
 		parRequestBody["code_challenge"] = codeChallenge
 		parRequestBody["code_challenge_method"] = c.config.PKCEChallengeMethod
+		claims["code_challenge"] = codeChallenge
+		claims["code_challenge_method"] = c.config.PKCEChallengeMethod
 	}
 
 	if c.config.AcrValues != "" {
@@ -90,34 +110,38 @@ func (c *OIDCClient) generatePARRequest(codeChallenge string, nonce string, stat
 	}
 
 	if c.config.PARAdditionalParameter != nil {
-		requestParameter := false
 		for k, v := range c.config.PARAdditionalParameter {
 			parRequestBody[k] = v
-
-			if k == "request" {
-				requestParameter = true
-			}
-
 		}
 
-		if requestParameter {
-			// apply special handling for 'request' parameter
-			// https://www.rfc-editor.org/rfc/rfc9126.html#section-3
-			paramToKeep := []string{
-				"request",
-				"client_id",
-				"client_secret",
-				"client_assertion_type",
-				"client_assertion",
-			}
+	}
 
-			//nolint
-			for k, _ := range parRequestBody {
-				// not an allowed parameter
-				// delete from request
-				if !stringInSlice(k, paramToKeep) {
-					delete(parRequestBody, k)
-				}
+	if c.config.UseRequestParameter {
+		// apply special handling for 'request' parameter
+		// https://www.rfc-editor.org/rfc/rfc9126.html#section-3
+		paramToKeep := []string{
+			"request",
+			"client_id",
+			"client_secret",
+			"client_assertion_type",
+			"client_assertion",
+		}
+
+		signedJwt, err := c.GenerateRequestJwt(claims)
+		if err != nil {
+			c.logger.Error("error generating request jwt", err)
+			return nil, err
+		}
+
+		c.logger.Debug("generated request jwt", "request", signedJwt)
+		parRequestBody["request"] = signedJwt
+
+		//nolint
+		for k := range parRequestBody {
+			// not an allowed parameter
+			// delete from request
+			if !stringInSlice(k, paramToKeep) {
+				delete(parRequestBody, k)
 			}
 		}
 

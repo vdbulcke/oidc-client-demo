@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/go-hclog"
 	"github.com/spf13/cobra"
 	oidcclient "github.com/vdbulcke/oidc-client-demo/src/client"
+	"github.com/vdbulcke/oidc-client-demo/src/client/jwt/signer"
 )
 
 // args var
@@ -19,6 +20,7 @@ var fakePKCEVerifier bool
 var mockNonce string
 var mockState string
 var mockCodeVerifier string
+var privateKey string
 
 // default
 var DefaultListeningAddress = "127.0.0.1"
@@ -36,6 +38,7 @@ func init() {
 	clientCmd.Flags().StringVarP(&mockNonce, "mock-nonce", "", "", "Use static 'nonce' value")
 	clientCmd.Flags().StringVarP(&mockState, "mock-state", "", "", "Use static 'state' value")
 	clientCmd.Flags().StringVarP(&mockCodeVerifier, "mock-code-verifier", "", "", "Use static pkce 'code_verifier' value")
+	clientCmd.Flags().StringVarP(&privateKey, "pem-key", "", "", "private key (pem format) for jwt signature")
 
 	// required flags
 	//nolint
@@ -66,6 +69,23 @@ func runClient(cmd *cobra.Command, args []string) {
 	if !oidcclient.ValidateConfig(config) {
 		appLogger.Error("Could not validate config")
 		os.Exit(1)
+	}
+
+	var jwtsigner signer.JwtSigner
+
+	if privateKey != "" {
+		key, err := signer.ParsePrivateKey(privateKey)
+		if err != nil {
+			appLogger.Error("error parsing private key", "key", privateKey, "err", err)
+			os.Exit(1)
+		}
+
+		jwtsigner, err = signer.NewJwtSigner(key, config.JwtSigningAlg)
+		if err != nil {
+			appLogger.Error("error generating jwt signer", "err", err)
+			os.Exit(1)
+		}
+
 	}
 
 	// setting the redirect URI
@@ -106,7 +126,7 @@ func runClient(cmd *cobra.Command, args []string) {
 	config.MockState = mockState
 
 	// Make a new OIDC Client
-	client, err := oidcclient.NewOIDCClient(config, appLogger)
+	client, err := oidcclient.NewOIDCClient(config, jwtsigner, appLogger)
 	if err != nil {
 		appLogger.Error("Error creating client", "error", err)
 		os.Exit(1)
