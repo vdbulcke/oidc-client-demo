@@ -19,20 +19,16 @@ release-snapshot:
 
 
 lint: 
-	golangci-lint run ./... 
+	golangci-lint run ./...
 
+changelog:
+	git-chglog -o CHANGELOG.md
 
-changelog: 
-	git-chglog -o CHANGELOG.md 
+test:
+	go test -v  ./...
 
-test: 
-	go test -run '' ./oidc-client/ -v
-	go test -run '' ./oidc-client/internal/pkce/ -v 
-	go test -run '' ./oidc-client/internal/oidc/discovery/ 
-
-
-gen-doc: 
-	dist/oidc-client-demo_linux_amd64/oidc-client documentation --dir ./doc
+gen-doc:
+	dist/oidc-client-demo_linux_amd64_v1/oidc-client documentation --dir ./doc
 
 doc-site: 
 	podman  run --rm -it -p 8000:8000 -v ${PWD}/www:/docs:z squidfunk/mkdocs-material 
