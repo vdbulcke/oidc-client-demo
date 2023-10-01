@@ -2,6 +2,12 @@
 ## [Unreleased]
 
 
+<a name="v0.17.0"></a>
+## [v0.17.0] - 2023-10-01
+### Features
+- 5d5858d - add --mock-jwt-kid flag to set a static kid for generated jwt ([#49](https://github.com/vdbulcke/oidc-client-demo/issues/49))
+
+
 <a name="v0.16.0"></a>
 ## [v0.16.0] - 2023-09-17
 ### Code Refactoring
@@ -169,7 +175,8 @@
 <a name="v0.0.1"></a>
 ## v0.0.1 - 2021-07-23
 
-[Unreleased]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.16.0...HEAD
+[Unreleased]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.17.0...HEAD
+[v0.17.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.16.0...v0.17.0
 [v0.16.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.15.0...v0.16.0
 [v0.15.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.14.0...v0.15.0
 [v0.14.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.13.1...v0.14.0
