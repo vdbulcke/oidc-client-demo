@@ -37,17 +37,17 @@ func ParsePrivateKey(filename string) (crypto.PrivateKey, error) {
 // NewJwtSigner create a JwtSigned for the correspond key type
 //
 // supported key tupes are rsa.PrivateKey and ecdsa.PrivateKey
-func NewJwtSigner(key crypto.PrivateKey, alg string) (JwtSigner, error) {
+func NewJwtSigner(key crypto.PrivateKey, alg, mockKid string) (JwtSigner, error) {
 
 	// case key to derive hc vault key type
 	switch priv := key.(type) {
 	case *rsa.PrivateKey:
 
-		return NewRSAJWTSigner(priv, alg)
+		return NewRSAJWTSigner(priv, alg, mockKid)
 
 	case *ecdsa.PrivateKey:
 
-		return NewECJWTSigner(priv, alg)
+		return NewECJWTSigner(priv, alg, mockKid)
 	default:
 		return nil, errors.New("unsupported key type. Must be one of RSA or EC")
 	}

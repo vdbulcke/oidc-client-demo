@@ -19,6 +19,7 @@ func init() {
 	jwtProfileCmd.Flags().StringVarP(&configFilename, "config", "c", "", "oidc client config file")
 	jwtProfileCmd.Flags().StringVarP(&privateKey, "pem-key", "", "", "private key (pem format) for jwt signature")
 	jwtProfileCmd.Flags().StringVarP(&endpoint, "endpoint", "", "", "OAuth endpoint for 'aud' audiance claims")
+	jwtProfileCmd.Flags().StringVarP(&mockKid, "mock-jwt-kid", "", "", "Use static jwt 'kid' value")
 
 	// required flags
 	//nolint
@@ -62,7 +63,7 @@ func jwtProfile(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	jwtsigner, err = signer.NewJwtSigner(key, config.JwtSigningAlg)
+	jwtsigner, err = signer.NewJwtSigner(key, config.JwtSigningAlg, mockKid)
 	if err != nil {
 		appLogger.Error("error generating jwt signer", "err", err)
 		os.Exit(1)

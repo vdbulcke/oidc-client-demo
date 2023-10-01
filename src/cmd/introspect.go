@@ -18,6 +18,7 @@ func init() {
 	introspectCmd.Flags().StringVarP(&configFilename, "config", "c", "", "oidc client config file")
 	introspectCmd.Flags().StringVarP(&token, "token", "", "", "Token to introspect")
 	introspectCmd.Flags().StringVarP(&privateKey, "pem-key", "", "", "private key (pem format) for jwt signature")
+	introspectCmd.Flags().StringVarP(&mockKid, "mock-jwt-kid", "", "", "Use static jwt 'kid' value")
 
 	// required flags
 	//nolint
@@ -62,7 +63,7 @@ func runIntrospectToken(cmd *cobra.Command, args []string) {
 			os.Exit(1)
 		}
 
-		jwtsigner, err = signer.NewJwtSigner(key, config.JwtSigningAlg)
+		jwtsigner, err = signer.NewJwtSigner(key, config.JwtSigningAlg, mockKid)
 		if err != nil {
 			appLogger.Error("error generating jwt signer", "err", err)
 			os.Exit(1)

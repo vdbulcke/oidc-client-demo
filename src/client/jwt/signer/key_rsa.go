@@ -18,7 +18,7 @@ type RSAJWTSigner struct {
 	signingMethod jwt.SigningMethod
 }
 
-func NewRSAJWTSigner(k *rsa.PrivateKey, alg string) (*RSAJWTSigner, error) {
+func NewRSAJWTSigner(k *rsa.PrivateKey, alg, mockKid string) (*RSAJWTSigner, error) {
 	var method jwt.SigningMethod
 	switch alg {
 	case "RS256":
@@ -31,12 +31,14 @@ func NewRSAJWTSigner(k *rsa.PrivateKey, alg string) (*RSAJWTSigner, error) {
 		return nil, fmt.Errorf("unsuported signing alg %s for RSA private key ", alg)
 
 	}
-
-	rsaKid, err := kid(&k.PublicKey)
-	if err != nil {
-		return nil, err
+	rsaKid := mockKid
+	if rsaKid == "" {
+		var err error
+		rsaKid, err = kid(&k.PublicKey)
+		if err != nil {
+			return nil, err
+		}
 	}
-
 	return &RSAJWTSigner{
 		PrivateKey:    k,
 		PublicKey:     &k.PublicKey,

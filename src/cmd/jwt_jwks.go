@@ -17,6 +17,7 @@ func init() {
 	// add flags to sub command
 	jwksCmd.Flags().StringVarP(&privateKey, "pem-key", "", "", "private key (pem format) for jwt signature")
 	jwksCmd.Flags().StringVarP(&jwtAlg, "alg", "", "RS256", "signing alg to use in jwks")
+	jwksCmd.Flags().StringVarP(&mockKid, "mock-jwt-kid", "", "", "Use static jwt 'kid' value")
 
 	//nolint
 	jwksCmd.MarkFlagRequired("pem-key")
@@ -43,7 +44,7 @@ func jwks(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	jwtsigner, err = signer.NewJwtSigner(key, jwtAlg)
+	jwtsigner, err = signer.NewJwtSigner(key, jwtAlg, mockKid)
 	if err != nil {
 		appLogger.Error("error generating jwt signer", "err", err)
 		os.Exit(1)

@@ -21,6 +21,7 @@ func init() {
 	refreshTokenCmd.Flags().StringVarP(&refreshToken, "refresh-token", "", "", "Refresh Token")
 	refreshTokenCmd.Flags().BoolVarP(&skipIdTokenVerification, "skip-id-token-verification", "", false, "Skip validation of id_token after renewing tokens")
 	refreshTokenCmd.Flags().StringVarP(&privateKey, "pem-key", "", "", "private key (pem format) for jwt signature")
+	refreshTokenCmd.Flags().StringVarP(&mockKid, "mock-jwt-kid", "", "", "Use static jwt 'kid' value")
 
 	// required flags
 	//nolint
@@ -65,7 +66,7 @@ func runRefreshToken(cmd *cobra.Command, args []string) {
 			os.Exit(1)
 		}
 
-		jwtsigner, err = signer.NewJwtSigner(key, config.JwtSigningAlg)
+		jwtsigner, err = signer.NewJwtSigner(key, config.JwtSigningAlg, mockKid)
 		if err != nil {
 			appLogger.Error("error generating jwt signer", "err", err)
 			os.Exit(1)

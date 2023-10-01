@@ -18,7 +18,7 @@ type ECJWTSigner struct {
 	signingMethod jwt.SigningMethod
 }
 
-func NewECJWTSigner(k *ecdsa.PrivateKey, alg string) (*ECJWTSigner, error) {
+func NewECJWTSigner(k *ecdsa.PrivateKey, alg, mockKid string) (*ECJWTSigner, error) {
 	var method jwt.SigningMethod
 	switch alg {
 	case "ES256":
@@ -32,9 +32,13 @@ func NewECJWTSigner(k *ecdsa.PrivateKey, alg string) (*ECJWTSigner, error) {
 
 	}
 
-	rsaKid, err := kid(&k.PublicKey)
-	if err != nil {
-		return nil, err
+	rsaKid := mockKid
+	if rsaKid == "" {
+		var err error
+		rsaKid, err = kid(&k.PublicKey)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &ECJWTSigner{

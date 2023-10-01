@@ -20,6 +20,7 @@ var fakePKCEVerifier bool
 var mockNonce string
 var mockState string
 var mockCodeVerifier string
+var mockKid string
 var privateKey string
 
 // default
@@ -38,6 +39,7 @@ func init() {
 	clientCmd.Flags().StringVarP(&mockNonce, "mock-nonce", "", "", "Use static 'nonce' value")
 	clientCmd.Flags().StringVarP(&mockState, "mock-state", "", "", "Use static 'state' value")
 	clientCmd.Flags().StringVarP(&mockCodeVerifier, "mock-code-verifier", "", "", "Use static pkce 'code_verifier' value")
+	clientCmd.Flags().StringVarP(&mockKid, "mock-jwt-kid", "", "", "Use static jwt 'kid' value")
 	clientCmd.Flags().StringVarP(&privateKey, "pem-key", "", "", "private key (pem format) for jwt signature")
 
 	// required flags
@@ -80,7 +82,7 @@ func runClient(cmd *cobra.Command, args []string) {
 			os.Exit(1)
 		}
 
-		jwtsigner, err = signer.NewJwtSigner(key, config.JwtSigningAlg)
+		jwtsigner, err = signer.NewJwtSigner(key, config.JwtSigningAlg, mockKid)
 		if err != nil {
 			appLogger.Error("error generating jwt signer", "err", err)
 			os.Exit(1)

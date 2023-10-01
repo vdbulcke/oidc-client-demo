@@ -23,6 +23,7 @@ func init() {
 	jwtRequestCmd.Flags().StringVarP(&mockNonce, "mock-nonce", "", "", "Use static 'nonce' value")
 	jwtRequestCmd.Flags().StringVarP(&mockState, "mock-state", "", "", "Use static 'state' value")
 	jwtRequestCmd.Flags().StringVarP(&mockCodeVerifier, "mock-code-verifier", "", "", "Use static pkce 'code_verifier' value")
+	jwtRequestCmd.Flags().StringVarP(&mockKid, "mock-jwt-kid", "", "", "Use static jwt 'kid' value")
 
 	// required flags
 	//nolint
@@ -81,7 +82,7 @@ func jwtRequest(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	jwtsigner, err = signer.NewJwtSigner(key, config.JwtSigningAlg)
+	jwtsigner, err = signer.NewJwtSigner(key, config.JwtSigningAlg, mockKid)
 	if err != nil {
 		appLogger.Error("error generating jwt signer", "err", err)
 		os.Exit(1)
