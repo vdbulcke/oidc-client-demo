@@ -6,6 +6,8 @@ import (
 	"fmt"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/lestrrat-go/jwx/v2/jwa"
+	"github.com/lestrrat-go/jwx/v2/jwe"
 	"gopkg.in/square/go-jose.v2"
 )
 
@@ -73,4 +75,27 @@ func (k *RSAJWTSigner) SignJWT(claims jwt.Claims) (string, error) {
 	token.Header["kid"] = k.Kid
 
 	return token.SignedString(k.PrivateKey)
+}
+
+// DecryptJWT decrypt jwt
+func (k *RSAJWTSigner) DecryptJWT(encryptedJwt, alg string) (string, error) {
+	var method jwa.KeyAlgorithm
+
+	switch alg {
+	case "RSA-OAEP-256":
+		method = jwa.RSA_OAEP_256
+
+	case "RSA-OAEP":
+		method = jwa.RSA_OAEP
+	default:
+		return "", fmt.Errorf("unsupported encryption alg %s", alg)
+	}
+
+	decrypted, err := jwe.Decrypt([]byte(encryptedJwt), jwe.WithKey(method, k.PrivateKey))
+	if err != nil {
+		return "", err
+	}
+
+	return string(decrypted), nil
+
 }

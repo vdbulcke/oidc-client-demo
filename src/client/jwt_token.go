@@ -21,7 +21,8 @@ func (c *OIDCClient) processRefreshToken(ctx context.Context, refreshTokenRaw st
 func (c *OIDCClient) processGenericToken(ctx context.Context, tokenRaw string, tokenType string) (*oidc.IDToken, error) {
 
 	// parse header
-	header, err := c.parseJWTHeader(tokenRaw)
+	// header, headerClaims, err := c.parseJWTHeader(tokenRaw)
+	header, _, err := c.parseJWTHeader(tokenRaw)
 	if err != nil {
 		c.logger.Error(fmt.Sprintf("error parsing %s token header", tokenType), "error", err)
 	} else {

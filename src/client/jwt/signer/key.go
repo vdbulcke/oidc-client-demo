@@ -7,6 +7,7 @@ import (
 // JwtSigner interface for signing jwt
 // and generating jwks
 type JwtSigner interface {
-	JWKS() ([]byte, error)                     // marshal of JWKS
-	SignJWT(claims jwt.Claims) (string, error) // signs jwt claims
+	JWKS() ([]byte, error)                               // marshal of JWKS
+	SignJWT(claims jwt.Claims) (string, error)           // signs jwt claims
+	DecryptJWT(encryptedJwt, alg string) (string, error) // decrypt jwt
 }

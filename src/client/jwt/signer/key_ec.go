@@ -76,3 +76,7 @@ func (k *ECJWTSigner) SignJWT(claims jwt.Claims) (string, error) {
 
 	return token.SignedString(k.PrivateKey)
 }
+func (k *ECJWTSigner) DecryptJWT(encryptedJwt, alg string) (string, error) {
+	return "", fmt.Errorf("unsupported encryption alg %s", alg)
+
+}
