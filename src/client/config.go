@@ -18,7 +18,7 @@ import (
 type OIDCClientConfig struct {
 	ClientID     string `yaml:"client_id"  validate:"required"`
 	ClientSecret string `yaml:"client_secret" `
-	AuthMethod   string `yaml:"auth_method"  validate:"required,oneof=client_secret_basic client_secret_post private_key_jwt"`
+	AuthMethod   string `yaml:"auth_method"  validate:"required,oneof=client_secret_basic client_secret_post private_key_jwt tls_client_auth"`
 
 	UsePKCE             bool   `yaml:"use_pkce"`
 	PKCEChallengeMethod string `yaml:"pkce_challenge_method"`

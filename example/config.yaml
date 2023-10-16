@@ -1,14 +1,13 @@
 ---
 ## Client Credentials: (Mandatory)
 ### NOTE: those client_id/client_secret can be passed
-###       as environment variables with: 
+###       as environment variables with:
 ###
 ###    export OIDC_CLIENT_ID=my_client_id
 ###    export OIDC_CLIENT_SECRET=my_client_id
 ###
 client_id: foo
-client_secret: bar 
-
+client_secret: bar
 
 ## Client Auth Method: (Mandatory)
 ###  Since version v0.2.0
@@ -17,33 +16,34 @@ client_secret: bar
 ###  * client_secret_post  (Using POST request)
 ###  * private_key_jwt     (Using POST client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer)
 ###    NOTE: private_key_jwt requires '--pem-key' flag
+###  * tls_client_auth
+###    NOTE: tls_client_auth requires '--pem-key' and '--pem-certificate' flag
 auth_method: client_secret_basic
-
 
 ## Private Key Jwt (Optional)
 ###  Since version v0.16.0
-### 
+###
 ### Example generating RSA key:
-### 
+###
 ###   openssl genrsa 4096 > key.pem
-### 
+###
 ### Example generating ecdsa key:
-### 
+###
 ###    openssl ecparam -name secp384r1 -genkey -noout -out ecdsa.pem ## generate key
 ###    openssl pkcs8 -topk8 -outform PEM -in ecdsa.pem -out key_ec.pem -nocrypt ## format to pkcs8 PEM
-### 
+###
 ### NOTE: requires '--pem-key key.pem' flag
 ### https://www.rfc-editor.org/rfc/rfc7523
 
-### client_assertion jwt duration 
+### client_assertion jwt duration
 ### optional: default 5m
 # jwt_profile_token_duration: 15m
 
-### client_assertion jwt 'aud' audiance 
+### client_assertion jwt 'aud' audiance
 ### optional: default value of token endpoint
 # jwt_profile_token_audiance: https://example.com/custom/audiance
 
-### client_assertion jwt and request jwt signing algorithm 
+### client_assertion jwt and request jwt signing algorithm
 ###
 ### Supported value: RS256 RS384 RS512 ES256 ES384 ES512
 ### optional: default RS256
@@ -51,16 +51,16 @@ auth_method: client_secret_basic
 
 ## Request Jwt parameter (Optional)
 ###  Since version v0.16.0
-### 
+###
 ### Example generating RSA key:
-### 
+###
 ###   openssl genrsa 4096 > key.pem
-### 
+###
 ### Example generating ecdsa key:
-### 
+###
 ###    openssl ecparam -name secp384r1 -genkey -noout -out ecdsa.pem ## generate key
 ###    openssl pkcs8 -topk8 -outform PEM -in ecdsa.pem -out key_ec.pem -nocrypt ## format to pkcs8 PEM
-### 
+###
 ### NOTE: requires '--pem-key key.pem' flag
 ### https://www.rfc-editor.org/rfc/rfc7523
 
@@ -68,116 +68,106 @@ auth_method: client_secret_basic
 ### optional: default false
 # use_request_parameter: true
 
-### request jwt 'aud' audiance 
+### request jwt 'aud' audiance
 ### optional: default value of Issuer
 # jwt_request_token_audiance: https://example.com/custom/audiance
 
-### client_assertion jwt duration 
+### client_assertion jwt duration
 ### optional: default 5m
 # jwt_profile_token_duration: 15m
 
-
 ## JWT Request Additional Param (optional)
-### 
+###
 ### Arbitrary Key/Value parameters to include in the jwt request
 ### format map[string]string
 # jwt_request_token_additional_parameters:
 #   claims: '{"id_token": {"foo": {"values": ["bar", "baz"]}}}'
-
 
 ## PKCE Flow: (Optional)
 ### Since version v0.5.0
 ### Enabled PKCE Flow
 # use_pkce: true
 
-### Supported challenge method 
+### Supported challenge method
 ###  * S256 (Recommended) Default if not specified
-###  * plain 
+###  * plain
 # pkce_challenge_method: S256
 
 ## Scopes: (Mandatory)
 scopes:
-- openid
-- profile
-- egovnrn
+  - openid
+  - profile
+  - egovnrn
 # - roles
 # - enterprise
 
 ## Token Signature Alg: (Mandatory)
 ###   List allowed signing algorithm for token validation
-token_signing_alg: 
-- "RS256"
-
+token_signing_alg:
+  - "RS256"
 
 ## IDP Config: (Mandatory)
-### NOTE: this 'issuer' will be used to find the ./well-known/openid-configuration 
-###       by adding ./well-known/openid-configuration after the issuer base url 
+### NOTE: this 'issuer' will be used to find the ./well-known/openid-configuration
+###       by adding ./well-known/openid-configuration after the issuer base url
 issuer: "https://idp.iamfas.int.belgium.be/fas/oauth2"
-
-
 
 ## Override Redirect URI (optional)
 ###  since v0.15.0
 ###
 ### NOTE: Make sure your custom redirect Uri is forwarded
 ###       to '/auth/callback' on the listening port (--port arg) .
-###       You will need to adapt the login url (default http://127.0.0.1:5556/login) 
-###       you use to trigger the authorization request to match the same domain as 
+###       You will need to adapt the login url (default http://127.0.0.1:5556/login)
+###       you use to trigger the authorization request to match the same domain as
 ###       your redirect uri (for the cookie domain of 'state' and 'nonce' cookies ).
-### 
-# override_redirect_uri: https://example.com/foo/bar 
-
+###
+# override_redirect_uri: https://example.com/foo/bar
 
 ## Alternative Well-Known (Optional)
-###  since v0.11.0 
-### 
+###  since v0.11.0
+###
 # alternative_wellknown_endpoint: ""
 ### Disable well known endpoint validation
 # insecure_wellknown_endpoint: true
 
-
 ## PAR (optional)
 ###  since v0.11.0
-###  Sends a Pushed Authorization Request to 
-###  Authorization Server, and redirect the user 
+###  Sends a Pushed Authorization Request to
+###  Authorization Server, and redirect the user
 ###  to the Authorization endpoint with a 'request_uri'.
-### 
-###  By default, the par endpoint is discovered from the 
+###
+###  By default, the par endpoint is discovered from the
 ###  well-known endpoint 'pushed_authorization_request_endpoint'.
 ###
 ###  reference: rfc9126
 ### Enable PAR
-# use_par: true 
+# use_par: true
 ### Override PAR endpoint
 # par_endpoint: "https://example.com/par"
-### Custom key (other than 'pushed_authorization_request_endpoint') on well known endpoint 
+### Custom key (other than 'pushed_authorization_request_endpoint') on well known endpoint
 # par_endpoint_wellknown_key: "par_endpoint"
 ### Arbitrary Key/Value parameters to include in PAR request
-# par_additional_parameters: 
+# par_additional_parameters:
 #   claims: '{"id_token": {"foo": {"values": ["bar", "baz"]}}}'
-#   foo:  bar 
+#   foo:  bar
 #   hello: world
-
 
 ## Authorize Request Additional Param (optional)
 ### since version 0.12.0
-### 
+###
 ### Arbitrary Key/Value parameters to include in Authorize request
 ### format map[string]string
 # authorize_additional_parameters:
 #   claims: '{"id_token": {"foo": {"values": ["bar", "baz"]}}}'
 
 ## Introspect: (Mandatory for 'introspect sub command')
-## 
+##
 introspect_endpoint: "https://idp.iamfas.int.belgium.be/fas/oauth2/introspect"
-
 ## Override Token endpoint: (Optional)
 ###   You can override some endpoints after they are fetched from ./well-known/openid-configuration
-### 
+###
 # token_endpoint: "https://idp.iamfas.int.belgium.be/fas/oauth2/access_token"
 # authorize_endpoint: "https://idp.iamfas.int.belgium.be/fas/oauth2/authorize"
 # jwks_endpoint: "https://iamapps-public.int.belgium.be/oidc/jwk_uri.json"
-
 
 ## Acr Values: (Optional)
 # acr_values: "urn:be:fedict:iam:fas:citizen:Level100"
@@ -186,7 +176,7 @@ introspect_endpoint: "https://idp.iamfas.int.belgium.be/fas/oauth2/introspect"
 ###  List of allowed amr value, the validation
 ###  will be successful if a least one of the amr
 ###  in the list if present in the token
-# amr_list: 
+# amr_list:
 # - eid
 # - bmid
 # - urn:be:fedict:iam:fas:Level500
@@ -197,16 +187,14 @@ introspect_endpoint: "https://idp.iamfas.int.belgium.be/fas/oauth2/introspect"
 ###  will be successful if 'acr' claim from id_token
 ###  is present in this list
 ###
-# acr_list: 
-# - "0" ## detault when acr are not implemented 
+# acr_list:
+# - "0" ## detault when acr are not implemented
 # - urn:be:fedict:iam:fas:Level500
 # - urn:be:fedict:iam:fas:Level450
 # - urn:be:fedict:iam:fas:Level400
 # - urn:be:fedict:iam:fas:Level350
 # - urn:be:fedict:iam:fas:Level200
 # - urn:be:fedict:iam:fas:Level100
-
-
 
 ## Skip Userinfo: (Optional)
 ###   Disable call to userinfo endpoint
@@ -215,7 +203,6 @@ introspect_endpoint: "https://idp.iamfas.int.belgium.be/fas/oauth2/introspect"
 ## TLS Setting: (Optional)
 ###   Disable TLS certificate validation
 # skip_tls_verification: true
-
 
 ##  Access Token JWT: (Optional)
 ###   Parse and Validate access token jwt

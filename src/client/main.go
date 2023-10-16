@@ -58,7 +58,7 @@ type OIDCClient struct {
 type subCtxKey string
 
 // OIDCClient create a new OIDC Client
-func NewOIDCClient(c *OIDCClientConfig, jwtsigner signer.JwtSigner, l hclog.Logger) (*OIDCClient, error) {
+func NewOIDCClient(c *OIDCClientConfig, jwtsigner signer.JwtSigner, clientCert tls.Certificate, l hclog.Logger) (*OIDCClient, error) {
 
 	if c.AuthMethod == "private_key_jwt" && jwtsigner == nil {
 		return nil, errors.New(" '--pem-key' is required for 'private_key_jwt' auth method")
@@ -71,8 +71,16 @@ func NewOIDCClient(c *OIDCClientConfig, jwtsigner signer.JwtSigner, l hclog.Logg
 	}
 
 	// skipping the TLS verification endpoint could be self signed
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{
-		InsecureSkipVerify: c.SkipTLSVerification,
+	// set client cert for mTLS
+	if c.AuthMethod == "tls_client_auth" {
+		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{
+			InsecureSkipVerify: c.SkipTLSVerification,
+			Certificates:       []tls.Certificate{clientCert},
+		}
+	} else {
+		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{
+			InsecureSkipVerify: c.SkipTLSVerification,
+		}
 	}
 
 	// construct well-known from Issuer, and discover well known

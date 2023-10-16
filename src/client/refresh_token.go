@@ -30,6 +30,9 @@ func (c *OIDCClient) RefreshTokenFlow(refreshToken string, skipIdTokenVerificati
 		params.Set("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
 		params.Set("client_assertion", signedJwt)
 
+	} else if c.config.AuthMethod == "tls_client_auth" {
+		c.logger.Debug("set client_id", c.config.ClientID)
+		params.Set("client_id", c.config.ClientID)
 	}
 
 	// token := new(oauth2.Token)

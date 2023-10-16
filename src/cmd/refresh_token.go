@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"crypto/tls"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -20,7 +21,8 @@ func init() {
 	refreshTokenCmd.Flags().StringVarP(&configFilename, "config", "c", "", "oidc client config file")
 	refreshTokenCmd.Flags().StringVarP(&refreshToken, "refresh-token", "", "", "Refresh Token")
 	refreshTokenCmd.Flags().BoolVarP(&skipIdTokenVerification, "skip-id-token-verification", "", false, "Skip validation of id_token after renewing tokens")
-	refreshTokenCmd.Flags().StringVarP(&privateKey, "pem-key", "", "", "private key (pem format) for jwt signature")
+	refreshTokenCmd.Flags().StringVarP(&privateKey, "pem-key", "", "", "private key (pem format) for jwt signature or mTLS")
+	refreshTokenCmd.Flags().StringVarP(&clientCertificate, "pem-cert", "", "", "client certificate (pem format) mTLS")
 	refreshTokenCmd.Flags().StringVarP(&mockKid, "mock-jwt-kid", "", "", "Use static jwt 'kid' value")
 
 	// required flags
@@ -73,6 +75,18 @@ func runRefreshToken(cmd *cobra.Command, args []string) {
 		}
 
 	}
+
+	var clientCert tls.Certificate
+
+	//load client certificate and associated private key
+	if privateKey != "" && clientCertificate != "" {
+		clientCert, err = tls.LoadX509KeyPair(clientCertificate, privateKey)
+		if err != nil {
+			appLogger.Error("Couldn't load client cert or key", "err", err)
+			os.Exit(1)
+		}
+	}
+
 	// NOTE: Redirect URI is not need for refresh token grant
 
 	// override config if flag is passed as args
@@ -86,7 +100,7 @@ func runRefreshToken(cmd *cobra.Command, args []string) {
 	config.OutputDir = outputDir
 
 	// Make a new OIDC Client
-	client, err := oidcclient.NewOIDCClient(config, jwtsigner, appLogger)
+	client, err := oidcclient.NewOIDCClient(config, jwtsigner, clientCert, appLogger)
 	if err != nil {
 		appLogger.Error("Error creating client", "error", err)
 		os.Exit(1)

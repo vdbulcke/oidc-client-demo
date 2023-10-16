@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"crypto/tls"
 	"fmt"
 	"os"
 
@@ -89,7 +90,8 @@ func jwtRequest(cmd *cobra.Command, args []string) {
 	}
 
 	// Make a new OIDC Client
-	client, err := oidcclient.NewOIDCClient(config, jwtsigner, appLogger)
+	var clientCert tls.Certificate
+	client, err := oidcclient.NewOIDCClient(config, jwtsigner, clientCert, appLogger)
 	if err != nil {
 		appLogger.Error("Error creating client", "error", err)
 		os.Exit(1)

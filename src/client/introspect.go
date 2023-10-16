@@ -148,6 +148,11 @@ func (c *OIDCClient) generateIntrospectRequest(token string) (*http.Request, err
 
 	}
 
+	if c.config.AuthMethod == "tls_client_auth" {
+		c.logger.Debug("set client_id", c.config.ClientID)
+		introspectParamValues.Set("client_id", c.config.ClientID)
+	}
+
 	req, err := http.NewRequest(http.MethodPost, c.config.IntrospectEndpoint, strings.NewReader(introspectParamValues.Encode()))
 	if err != nil {
 
