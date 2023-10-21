@@ -106,6 +106,19 @@ scopes:
 token_signing_alg:
   - "RS256"
 
+## Token Encryption Alg: (optional)
+###   List allowed encryption algorithm for token validation
+token_encryption_alg:
+## RSA 
+- RSA-OAEP
+- RSA-OAEP-256
+## Eliptic curve
+- ECDH-ES
+- ECDH-ES+A128KW
+- ECDH-ES+A192KW
+- ECDH-ES+A256KW
+
+
 ## IDP Config: (Mandatory)
 ### NOTE: this 'issuer' will be used to find the ./well-known/openid-configuration
 ###       by adding ./well-known/openid-configuration after the issuer base url

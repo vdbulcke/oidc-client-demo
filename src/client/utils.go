@@ -57,7 +57,7 @@ func (c *OIDCClient) NewCodeChallenge(codeVerifier string) (string, error) {
 	return pkce.NewCodeChallenge(codeVerifier, c.config.PKCEChallengeMethod)
 
 }
-func (c *OIDCClient) parseJWTHeader(rawToken string) (string, map[string]string, error) {
+func (c *OIDCClient) parseJWTHeader(rawToken string) (string, map[string]interface{}, error) {
 
 	parts := strings.Split(rawToken, ".")
 	// header must be the first part
@@ -66,7 +66,7 @@ func (c *OIDCClient) parseJWTHeader(rawToken string) (string, map[string]string,
 		return "", nil, fmt.Errorf(" malformed jwt header: %v", err)
 	}
 
-	var parsedHeader map[string]string
+	var parsedHeader map[string]interface{}
 	if err := json.Unmarshal(header, &parsedHeader); err != nil {
 		return "", nil, fmt.Errorf("failed to unmarshal jwt header: %v", err)
 	}

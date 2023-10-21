@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 
+	"slices"
+
 	"github.com/coreos/go-oidc/v3/oidc"
 )
 
@@ -18,23 +20,30 @@ func (c *OIDCClient) processIdToken(idTokenRaw string) (*oidc.IDToken, error) {
 		// pretty print header
 		c.logger.Info("IDToken header", "header", header)
 
-		if alg, ok := headerClaims["alg"]; ok {
-			// ony supported encryption alg
-			if alg == "RSA-OAEP-256" || alg == "RSA-OAEP" {
-				jwtPayload, err := c.jwtsigner.DecryptJWT(idTokenRaw, alg)
-				if err != nil {
-					c.logger.Error("error decrypting jwt", "error", err)
-				} else {
+		if algI, ok := headerClaims["alg"]; ok {
 
-					// nested jwt payload
-					idTokenRaw = jwtPayload
-					c.logger.Info("Encryped JWT", "payload", jwtPayload)
-					nestedHeader, _, err := c.parseJWTHeader(idTokenRaw)
-					if err == nil {
-						c.logger.Info("IDToken nested token header", "header", nestedHeader)
+			// check string
+			if alg, ok := algI.(string); ok {
+				// ony supported encryption alg
+				if slices.Contains(c.config.TokenEncryptionAlg, alg) {
+					// if alg == "RSA-OAEP-256" || alg == "RSA-OAEP" || alg == "ECDH-ES" {
+					jwtPayload, err := c.jwtsigner.DecryptJWT(idTokenRaw, alg)
+					if err != nil {
+						c.logger.Error("error decrypting jwt", "error", err)
+					} else {
+
+						// nested jwt payload
+						idTokenRaw = jwtPayload
+						c.logger.Info("Encryped JWT", "payload", jwtPayload)
+						nestedHeader, _, err := c.parseJWTHeader(idTokenRaw)
+						if err == nil {
+							c.logger.Info("IDToken nested token header", "header", nestedHeader)
+						}
 					}
 				}
+
 			}
+
 		}
 	}
 

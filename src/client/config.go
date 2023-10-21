@@ -47,7 +47,8 @@ type OIDCClientConfig struct {
 	PARAdditionalParameter            map[string]string `yaml:"par_additional_parameters"`
 	AuthorizeAdditionalParameter      map[string]string `yaml:"authorize_additional_parameters"`
 
-	TokenSigningAlg []string `yaml:"token_signing_alg" validate:"required"`
+	TokenSigningAlg    []string `yaml:"token_signing_alg" validate:"required"`
+	TokenEncryptionAlg []string `yaml:"token_encryption_alg" validate:"dive,oneof=ECDH-ES RSA-OAEP RSA-OAEP-256 ECDH-ES+A128KW ECDH-ES+A192KW ECDH-ES+A256KW"`
 
 	AMRWhitelist []string `yaml:"amr_list"`
 	ACRWhitelist []string `yaml:"acr_list"`

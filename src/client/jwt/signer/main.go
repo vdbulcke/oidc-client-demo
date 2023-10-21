@@ -28,7 +28,13 @@ func ParsePrivateKey(filename string) (crypto.PrivateKey, error) {
 
 	privKey, err := x509.ParsePKCS8PrivateKey(key.Bytes)
 	if err != nil {
-		return nil, err
+		privKey, err = x509.ParsePKCS1PrivateKey(key.Bytes)
+		if err != nil {
+			privKey, err = x509.ParseECPrivateKey(key.Bytes)
+			if err != nil {
+				return nil, err
+			}
+		}
 	}
 
 	return privKey, nil

@@ -1,9 +1,15 @@
 package signer
 
 import (
+	"crypto/rand"
 	"crypto/rsa"
+	"crypto/sha1"
+	"crypto/x509"
+	"crypto/x509/pkix"
 	"encoding/json"
 	"fmt"
+	"math/big"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/lestrrat-go/jwx/v2/jwa"
@@ -54,15 +60,33 @@ func NewRSAJWTSigner(k *rsa.PrivateKey, alg, mockKid string) (*RSAJWTSigner, err
 // JWKS is the JSON JWKS representation of the rsa.PublicKey
 func (k *RSAJWTSigner) JWKS() ([]byte, error) {
 
+	cert, err := k.genX509Cert()
+	if err != nil {
+		return nil, err
+	}
+
+	fingerprint := sha1.Sum(cert.Raw)
+
 	// TODO: support mutli signing alg
-	jwk := jose.JSONWebKey{
-		Use:       "sig",
-		Algorithm: k.alg,
-		Key:       k.PublicKey,
-		KeyID:     k.Kid,
+	sig := jose.JSONWebKey{
+		Use: "sig",
+		// Algorithm:                 k.alg,
+		Key:                       k.PublicKey,
+		KeyID:                     k.Kid,
+		Certificates:              []*x509.Certificate{cert},
+		CertificateThumbprintSHA1: fingerprint[:],
+	}
+
+	enc := jose.JSONWebKey{
+		Use: "enc",
+
+		Key:                       k.PublicKey,
+		KeyID:                     k.Kid,
+		Certificates:              []*x509.Certificate{cert},
+		CertificateThumbprintSHA1: fingerprint[:],
 	}
 	jwks := &jose.JSONWebKeySet{
-		Keys: []jose.JSONWebKey{jwk},
+		Keys: []jose.JSONWebKey{sig, enc},
 	}
 
 	return json.Marshal(jwks)
@@ -98,4 +122,33 @@ func (k *RSAJWTSigner) DecryptJWT(encryptedJwt, alg string) (string, error) {
 
 	return string(decrypted), nil
 
+}
+
+func (k *RSAJWTSigner) genX509Cert() (*x509.Certificate, error) {
+	serialNumber := big.NewInt(100000000000000000)
+	template := &x509.Certificate{
+		SerialNumber: serialNumber,
+		Subject: pkix.Name{
+			CommonName: "oidc-client-demo",
+		},
+		Issuer: pkix.Name{
+			CommonName: "oidc-client-demo",
+		},
+		NotBefore:          time.Now(),
+		NotAfter:           time.Now().AddDate(5, 0, 0),
+		PublicKeyAlgorithm: x509.RSA,
+		SignatureAlgorithm: x509.SHA512WithRSA,
+	}
+
+	derBytes, err := x509.CreateCertificate(rand.Reader, template, template, k.PublicKey, k.PrivateKey)
+	if err != nil {
+		return nil, err
+	}
+
+	cert, err := x509.ParseCertificate(derBytes)
+	if err != nil {
+		return nil, err
+	}
+
+	return cert, nil
 }
