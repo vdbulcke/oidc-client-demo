@@ -2,6 +2,14 @@
 ## [Unreleased]
 
 
+<a name="v0.18.0"></a>
+## [v0.18.0] - 2023-10-21
+### Features
+- 3444088 - add ECDH-ES, ECDH-ES+A128KW, ECDH-ES+A192KW, ECDH-ES+A256KW encryption alg ([#51](https://github.com/vdbulcke/oidc-client-demo/issues/51))
+- c8abffc - add RSA-OAEP-256 and RSA-OAEP idtoken encryption ([#51](https://github.com/vdbulcke/oidc-client-demo/issues/51))
+- 2780f48 - add mTLS client authentication method
+
+
 <a name="v0.17.0"></a>
 ## [v0.17.0] - 2023-10-01
 ### Features
@@ -175,7 +183,8 @@
 <a name="v0.0.1"></a>
 ## v0.0.1 - 2021-07-23
 
-[Unreleased]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.17.0...HEAD
+[Unreleased]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.18.0...HEAD
+[v0.18.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.17.0...v0.18.0
 [v0.17.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.16.0...v0.17.0
 [v0.16.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.15.0...v0.16.0
 [v0.15.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.14.0...v0.15.0
