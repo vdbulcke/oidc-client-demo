@@ -2,6 +2,12 @@
 ## [Unreleased]
 
 
+<a name="v0.19.0"></a>
+## [v0.19.0] - 2023-11-01
+### Features
+- 84ab65a - optional client_id on token endpoint for private_key_jwt ([#55](https://github.com/vdbulcke/oidc-client-demo/issues/55))
+
+
 <a name="v0.18.0"></a>
 ## [v0.18.0] - 2023-10-21
 ### Features
@@ -183,7 +189,8 @@
 <a name="v0.0.1"></a>
 ## v0.0.1 - 2021-07-23
 
-[Unreleased]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.18.0...HEAD
+[Unreleased]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.19.0...HEAD
+[v0.19.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.18.0...v0.19.0
 [v0.18.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.17.0...v0.18.0
 [v0.17.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.16.0...v0.17.0
 [v0.16.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.15.0...v0.16.0
