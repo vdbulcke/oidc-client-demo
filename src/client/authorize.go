@@ -193,6 +193,11 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 		authZCode := r.URL.Query().Get("code")
 		c.logger.Info("Received AuthZ Code", "code", authZCode)
 
+		v := url.Values{
+			"grant_type":   {"authorization_code"},
+			"code":         {authZCode},
+			"redirect_uri": {c.config.RedirectUri},
+		}
 		// Extra parameter for authorize endpoint
 		var tokenOpts []oauth2.AuthCodeOption
 		// var oauth2Token *oauth2.Token
@@ -209,6 +214,7 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 
 			// set extra pkce param
 			pkceVerifierOption := oauth2.SetAuthURLParam("code_verifier", codeVerifier)
+			v.Set("code_verifier", codeVerifier)
 			tokenOpts = append(tokenOpts, pkceVerifierOption)
 			c.logger.Debug("using pkce code_verifier for getting access token")
 
@@ -218,6 +224,8 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 
 			assertionTypeOption := oauth2.SetAuthURLParam("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
 
+			v.Set("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
+
 			signedJwt, err := c.GenerateJwtProfile(c.Wellknown.TokenEndpoint)
 			if err != nil {
 				c.logger.Error("Failed to generate jwt client_assertion", "err", err)
@@ -226,14 +234,26 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 			}
 
 			assertionOption := oauth2.SetAuthURLParam("client_assertion", signedJwt)
+
+			v.Set("client_assertion", signedJwt)
 			c.logger.Debug("generated jwt", "client_assertion", signedJwt)
 			tokenOpts = append(tokenOpts, assertionTypeOption)
 			tokenOpts = append(tokenOpts, assertionOption)
 
 		}
-
+		c.logger.Debug("Token exchange", "opts", tokenOpts)
 		// Access Token Response
-		oauth2Token, err := c.oAuthConfig.Exchange(c.ctx, authZCode, tokenOpts...)
+		// oauth2Token, err := c.oAuthConfig.Exchange(c.ctx, authZCode, tokenOpts...)
+		// if err != nil {
+		// 	c.logger.Error("Failed to get Access Token", "err", err)
+		// 	http.Error(w, "Failed to exchange token: "+err.Error(), http.StatusInternalServerError)
+		// 	return
+		// }
+
+		// for _, opt := range tokenOpts {
+		// 	opt.setValue(v)
+		// }
+		oauth2Token, err := c.TokenExchange(v)
 		if err != nil {
 			c.logger.Error("Failed to get Access Token", "err", err)
 			http.Error(w, "Failed to exchange token: "+err.Error(), http.StatusInternalServerError)
@@ -241,7 +261,8 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 		}
 
 		// Parse Access Token
-		accessTokenResponse, err := c.parseAccessTokenResponse(oauth2Token)
+		// accessTokenResponse, err := c.parseAccessTokenResponse(oauth2Token)
+		accessTokenResponse, err := c.parseInternalAccessTokenResponse(oauth2Token)
 		if err != nil {
 			c.logger.Error("Error Parsing Access Token", "err", err)
 			http.Error(w, "Error Parsing Access Token", http.StatusBadRequest)
@@ -316,7 +337,14 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 		}
 
 		// Fetch Userinfo
-		err = c.userinfo(oauth2Token)
+
+		tok := &oauth2.Token{
+			AccessToken:  oauth2Token.AccessToken,
+			RefreshToken: oauth2Token.RefreshToken,
+			TokenType:    oauth2Token.TokenType,
+			Expiry:       oauth2Token.Expiry,
+		}
+		err = c.userinfo(tok)
 		if err != nil {
 			http.Error(w, "Failed to get userinfo: "+err.Error(), http.StatusInternalServerError)
 			return
@@ -326,7 +354,7 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 		resp := struct {
 			OAuth2Token     *oauth2.Token
 			AccessTokenResp *JSONAccessTokenResponse
-		}{oauth2Token, accessTokenResponse}
+		}{tok, accessTokenResponse}
 
 		// Format in JSON global HTTP response
 		data, err := json.MarshalIndent(resp, "", "    ")

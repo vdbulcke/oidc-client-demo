@@ -78,6 +78,10 @@ func (t *Token) Extra(key string) interface{} {
 	return v
 }
 
+func (t *Token) Type() string {
+	return t.TokenType
+}
+
 // tokenJSON is the struct representing the HTTP response from OAuth2
 // providers returning a token or error in JSON form.
 // https://datatracker.ietf.org/doc/html/rfc6749#section-5.1

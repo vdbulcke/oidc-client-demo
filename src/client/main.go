@@ -213,6 +213,8 @@ func NewOIDCClient(c *OIDCClientConfig, jwtsigner signer.JwtSigner, clientCert t
 
 	case "client_secret_post":
 		oAuthConfig.Endpoint.AuthStyle = oauth2.AuthStyleInParams
+	default:
+		oAuthConfig.Endpoint.AuthStyle = oauth2.AuthStyleAutoDetect
 
 	}
 

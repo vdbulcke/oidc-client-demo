@@ -20,6 +20,12 @@ client_secret: bar
 ###    NOTE: tls_client_auth requires '--pem-key' and '--pem-certificate' flag
 auth_method: client_secret_basic
 
+
+## Always Set 'client_id' for token endpoint (optional)
+### Since version v0.19.0
+# always_set_client_id_for_token_endpoint: true
+
+
 ## Private Key Jwt (Optional)
 ###  Since version v0.16.0
 ###

@@ -1,10 +1,8 @@
 package oidcclient
 
 import (
-	"context"
 	"net/url"
 
-	internaloauth2 "github.com/vdbulcke/oidc-client-demo/src/client/internal/oauth2"
 	"golang.org/x/oauth2"
 )
 
@@ -18,34 +16,7 @@ func (c *OIDCClient) RefreshTokenFlow(refreshToken string, skipIdTokenVerificati
 		"refresh_token": {refreshToken},
 	}
 
-	if c.config.AuthMethod == "private_key_jwt" {
-
-		// signedJwt, err := c.GenerateJwtProfile(c.config.IntrospectEndpoint)
-		signedJwt, err := c.GenerateJwtProfile(c.Wellknown.TokenEndpoint)
-		if err != nil {
-			c.logger.Error("Failed to generate jwt client_assertion", "err", err)
-			return err
-		}
-		c.logger.Debug("introspect setting client_assertion", "jwt", signedJwt)
-		params.Set("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
-		params.Set("client_assertion", signedJwt)
-
-	} else if c.config.AuthMethod == "tls_client_auth" {
-		c.logger.Debug("set client_id", c.config.ClientID)
-		params.Set("client_id", c.config.ClientID)
-	}
-
-	// token := new(oauth2.Token)
-	// token.RefreshToken = refreshToken
-	// token.Expiry = time.Now()
-
-	// TokenSource will refresh the token if needed (which is likely in this
-	// use case)
-	// ts := c.oAuthConfig.TokenSource(context.TODO(), token)
-
-	// get the oauth Token
-	// oauth2Token, err := ts.Token()
-	oauth2Token, err := internaloauth2.RetrieveToken(context.TODO(), c.config.ClientID, c.config.ClientSecret, c.Wellknown.TokenEndpoint, params, c.oAuthConfig.Endpoint.AuthStyle)
+	oauth2Token, err := c.TokenExchange(params)
 	if err != nil {
 		c.logger.Error("Failed to Renew Access Token from refresh token", "refresh-token", refreshToken, "error", err)
 		return err

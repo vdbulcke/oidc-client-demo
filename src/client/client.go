@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	"golang.org/x/oauth2"
+	internaloauth2 "github.com/vdbulcke/oidc-client-demo/src/client/internal/oauth2"
 )
 
 // JSONAccessTokenResponse ...
@@ -42,7 +42,7 @@ func (c *OIDCClient) setCallbackCookie(w http.ResponseWriter, r *http.Request, n
 	http.SetCookie(w, cookie)
 }
 
-func (c *OIDCClient) parseAccessTokenResponse(oauth2Token *oauth2.Token) (*JSONAccessTokenResponse, error) {
+func (c *OIDCClient) parseInternalAccessTokenResponse(oauth2Token *internaloauth2.Token) (*JSONAccessTokenResponse, error) {
 	// common logger text
 	commonLoggerText := "Access Token Response"
 
@@ -54,6 +54,7 @@ func (c *OIDCClient) parseAccessTokenResponse(oauth2Token *oauth2.Token) (*JSONA
 
 	// Parse Token Type
 	tokenType := oauth2Token.Type()
+	// tokenType := "Bearer"
 	if c.logger.IsDebug() {
 		c.logger.Debug(commonLoggerText, "token_type", tokenType)
 	}

@@ -20,6 +20,8 @@ type OIDCClientConfig struct {
 	ClientSecret string `yaml:"client_secret" `
 	AuthMethod   string `yaml:"auth_method"  validate:"required,oneof=client_secret_basic client_secret_post private_key_jwt tls_client_auth"`
 
+	ClientIDParamForTokenEndpoint bool `yaml:"always_set_client_id_for_token_endpoint" default:"false"`
+
 	UsePKCE             bool   `yaml:"use_pkce"`
 	PKCEChallengeMethod string `yaml:"pkce_challenge_method"`
 	PKCECodeLength      int
@@ -130,10 +132,10 @@ func ValidateConfig(config *OIDCClientConfig) bool {
 		}
 	}
 
-	if !config.UsePKCE && config.ClientSecret == "" {
-		fmt.Println("Error 'client_secret' not set")
-		return false
-	}
+	// if !config.UsePKCE && config.ClientSecret == "" {
+	// 	fmt.Println("Error 'client_secret' not set")
+	// 	return false
+	// }
 
 	if errs == nil {
 		return true

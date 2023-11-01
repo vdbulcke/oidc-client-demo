@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 
 	"github.com/go-playground/validator"
 	"github.com/hashicorp/go-hclog"
@@ -46,7 +45,7 @@ func NewWellKnown(wellKnown string) (*OIDCWellKnownOpenidConfiguration, error) {
 // ValidWellKnown validate config
 func ValidWellKnown(w *OIDCWellKnownOpenidConfiguration, issuer string, logger hclog.Logger) bool {
 
-	issuer = strings.TrimSuffix(issuer, "/")
+	// issuer = strings.TrimSuffix(issuer, "/")
 	if issuer != w.Issuer {
 		logger.Error("Issuer not matching discovery", "issuer", issuer, "discovery", w.Issuer)
 		return false
