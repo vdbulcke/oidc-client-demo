@@ -2,6 +2,9 @@
 ## [Unreleased]
 
 
+<a name="v0.19.1"></a>
+## [v0.19.1] - 2023-12-26
+
 <a name="v0.19.0"></a>
 ## [v0.19.0] - 2023-11-01
 ### Features
@@ -189,7 +192,8 @@
 <a name="v0.0.1"></a>
 ## v0.0.1 - 2021-07-23
 
-[Unreleased]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.19.0...HEAD
+[Unreleased]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.19.1...HEAD
+[v0.19.1]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.19.0...v0.19.1
 [v0.19.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.18.0...v0.19.0
 [v0.18.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.17.0...v0.18.0
 [v0.17.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.16.0...v0.17.0
