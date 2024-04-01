@@ -2,6 +2,18 @@
 ## [Unreleased]
 
 
+<a name="v0.19.3"></a>
+## [v0.19.3] - 2024-04-01
+### Bug Fixes
+- 09075fa - dependencies update
+
+
+<a name="v0.19.2"></a>
+## [v0.19.2] - 2024-01-27
+### Bug Fixes
+- e626762 - update dependencies
+
+
 <a name="v0.19.1"></a>
 ## [v0.19.1] - 2023-12-26
 
@@ -192,7 +204,9 @@
 <a name="v0.0.1"></a>
 ## v0.0.1 - 2021-07-23
 
-[Unreleased]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.19.1...HEAD
+[Unreleased]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.19.3...HEAD
+[v0.19.3]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.19.2...v0.19.3
+[v0.19.2]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.19.1...v0.19.2
 [v0.19.1]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.19.0...v0.19.1
 [v0.19.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.18.0...v0.19.0
 [v0.18.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.17.0...v0.18.0
