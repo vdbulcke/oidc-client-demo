@@ -2,6 +2,12 @@
 ## [Unreleased]
 
 
+<a name="v0.20.0"></a>
+## [v0.20.0] - 2024-04-12
+### Features
+- 2950fd0 - add logging of http req/resp in debug ([#60](https://github.com/vdbulcke/oidc-client-demo/issues/60))
+
+
 <a name="v0.19.3"></a>
 ## [v0.19.3] - 2024-04-01
 ### Bug Fixes
@@ -204,7 +210,8 @@
 <a name="v0.0.1"></a>
 ## v0.0.1 - 2021-07-23
 
-[Unreleased]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.19.3...HEAD
+[Unreleased]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.20.0...HEAD
+[v0.20.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.19.3...v0.20.0
 [v0.19.3]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.19.2...v0.19.3
 [v0.19.2]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.19.1...v0.19.2
 [v0.19.1]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.19.0...v0.19.1
