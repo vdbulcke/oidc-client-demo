@@ -12,6 +12,7 @@ import (
 	"github.com/go-playground/validator"
 	"gopkg.in/yaml.v3"
 
+	client_http "github.com/vdbulcke/oidc-client-demo/src/client/http"
 	"github.com/vdbulcke/oidc-client-demo/src/client/internal/pkce"
 )
 
@@ -65,6 +66,7 @@ type OIDCClientConfig struct {
 	JwtRequestAdditionalParameter map[string]string `yaml:"jwt_request_token_additional_parameters"`
 	JwtSigningAlg                 string            `yaml:"jwt_signing_alg" default:"RS256" validate:"required,oneof=ES256 ES384 ES512 RS256 RS384 RS512"`
 
+	HttpClientConfig *client_http.HttpClientConfig `yaml:"http_client_config"  `
 	// Mock
 	MockState        string
 	MockNonce        string
@@ -180,6 +182,12 @@ func ParseConfig(configFile string) (*OIDCClientConfig, error) {
 
 	// set default PKCE Code length
 	config.PKCECodeLength = 50
+
+	// Handle default
+	if config.HttpClientConfig == nil {
+		config.HttpClientConfig = client_http.NewDefaultHttpClientCfg()
+	}
+	config.HttpClientConfig.InsecureSkipVerify = config.SkipTLSVerification
 
 	// return Parse config struct
 	return &config, nil

@@ -19,6 +19,7 @@ import (
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/hashicorp/go-hclog"
+	client_http "github.com/vdbulcke/oidc-client-demo/src/client/http"
 	"github.com/vdbulcke/oidc-client-demo/src/client/internal/oidc/discovery"
 	"github.com/vdbulcke/oidc-client-demo/src/client/jwt/signer"
 	"golang.org/x/oauth2"
@@ -70,18 +71,15 @@ func NewOIDCClient(c *OIDCClientConfig, jwtsigner signer.JwtSigner, clientCert t
 		l.Warn("TLS Validation is disabled")
 	}
 
-	// skipping the TLS verification endpoint could be self signed
+	clientCerts := []tls.Certificate{}
 	// set client cert for mTLS
 	if c.AuthMethod == "tls_client_auth" {
-		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{
-			InsecureSkipVerify: c.SkipTLSVerification,
-			Certificates:       []tls.Certificate{clientCert},
-		}
-	} else {
-		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{
-			InsecureSkipVerify: c.SkipTLSVerification,
-		}
+		clientCerts = append(clientCerts, clientCert)
 	}
+
+	// http client set custom transport
+	httpClient := client_http.NewHttpClient(c.HttpClientConfig, l, clientCerts)
+	http.DefaultClient = httpClient
 
 	// construct well-known from Issuer, and discover well known
 	wellKnown := strings.TrimSuffix(c.Issuer, "/") + "/.well-known/openid-configuration"
