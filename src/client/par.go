@@ -1,7 +1,6 @@
 package oidcclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"io"
@@ -147,24 +146,21 @@ func (c *OIDCClient) generatePARRequest(codeChallenge string, nonce string, stat
 
 	}
 
-	payloadRaw, err := json.Marshal(parRequestBody)
-	if err != nil {
-		c.logger.Error("error formatting PAR request", "error", err)
-		return nil, err
+	params := url.Values{}
+	for k, v := range parRequestBody {
+		if val, ok := v.(string); ok {
+			params.Set(k, val)
+		}
 	}
 
-	if c.logger.IsDebug() {
-		c.logger.Debug("par Request payload", "request", string(payloadRaw))
-	}
-
-	req, err := http.NewRequest(http.MethodPost, c.config.PAREndpoint, bytes.NewBuffer(payloadRaw))
+	req, err := http.NewRequest(http.MethodPost, c.config.PAREndpoint, strings.NewReader(params.Encode()))
 	if err != nil {
 
 		return nil, err
 	}
 
 	// Set Content Type
-	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
 
 	// add client_id client_secret as Basic Auth Header
 	// if Auth method is client_secret_post
