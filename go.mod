@@ -5,15 +5,17 @@ go 1.21
 require (
 	github.com/coreos/go-oidc/v3 v3.4.0
 	github.com/creasty/defaults v1.7.0
+	github.com/go-jose/go-jose/v4 v4.0.3
 	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/hashicorp/go-hclog v1.0.0
 	github.com/lestrrat-go/jwx/v2 v2.0.21
 	github.com/spf13/cobra v1.3.0
 	golang.org/x/oauth2 v0.12.0
-	gopkg.in/square/go-jose.v2 v2.6.0
 	gopkg.in/yaml.v3 v3.0.1
 )
+
+require gopkg.in/square/go-jose.v2 v2.6.0 // indirect
 
 require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect

@@ -11,10 +11,10 @@ import (
 	"math/big"
 	"time"
 
+	"github.com/go-jose/go-jose/v4"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/lestrrat-go/jwx/v2/jwa"
 	"github.com/lestrrat-go/jwx/v2/jwe"
-	"gopkg.in/square/go-jose.v2"
 )
 
 type RSAJWTSigner struct {
