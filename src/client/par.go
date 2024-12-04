@@ -58,16 +58,21 @@ func (c *OIDCClient) DoPARRequest(codeChallenge string, nonce string, state stri
 
 // generatePARRequest generate the introspect req based
 //
+// RCF9126
+//
 //	on configured Auth Method
 func (c *OIDCClient) generatePARRequest(codeChallenge string, nonce string, state string) (*http.Request, error) {
 
+	scopes := strings.Join(c.config.Scopes, " ")
 	parRequestBody := make(map[string]interface{})
 	parRequestBody["client_id"] = c.config.ClientID
 	parRequestBody["response_type"] = "code"
-	parRequestBody["scope"] = strings.Join(c.config.Scopes, " ")
 	parRequestBody["redirect_uri"] = c.config.RedirectUri
 	parRequestBody["nonce"] = nonce
 	parRequestBody["state"] = state
+	if scopes != "" {
+		parRequestBody["scope"] = scopes
+	}
 
 	claims := map[string]interface{}{}
 
@@ -82,7 +87,19 @@ func (c *OIDCClient) generatePARRequest(codeChallenge string, nonce string, stat
 	}
 	if c.config.AuthMethod == "private_key_jwt" {
 
-		// TODO: is this a AM bug ?
+		// Due to historical reasons, there is potential ambiguity regarding the
+		// appropriate audience value to use when employing JWT client
+		// assertion-based authentication (defined in Section 2.2 of [RFC7523]
+		// with "private_key_jwt" or "client_secret_jwt" authentication method
+		// names per Section 9 of [OIDC]).  To address that ambiguity, the
+		// issuer identifier URL of the authorization server according to
+		// [RFC8414] SHOULD be used as the value of the audience.  In order to
+		// facilitate interoperability, the authorization server MUST accept its
+		// issuer identifier, token endpoint URL, or pushed authorization
+		// request endpoint URL as values that identify it as an intended
+		// audience.
+
+		// TODO: add config setting to override aud of JWT profile for PAR
 		// signedJwt, err := c.GenerateJwtProfile(c.Wellknown.PushedAuthorizationRequestEndpoint)
 		signedJwt, err := c.GenerateJwtProfile(c.Wellknown.TokenEndpoint)
 		if err != nil {
@@ -108,22 +125,59 @@ func (c *OIDCClient) generatePARRequest(codeChallenge string, nonce string, stat
 		parRequestBody["acr_values"] = c.config.AcrValues
 	}
 
-	if c.config.PARAdditionalParameter != nil {
-		for k, v := range c.config.PARAdditionalParameter {
-			parRequestBody[k] = v
-		}
-
-	}
-
+	// RCF9101
 	if c.config.UseRequestParameter {
-		// apply special handling for 'request' parameter
+
 		// https://www.rfc-editor.org/rfc/rfc9126.html#section-3
+		// 3.  The "request" Request Parameter
+
+		//    Clients MAY use the "request" parameter as defined in JAR [RFC9101]
+		//    to push a Request Object JWT to the authorization server.  The rules
+		//    for processing, signing, and encryption of the Request Object as
+		//    defined in JAR [RFC9101] apply.  Request parameters required by a
+		//    given client authentication method are included in the "application/
+		//    x-www-form-urlencoded" request directly and are the only parameters
+		//    other than "request" in the form body (e.g., mutual TLS client
+		//    authentication [RFC8705] uses the "client_id" HTTP request parameter,
+		//    while JWT assertion-based client authentication [RFC7523] uses
+		//    "client_assertion" and "client_assertion_type").  All other request
+		//    parameters, i.e., those pertaining to the authorization request
+		//    itself, MUST appear as claims of the JWT representing the
+		//    authorization request.
 		paramToKeep := []string{
 			"request",
-			"client_id",
 			"client_secret",
 			"client_assertion_type",
 			"client_assertion",
+		}
+
+		if c.config.StrictOIDCAndRCF6749Param {
+			// RFC9101
+			//
+			// The client MAY send the parameters included in the Request Object
+			// duplicated in the query parameters as well for backward
+			// compatibility, etc.  However, the authorization server supporting
+			// this specification MUST only use the parameters included in the
+			// Request Object.
+
+			// openid-connect-core
+			//
+			// So that the request is a valid OAuth 2.0 Authorization Request,
+			// values for the "response_type" and "client_id" parameters MUST be
+			// included using the OAuth 2.0 request syntax, since they are REQUIRED
+			// by OAuth 2.0.  The values for these parameters MUST match those in
+			// the Request Object, if present.
+
+			// Even if a "scope" parameter is present in the Request Object value, a
+			// "scope" parameter MUST always be passed using the OAuth 2.0 request
+			// syntax containing the "openid" scope value to indicate to the
+			// underlying OAuth 2.0 logic that this is an OpenID Connect request.
+
+			paramToKeep = append(paramToKeep, "client_id", "response_type")
+
+			if strings.Contains(scopes, "openid") {
+				paramToKeep = append(paramToKeep, "scope", "redirect_uri")
+			}
 		}
 
 		signedJwt, err := c.GenerateRequestJwt(claims)
@@ -142,6 +196,13 @@ func (c *OIDCClient) generatePARRequest(codeChallenge string, nonce string, stat
 			if !stringInSlice(k, paramToKeep) {
 				delete(parRequestBody, k)
 			}
+		}
+
+	}
+
+	if c.config.PARAdditionalParameter != nil {
+		for k, v := range c.config.PARAdditionalParameter {
+			parRequestBody[k] = v
 		}
 
 	}

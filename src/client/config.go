@@ -58,13 +58,14 @@ type OIDCClientConfig struct {
 
 	RedirectUri string `yaml:"override_redirect_uri"`
 
-	UseRequestParameter           bool              `yaml:"use_request_parameter" default:"false"`
-	JwtProfileTokenDuration       time.Duration     `yaml:"jwt_profile_token_duration" default:"5m"`
-	JwtProfileAudiance            string            `yaml:"jwt_profile_token_audiance" `
-	JwtRequestTokenDuration       time.Duration     `yaml:"jwt_request_token_duration" default:"5m"`
-	JwtRequestAudiance            string            `yaml:"jwt_request_token_audiance" `
-	JwtRequestAdditionalParameter map[string]string `yaml:"jwt_request_token_additional_parameters"`
-	JwtSigningAlg                 string            `yaml:"jwt_signing_alg" default:"RS256" validate:"required,oneof=ES256 ES384 ES512 RS256 RS384 RS512"`
+	UseRequestParameter           bool                   `yaml:"use_request_parameter" default:"false"`
+	StrictOIDCAndRCF6749Param     bool                   `yaml:"strict_oidc_rcf6749_param" default:"false"`
+	JwtProfileTokenDuration       time.Duration          `yaml:"jwt_profile_token_duration" default:"5m"`
+	JwtProfileAudiance            string                 `yaml:"jwt_profile_token_audiance" `
+	JwtRequestTokenDuration       time.Duration          `yaml:"jwt_request_token_duration" default:"5m"`
+	JwtRequestAudiance            string                 `yaml:"jwt_request_token_audiance" `
+	JwtRequestAdditionalParameter map[string]interface{} `yaml:"jwt_request_token_additional_parameters"`
+	JwtSigningAlg                 string                 `yaml:"jwt_signing_alg" default:"RS256" validate:"required,oneof=ES256 ES384 ES512 RS256 RS384 RS512"`
 
 	HttpClientConfig *client_http.HttpClientConfig `yaml:"http_client_config"  `
 	// Mock

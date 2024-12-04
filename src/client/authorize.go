@@ -142,14 +142,6 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 				claims["code_challenge_method"] = c.config.PKCEChallengeMethod
 			}
 
-			// if specified add extra K/V parameter on authorize request
-			if c.config.AuthorizeAdditionalParameter != nil {
-				for k, v := range c.config.AuthorizeAdditionalParameter {
-
-					authorizeOpts = append(authorizeOpts, oauth2.SetAuthURLParam(k, v))
-				}
-			}
-
 			if c.config.UseRequestParameter {
 
 				signedJwt, err := c.GenerateRequestJwt(claims)
@@ -163,6 +155,13 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 				authorizeOpts = append(authorizeOpts, oauth2.SetAuthURLParam("request", signedJwt))
 			}
 
+			// if specified add extra K/V parameter on authorize request
+			if c.config.AuthorizeAdditionalParameter != nil {
+				for k, v := range c.config.AuthorizeAdditionalParameter {
+
+					authorizeOpts = append(authorizeOpts, oauth2.SetAuthURLParam(k, v))
+				}
+			}
 			// generate the authorize url with the extra options
 			authorizeURL = c.oAuthConfig.AuthCodeURL(state, authorizeOpts...)
 

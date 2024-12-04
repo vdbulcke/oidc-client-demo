@@ -74,6 +74,20 @@ auth_method: client_secret_basic
 ### optional: default false
 # use_request_parameter: true
 
+### RCF6749 (OAuth2 ) and OIDC standard
+### requires mandatory parameter present 
+### RCF6749 Section 4.1.1
+###  - response_type 
+###  - client_id  
+###
+### OIDC Standard code: 
+###  - scope (MUST includes 'openid')
+###  - redirect_uri
+###
+###
+### optional: default false
+# strict_oidc_rcf6749_param: true 
+
 ### request jwt 'aud' audiance
 ### optional: default value of Issuer
 # jwt_request_token_audiance: https://example.com/custom/audiance
