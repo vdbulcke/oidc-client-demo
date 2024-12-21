@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"slices"
 	"strings"
 )
 
@@ -173,7 +174,8 @@ func (c *OIDCClient) generatePARRequest(codeChallenge string, nonce string, stat
 			// syntax containing the "openid" scope value to indicate to the
 			// underlying OAuth 2.0 logic that this is an OpenID Connect request.
 
-			paramToKeep = append(paramToKeep, "client_id", "response_type")
+			paramToKeep = append(paramToKeep, "response_type")
+			paramToKeep = append(paramToKeep, "client_id")
 
 			if strings.Contains(scopes, "openid") {
 				paramToKeep = append(paramToKeep, "scope", "redirect_uri")
@@ -189,11 +191,11 @@ func (c *OIDCClient) generatePARRequest(codeChallenge string, nonce string, stat
 		c.logger.Debug("generated request jwt", "request", signedJwt)
 		parRequestBody["request"] = signedJwt
 
-		//nolint
-		for k := range parRequestBody {
+		for k, _ := range parRequestBody {
 			// not an allowed parameter
 			// delete from request
-			if !stringInSlice(k, paramToKeep) {
+			// if !stringInSlice(k, paramToKeep) {
+			if !slices.Contains(paramToKeep, k) {
 				delete(parRequestBody, k)
 			}
 		}

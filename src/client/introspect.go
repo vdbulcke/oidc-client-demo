@@ -145,6 +145,7 @@ func (c *OIDCClient) generateIntrospectRequest(token string) (*http.Request, err
 		c.logger.Debug("introspect setting client_assertion", "jwt", signedJwt)
 		introspectParamValues.Set("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
 		introspectParamValues.Set("client_assertion", signedJwt)
+		introspectParamValues.Set("client_id", c.config.ClientID)
 
 	}
 
