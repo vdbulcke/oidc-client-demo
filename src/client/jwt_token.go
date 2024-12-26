@@ -5,20 +5,20 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/coreos/go-oidc/v3/oidc"
+	"github.com/go-jose/go-jose/v4"
 )
 
 // processAccessToken Handle accessToken JWT validation
-func (c *OIDCClient) processAccessToken(ctx context.Context, accessTokenRaw string) (*oidc.IDToken, error) {
+func (c *OIDCClient) processAccessToken(ctx context.Context, accessTokenRaw string) error {
 	return c.processGenericToken(ctx, accessTokenRaw, "Access")
 }
 
 // processRefreshToken Handle Refresh Token JWT validation
-func (c *OIDCClient) processRefreshToken(ctx context.Context, refreshTokenRaw string) (*oidc.IDToken, error) {
+func (c *OIDCClient) processRefreshToken(ctx context.Context, refreshTokenRaw string) error {
 	return c.processGenericToken(ctx, refreshTokenRaw, "Refresh")
 }
 
-func (c *OIDCClient) processGenericToken(ctx context.Context, tokenRaw string, tokenType string) (*oidc.IDToken, error) {
+func (c *OIDCClient) processGenericToken(ctx context.Context, tokenRaw string, tokenType string) error {
 
 	// parse header
 	// header, headerClaims, err := c.parseJWTHeader(tokenRaw)
@@ -30,21 +30,41 @@ func (c *OIDCClient) processGenericToken(ctx context.Context, tokenRaw string, t
 		c.logger.Info(fmt.Sprintf("%s Token header", tokenType), "header", header)
 	}
 
-	// validate signature against the JWK
-	jwtToken, err := c.jwkVerifier.Verify(c.ctx, tokenRaw)
-	if err != nil {
-		c.logger.Error(fmt.Sprintf("%s Token validation failed", tokenType), "err", err)
+	var supportedSigAlgs []jose.SignatureAlgorithm
 
-		return nil, err
+	// default to provider metadata supported alg
+	for _, alg := range c.client.GetWellknown().IDTokenSigningAlgValuesSupported {
+		supportedSigAlgs = append(supportedSigAlgs, jose.SignatureAlgorithm(alg))
 	}
 
+	if len(supportedSigAlgs) == 0 {
+		// If no algorithms were specified by both the config and discovery, default
+		// to the one mandatory algorithm "RS256".
+		supportedSigAlgs = []jose.SignatureAlgorithm{jose.RS256}
+	}
+
+	jws, err := jose.ParseSigned(tokenRaw, supportedSigAlgs)
+	if err != nil {
+		return fmt.Errorf("id_token: signature validation malformed jwt: %w", err)
+	}
+
+	ks := c.client.GetJWKSet()
+
+	err = ks.VerifySignature(c.ctx, jws)
+	if err != nil {
+
+		c.logger.Error(fmt.Sprintf("%s Token validation failed", tokenType), "err", err)
+		return err
+	}
+
+	payload := jws.UnsafePayloadWithoutVerification()
 	// Print token
 	var accessTokenClaims *json.RawMessage
 
 	// format access Token Claims
-	if err := jwtToken.Claims(&accessTokenClaims); err != nil {
+	if err := json.Unmarshal(payload, &accessTokenClaims); err != nil {
 		c.logger.Error(fmt.Sprintf("Error Parsing %s Token Claims", tokenType), "err", err)
-		return nil, err
+		return err
 	}
 
 	// Print Access Token Claims, and User Info
@@ -68,5 +88,5 @@ func (c *OIDCClient) processGenericToken(ctx context.Context, tokenRaw string, t
 		}
 	}
 
-	return jwtToken, nil
+	return nil
 }

@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/go-hclog"
 	"github.com/spf13/cobra"
+	"github.com/vdbulcke/oauthx"
 	oidcclient "github.com/vdbulcke/oidc-client-demo/src/client"
 	"github.com/vdbulcke/oidc-client-demo/src/client/jwt/signer"
 )
@@ -61,6 +62,24 @@ var clientCmd = &cobra.Command{
 // startServer cobra server handler
 func runClient(cmd *cobra.Command, args []string) {
 
+	client := initClient()
+
+	// set default output
+	client.SetDefaultOutput()
+
+	// display info about the current client
+	client.Info()
+
+	err := client.OIDCAuthorizationCodeFlow()
+	if err != nil {
+		client.GetLogger().Error("Error initializing client", "error", err)
+		os.Exit(1)
+	}
+
+}
+
+func initClient() *oidcclient.OIDCClient {
+
 	appLogger := genLogger()
 
 	// Parse Config
@@ -76,7 +95,7 @@ func runClient(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	var jwtsigner signer.JwtSigner
+	var oauthkey oauthx.OAuthPrivateKey
 
 	if privateKey != "" {
 		key, err := signer.ParsePrivateKey(privateKey)
@@ -85,9 +104,10 @@ func runClient(cmd *cobra.Command, args []string) {
 			os.Exit(1)
 		}
 
-		jwtsigner, err = signer.NewJwtSigner(key, config.JwtSigningAlg, mockKid)
+		oauthkey, err = oauthx.NewOAuthPrivateKey(key, config.JwtSigningAlg, mockKid)
+
 		if err != nil {
-			appLogger.Error("error generating jwt signer", "err", err)
+			appLogger.Error("error parsing private key", "key", privateKey, "err", err)
 			os.Exit(1)
 		}
 
@@ -142,24 +162,12 @@ func runClient(cmd *cobra.Command, args []string) {
 	config.MockState = mockState
 
 	// Make a new OIDC Client
-	client, err := oidcclient.NewOIDCClient(config, jwtsigner, clientCert, appLogger)
+	client, err := oidcclient.NewOIDCClient(config, oauthkey, clientCert, appLogger)
 	if err != nil {
 		appLogger.Error("Error creating client", "error", err)
 		os.Exit(1)
 	}
-
-	// set default output
-	client.SetDefaultOutput()
-
-	// display info about the current client
-	client.Info()
-
-	err = client.OIDCAuthorizationCodeFlow()
-	if err != nil {
-		appLogger.Error("Error initializing client", "error", err)
-		os.Exit(1)
-	}
-
+	return client
 }
 
 // genLogger generate logger

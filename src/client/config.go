@@ -1,6 +1,7 @@
 package oidcclient
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -12,14 +13,14 @@ import (
 	"github.com/go-playground/validator"
 	"gopkg.in/yaml.v3"
 
+	"github.com/vdbulcke/oauthx"
 	client_http "github.com/vdbulcke/oidc-client-demo/src/client/http"
-	"github.com/vdbulcke/oidc-client-demo/src/client/internal/pkce"
 )
 
 type OIDCClientConfig struct {
 	ClientID     string `yaml:"client_id"  validate:"required"`
 	ClientSecret string `yaml:"client_secret" `
-	AuthMethod   string `yaml:"auth_method"  validate:"required,oneof=client_secret_basic client_secret_post private_key_jwt tls_client_auth"`
+	AuthMethod   string `yaml:"auth_method"  validate:"required,oneof=none client_secret_basic client_secret_post private_key_jwt tls_client_auth"`
 
 	ClientIDParamForTokenEndpoint bool `yaml:"always_set_client_id_for_token_endpoint" default:"false"`
 
@@ -37,11 +38,20 @@ type OIDCClientConfig struct {
 
 	Issuer string `yaml:"issuer"  validate:"required"`
 
+	Claims      string `yaml:"oidc_claims_param"`
+	ParseClaims *oauthx.OpenIdRequestedClaimsParam
+
+	AuthorizationDetailsInput string `yaml:"authorization_details"`
+	AuthorizationDetails      oauthx.AuthorizationDetails
+
 	TokenEndpoint                string `yaml:"token_endpoint"  `
 	AuthorizeEndpoint            string `yaml:"authorize_endpoint"  `
+	UserinfoEndpoint             string `yaml:"userinfo_endpoint"  `
 	JwksEndpoint                 string `yaml:"jwks_endpoint"`
 	IntrospectEndpoint           string `yaml:"introspect_endpoint"`
 	PAREndpoint                  string `yaml:"par_endpoint"`
+	EndSessionEndpoint           string `yaml:"endsession_endpoint"`
+	RevocationEndpoint           string `yaml:"revocation_endpoint"`
 	AlternativeWellKnownEndpoint string `yaml:"alternative_wellknown_endpoint"`
 	InsecureWellKnownEndpoint    bool   `yaml:"insecure_wellknown_endpoint"`
 
@@ -58,14 +68,19 @@ type OIDCClientConfig struct {
 
 	RedirectUri string `yaml:"override_redirect_uri"`
 
-	UseRequestParameter           bool                   `yaml:"use_request_parameter" default:"false"`
-	StrictOIDCAndRCF6749Param     bool                   `yaml:"strict_oidc_rcf6749_param" default:"false"`
-	JwtProfileTokenDuration       time.Duration          `yaml:"jwt_profile_token_duration" default:"5m"`
-	JwtProfileAudiance            string                 `yaml:"jwt_profile_token_audiance" `
-	JwtRequestTokenDuration       time.Duration          `yaml:"jwt_request_token_duration" default:"5m"`
-	JwtRequestAudiance            string                 `yaml:"jwt_request_token_audiance" `
-	JwtRequestAdditionalParameter map[string]interface{} `yaml:"jwt_request_token_additional_parameters"`
-	JwtSigningAlg                 string                 `yaml:"jwt_signing_alg" default:"RS256" validate:"required,oneof=ES256 ES384 ES512 RS256 RS384 RS512"`
+	UseRequestParameter             bool                   `yaml:"use_request_parameter" default:"false"`
+	StrictOIDCAndRCF6749Param       bool                   `yaml:"strict_oidc_rcf6749_param" default:"false"`
+	JwtProfileTokenDuration         time.Duration          `yaml:"jwt_profile_token_duration" default:"5m"`
+	JwtProfileAudiance              string                 `yaml:"jwt_profile_token_audiance" `
+	JwtProfilePARAudiance           string                 `yaml:"jwt_profile_par_endpoint_audiance" `
+	JwtProfileTokenAudiance         string                 `yaml:"jwt_profile_token_endpoint_audiance" `
+	JwtProfileRevocationAudiance    string                 `yaml:"jwt_profile_revocation_endpoint_audiance" `
+	JwtProfileIntrospectionAudiance string                 `yaml:"jwt_profile_introspection_endpoint_audiance" `
+	JwtProfileEndpointAsAudiance    bool                   `yaml:"jwt_profile_endpoint_audiance" default:"false"`
+	JwtRequestTokenDuration         time.Duration          `yaml:"jwt_request_token_duration" default:"5m"`
+	JwtRequestAudiance              string                 `yaml:"jwt_request_token_audiance" `
+	JwtRequestAdditionalParameter   map[string]interface{} `yaml:"jwt_request_token_additional_parameters"`
+	JwtSigningAlg                   string                 `yaml:"jwt_signing_alg" default:"RS256" validate:"required,oneof=ES256 ES384 ES512 RS256 RS384 RS512"`
 
 	HttpClientConfig *client_http.HttpClientConfig `yaml:"http_client_config"  `
 	// Mock
@@ -129,7 +144,7 @@ func ValidateConfig(config *OIDCClientConfig) bool {
 	errs := validate.Struct(config)
 
 	if config.PKCEChallengeMethod != "" {
-		if config.PKCEChallengeMethod != pkce.PKCEMethodPlain && config.PKCEChallengeMethod != pkce.PKCEMethodS256 {
+		if config.PKCEChallengeMethod != "plain" && config.PKCEChallengeMethod != "S256" {
 			fmt.Println("Invalid 'pkce_challenge_method' must be one of 'S256' or 'plain'")
 			return false
 		}
@@ -178,7 +193,30 @@ func ParseConfig(configFile string) (*OIDCClientConfig, error) {
 
 	// Set Default PKCE Method if not set
 	if config.PKCEChallengeMethod == "" {
-		config.PKCEChallengeMethod = pkce.PKCEMethodS256
+		config.PKCEChallengeMethod = "S256"
+	}
+
+	if config.Claims != "" {
+
+		var claims oauthx.OpenIdRequestedClaimsParam
+		err = json.Unmarshal([]byte(config.Claims), &claims)
+		if err != nil {
+			return nil, fmt.Errorf("oidc claims: parse error %w", err)
+		}
+
+		config.ParseClaims = &claims
+
+	}
+
+	if config.AuthorizationDetailsInput != "" {
+		var authDetails oauthx.AuthorizationDetails
+		err = json.Unmarshal([]byte(config.AuthorizationDetailsInput), &authDetails)
+		if err != nil {
+			return nil, fmt.Errorf("rfc9396 authotization_details: parse error %w", err)
+		}
+
+		config.AuthorizationDetails = authDetails
+
 	}
 
 	// set default PKCE Code length

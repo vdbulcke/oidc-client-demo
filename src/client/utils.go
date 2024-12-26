@@ -1,62 +1,45 @@
 package oidcclient
 
 import (
+	"crypto"
+	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
+	"encoding/pem"
 	"fmt"
+	"os"
 	"strings"
-
-	pkce "github.com/vdbulcke/oidc-client-demo/src/client/internal/pkce"
 )
 
-func stringInSlice(a string, list []string) bool {
-	for _, b := range list {
-		if b == a {
-			return true
+// ParsePrivateKey pase PEM private key file, and returns
+// a crypto.PrivateKey interface.
+func ParsePrivateKey(filename string) (crypto.PrivateKey, error) {
+
+	// read private key file
+	data, err := os.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
+
+	key, _ := pem.Decode(data)
+	if key == nil {
+		return nil, fmt.Errorf("error decoding PEM file, invalid format")
+	}
+
+	privKey, err := x509.ParsePKCS8PrivateKey(key.Bytes)
+	if err != nil {
+		privKey, err = x509.ParsePKCS1PrivateKey(key.Bytes)
+		if err != nil {
+			privKey, err = x509.ParseECPrivateKey(key.Bytes)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
-	return false
+
+	return privKey, nil
 }
 
-func (c *OIDCClient) NewNonce(length int) (string, error) {
-
-	// if mock value provider return value
-	if c.config.MockNonce != "" {
-		return c.config.MockNonce, nil
-	}
-
-	// else generate random string
-	return c.randString(length)
-}
-
-func (c *OIDCClient) NewState(length int) (string, error) {
-
-	// if mock value provider return value
-	if c.config.MockState != "" {
-		return c.config.MockState, nil
-	}
-
-	// else generate random string
-	return c.randString(length)
-}
-
-func (c *OIDCClient) NewCodeVerifier(length int) (string, error) {
-
-	// if mock value provider return value
-	if c.config.MockCodeVerifier != "" {
-		return c.config.MockCodeVerifier, nil
-	}
-
-	// else generate random string
-	return pkce.NewCodeVerifier(length)
-}
-
-func (c *OIDCClient) NewCodeChallenge(codeVerifier string) (string, error) {
-
-	// else generate random string
-	return pkce.NewCodeChallenge(codeVerifier, c.config.PKCEChallengeMethod)
-
-}
 func (c *OIDCClient) parseJWTHeader(rawToken string) (string, map[string]interface{}, error) {
 
 	parts := strings.Split(rawToken, ".")

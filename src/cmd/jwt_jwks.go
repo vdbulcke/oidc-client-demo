@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/vdbulcke/oauthx"
 	"github.com/vdbulcke/oidc-client-demo/src/client/jwt/signer"
 )
 
@@ -36,7 +37,7 @@ func jwks(cmd *cobra.Command, args []string) {
 
 	appLogger := genLogger()
 
-	var jwtsigner signer.JwtSigner
+	var oauthkey oauthx.OAuthPrivateKey
 
 	key, err := signer.ParsePrivateKey(privateKey)
 	if err != nil {
@@ -44,13 +45,20 @@ func jwks(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	jwtsigner, err = signer.NewJwtSigner(key, jwtAlg, mockKid)
+	oauthkey, err = oauthx.NewOAuthPrivateKey(key, jwtAlg, mockKid)
+
 	if err != nil {
-		appLogger.Error("error generating jwt signer", "err", err)
+		appLogger.Error("error parsing private key", "key", privateKey, "err", err)
 		os.Exit(1)
 	}
 
-	jwks, err := jwtsigner.JWKS()
+	jwtSigner, ok := oauthkey.(oauthx.JwtAdvertiser)
+	if !ok {
+		appLogger.Error("Error invalid type oauthx.JwtAdvertiser ")
+		os.Exit(1)
+	}
+
+	jwks, err := jwtSigner.JWKS()
 	if err != nil {
 		appLogger.Error("Error generating  jwks ", "error", err)
 		os.Exit(1)

@@ -1,9 +1,9 @@
 package oidcclient
 
 import (
-	"net/url"
+	"errors"
 
-	"golang.org/x/oauth2"
+	"github.com/vdbulcke/oauthx"
 )
 
 // RefreshTokenFlow renew the refresh token
@@ -11,106 +11,88 @@ import (
 // ref: https://github.com/nonbeing/awsconsoleauth/blob/master/http.go#L46
 func (c *OIDCClient) RefreshTokenFlow(refreshToken string, skipIdTokenVerification bool) error {
 
-	params := url.Values{
-		"grant_type":    {"refresh_token"},
-		"refresh_token": {refreshToken},
-	}
+	req := oauthx.NewTokenRequest(
+		oauthx.RefreshTokenGrantTypeOpt(),
+		oauthx.RefreshTokenOpt(refreshToken),
+	)
 
-	oauth2Token, err := c.TokenExchange(params)
+	tokenResp, err := c.client.DoTokenRequest(c.ctx, req)
 	if err != nil {
-		c.logger.Error("Failed to Renew Access Token from refresh token", "refresh-token", refreshToken, "error", err)
+		c.logger.Error("Failed to Renew Access Token from refresh token", "err", err)
+
+		var httpErr *oauthx.HttpErr
+		if errors.As(err, &httpErr) {
+			c.logger.Error("http error", "response_headers", httpErr.ResponseHeader, "response_body", string(httpErr.RespBody))
+		}
+
 		return err
 	}
 
-	// Parse Access Token
-	accessTokenResponse := &JSONAccessTokenResponse{
-		AccessToken:            oauth2Token.AccessToken,
-		ExpiresInHumanReadable: oauth2Token.Expiry.String(),
-		TokenType:              oauth2Token.TokenType,
-		RefreshToken:           oauth2Token.RefreshToken,
-	}
-
-	// Parsing Extra field
-
-	// Parsing IdToken
-	idToken, ok := oauth2Token.Extra("id_token").(string)
-	if ok {
-
-		accessTokenResponse.IDToken = idToken
-	}
-
-	// Parsing Nonce
-	nonce, ok := oauth2Token.Extra("nonce").(string)
-	if ok {
-
-		accessTokenResponse.Nonce = nonce
-	}
-
-	// Parsing Scopes
-	scope, ok := oauth2Token.Extra("scope").(string)
-	if ok {
-
-		accessTokenResponse.Scope = scope
-	}
 	// Print Access Token
-	c.processAccessTokenResponse(accessTokenResponse)
+	c.processAccessTokenResponse(tokenResp)
 
-	// Validate ID Token
-	idTokenRaw := accessTokenResponse.IDToken
-	if idTokenRaw == "" {
-		c.logger.Error("no ID Token Found")
-	} else if !skipIdTokenVerification {
-		// verify and print idToken
-		_, err = c.processIdToken(idTokenRaw)
+	if tokenResp.IDToken != "" {
+
+		// use default options
+		idToken, err := c.client.ParseIDToken(c.ctx, tokenResp.IDToken)
 		if err != nil {
+			c.logger.Error("ID Token validation failed", "err", err)
 			return err
 		}
 
+		// print idToken
+		c.processIdToken(idToken)
 	}
 
 	// Validate Access Token if JWT
 	// and print claims
 	if c.config.AccessTokenJwt {
 		// try to parse access token as JWT
-		accessTokenRaw := accessTokenResponse.AccessToken
+		accessTokenRaw := tokenResp.AccessToken
 		if accessTokenRaw == "" {
 			c.logger.Error("no Access Token Found")
 		} else {
 			// validate signature against the JWK
-			_, err := c.processAccessToken(c.ctx, accessTokenRaw)
+			err := c.processAccessToken(c.ctx, accessTokenRaw)
 			if err != nil {
 				c.logger.Error("Access Token validation failed", "err", err)
 				return err
 			}
+
 		}
 	}
 
-	// Validate Access Token if JWT
+	// Validate refresh Token if JWT
 	// and print claims
 	if c.config.RefreshTokenJwt {
-		refreshTokenRaw := accessTokenResponse.RefreshToken
+		// try to parse refresh token as JWT
+		refreshTokenRaw := tokenResp.RefreshToken
 		if refreshTokenRaw == "" {
 			c.logger.Error("no Refresh Token Found")
 		} else {
 			// validate signature against the JWK
-			_, err := c.processRefreshToken(c.ctx, refreshTokenRaw)
+			err := c.processRefreshToken(c.ctx, refreshTokenRaw)
 			if err != nil {
 				c.logger.Error("Refresh Token validation failed", "err", err)
 				return err
 			}
+
 		}
 	}
 
-	tok := &oauth2.Token{
-		AccessToken:  oauth2Token.AccessToken,
-		RefreshToken: oauth2Token.RefreshToken,
-		TokenType:    oauth2Token.TokenType,
-		Expiry:       oauth2Token.Expiry,
-	}
 	// Fetch Userinfo
-	err = c.userinfo(tok)
-	if err != nil {
-		return err
+	if !c.config.SkipUserinfo {
+		userinfo, err := c.client.DoUserinfoRequest(c.ctx, tokenResp.AccessToken)
+		if err != nil {
+
+			var httpErr *oauthx.HttpErr
+			if errors.As(err, &httpErr) {
+				c.logger.Error("http error", "response_headers", httpErr.ResponseHeader, "response_body", string(httpErr.RespBody))
+			}
+			return err
+		}
+
+		_ = c.userinfo(userinfo)
 	}
 
 	return nil

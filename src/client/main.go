@@ -13,16 +13,15 @@ package oidcclient
 import (
 	"context"
 	"crypto/tls"
-	"errors"
-	"net/http"
+	"fmt"
 	"strings"
 
-	"github.com/coreos/go-oidc/v3/oidc"
+	"github.com/google/uuid"
 	"github.com/hashicorp/go-hclog"
+	"github.com/vdbulcke/oauthx"
+	"github.com/vdbulcke/oauthx/assert"
+	"github.com/vdbulcke/oauthx/tracing"
 	client_http "github.com/vdbulcke/oidc-client-demo/src/client/http"
-	"github.com/vdbulcke/oidc-client-demo/src/client/internal/oidc/discovery"
-	"github.com/vdbulcke/oidc-client-demo/src/client/jwt/signer"
-	"golang.org/x/oauth2"
 )
 
 type OIDCClient struct {
@@ -36,36 +35,15 @@ type OIDCClient struct {
 	// shared context for this client
 	ctx context.Context
 
-	// OIDC provider
-	provider *oidc.Provider
-
-	// OIDC verifier
-	verifier *oidc.IDTokenVerifier
-
-	// JWT Verifier
-	jwkVerifier *oidc.IDTokenVerifier
-
-	// OAauth2 Config
-	oAuthConfig oauth2.Config
-
-	// oidc well-known
-	Wellknown *discovery.OIDCWellKnownOpenidConfiguration
-
-	// jwt signer
-	jwtsigner signer.JwtSigner
+	auth   oauthx.AuthMethod
+	client *oauthx.OAuthClient
 }
 
 // subCtxKey key to store 'sub' in context
 type subCtxKey string
 
 // OIDCClient create a new OIDC Client
-func NewOIDCClient(c *OIDCClientConfig, jwtsigner signer.JwtSigner, clientCert tls.Certificate, l hclog.Logger) (*OIDCClient, error) {
-
-	if c.AuthMethod == "private_key_jwt" && jwtsigner == nil {
-		return nil, errors.New(" '--pem-key' is required for 'private_key_jwt' auth method")
-	}
-
-	ctx := context.Background()
+func NewOIDCClient(c *OIDCClientConfig, privateKey oauthx.OAuthPrivateKey, clientCert tls.Certificate, l hclog.Logger) (_ *OIDCClient, err error) {
 
 	if c.SkipTLSVerification {
 		l.Warn("TLS Validation is disabled")
@@ -79,152 +57,146 @@ func NewOIDCClient(c *OIDCClientConfig, jwtsigner signer.JwtSigner, clientCert t
 
 	// http client set custom transport
 	httpClient := client_http.NewHttpClient(c.HttpClientConfig, l, clientCerts)
-	http.DefaultClient = httpClient
 
-	// construct well-known from Issuer, and discover well known
-	wellKnown := strings.TrimSuffix(c.Issuer, "/") + "/.well-known/openid-configuration"
+	// create a context with trace-id header
+	ctx := context.Background()
+	traceId := uuid.New().String()
+	ctx = tracing.ContextWithTraceID(ctx, "x-trace-id", traceId)
+	l.Debug("Initial context", "trace_id", traceId)
+
+	// Let's starts by getting the AS metadata configuration
+	var wk *oauthx.WellKnownConfiguration
 
 	if c.AlternativeWellKnownEndpoint != "" {
-		// override wellknown if an alternative is provided
-		wellKnown = c.AlternativeWellKnownEndpoint
 		l.Warn("Using Alternative wellknown", "url", c.AlternativeWellKnownEndpoint)
-	}
 
-	wk, err := discovery.NewWellKnown(wellKnown)
-	if err != nil {
-		l.Error("Could not get WellKnown endpoint", "err", err)
-		return nil, err
-	}
+		wk, err = oauthx.NewInsecureWellKnownEndpoint(ctx, c.AlternativeWellKnownEndpoint, httpClient)
+		if err != nil {
+			return nil, fmt.Errorf("insecure wellknown: %w", err)
+		}
 
-	if !c.InsecureWellKnownEndpoint {
-		if !discovery.ValidWellKnown(wk, c.Issuer, l) {
-			return nil, errors.New("wellknown validation error")
+	} else if c.InsecureWellKnownEndpoint {
+		wkEndpoint := strings.TrimSuffix(c.Issuer, "/") + "/.well-known/openid-configuration"
+		wk, err = oauthx.NewInsecureWellKnownEndpoint(ctx, wkEndpoint, httpClient)
+		if err != nil {
+			return nil, fmt.Errorf("oidc wellknown: %w", err)
+		}
+
+	} else {
+
+		// fetch /.well-known/openid-configuration
+		wk, err = oauthx.NewWellKnownOpenidConfiguration(ctx, c.Issuer, httpClient)
+		if err != nil {
+			return nil, fmt.Errorf("oidc wellknown: %w", err)
 		}
 	}
 
-	// if Well Known Requires PAR
-	if wk.RequirePushedAuthorizationRequests {
-		l.Warn("Pushed Authorization Request is required")
-		c.UsePAR = true
+	// let use override endpoint from remote server
+	if c.PAREndpoint != "" {
+		wk.PushedAuthorizationRequestEndpoint = c.PAREndpoint
 	}
-
-	// if no explicit 'par_endpoint'
-	if c.UsePAR && c.PAREndpoint == "" {
-
-		// try to get it from standard Well Known endpoint property
-		if wk.PushedAuthorizationRequestEndpoint != "" {
-			c.PAREndpoint = wk.PushedAuthorizationRequestEndpoint
-
-		} else if c.PARIntrospectEndpointWellKnownKey != "" {
-			// if alternative key on well known is defined
-			par := wk.WellKnownRaw[c.PARIntrospectEndpointWellKnownKey]
-			if par == nil {
-				l.Error("could not find PAR endpoint on well-known", "key", c.PARIntrospectEndpointWellKnownKey)
-
-			} else {
-				//nolint
-				switch par := par.(type) {
-				case string:
-					c.PAREndpoint = par
-				}
-
-			}
-		}
-
-		if c.PAREndpoint == "" {
-			l.Error("no PAR endpoint defined with 'use_par: true'")
-			return nil, errors.New("invalid config")
-		}
-
-	}
-	// override setting from well-known endpoint
 	if c.AuthorizeEndpoint != "" {
 		wk.AuthorizationEndpoint = c.AuthorizeEndpoint
 	}
 	if c.TokenEndpoint != "" {
 		wk.TokenEndpoint = c.TokenEndpoint
 	}
-
-	// Create a oidc Provider Config manually
-	providerConfig := &oidc.ProviderConfig{
-		IssuerURL:   c.Issuer,
-		AuthURL:     wk.AuthorizationEndpoint,
-		TokenURL:    wk.TokenEndpoint,
-		UserInfoURL: wk.UserinfoEndpoint,
-		JWKSURL:     wk.JwksUri,
-		Algorithms:  wk.IDTokenSigningAlgValuesSupported,
+	if c.UserinfoEndpoint != "" {
+		wk.UserinfoEndpoint = c.UserinfoEndpoint
 	}
-
-	provider := providerConfig.NewProvider(ctx)
-	if err != nil {
-		l.Error("Could create OIDC provider form WellKnown endpoint", "err", err)
-		return nil, err
+	if c.IntrospectEndpoint != "" {
+		wk.IntrospectionEndpoint = c.IntrospectEndpoint
 	}
-
-	oidcConfig := &oidc.Config{
-		ClientID: c.ClientID,
-		// SupportedSigningAlgs: []string{c.config.TokenSigningAlg},
-		SupportedSigningAlgs: c.TokenSigningAlg,
-	}
-
-	jwtConfig := &oidc.Config{
-		ClientID:             c.ClientID,
-		SupportedSigningAlgs: c.TokenSigningAlg,
-		SkipClientIDCheck:    true,  // Disable check Audience == clientID
-		SkipIssuerCheck:      false, // Check Issuer
-	}
-
-	var verifier, jwkVerifier *oidc.IDTokenVerifier
-
 	if c.JwksEndpoint != "" {
-
-		keySet := oidc.NewRemoteKeySet(ctx, c.JwksEndpoint)
-		verifier = oidc.NewVerifier(c.Issuer, keySet, oidcConfig)
-		jwkVerifier = oidc.NewVerifier(c.Issuer, keySet, jwtConfig)
-
-		if l.IsDebug() {
-			l.Debug("Using Custom JWK endpoint", "jwk_endpoint", c.JwksEndpoint)
-		}
-
-	} else {
-		verifier = provider.Verifier(oidcConfig)
-		jwkVerifier = provider.Verifier(jwtConfig)
+		wk.JwksUri = c.JwksEndpoint
+	}
+	if c.PAREndpoint != "" {
+		wk.PushedAuthorizationRequestEndpoint = c.PAREndpoint
+	}
+	if c.EndSessionEndpoint != "" {
+		wk.EndSessionEndpoint = c.EndSessionEndpoint
+	}
+	if c.RevocationEndpoint != "" {
+		wk.RevocationEndpoint = c.RevocationEndpoint
 	}
 
-	// new OAuth2 Config
-	oAuthConfig := oauth2.Config{
-		ClientID:    c.ClientID,
-		Endpoint:    provider.Endpoint(),
-		RedirectURL: c.RedirectUri,
-		Scopes:      c.Scopes,
+	if len(c.TokenSigningAlg) > 0 {
+		wk.IDTokenSigningAlgValuesSupported = c.TokenSigningAlg
+		wk.UserinfoSigningAlgValuesSupported = c.TokenSigningAlg
+		wk.IntrospectionEndpointAuthSigningAlgValuesSupported = c.TokenSigningAlg
 	}
 
-	// only set client secret if defined
-	if c.ClientSecret != "" {
-		oAuthConfig.ClientSecret = c.ClientSecret
-	}
-
-	// setting auth method
+	// parse auth method
+	var auth oauthx.AuthMethod
 	switch c.AuthMethod {
 	case "client_secret_basic":
-		oAuthConfig.Endpoint.AuthStyle = oauth2.AuthStyleInHeader
-
+		assert.StrNotEmpty(c.ClientID, assert.Exit, "missing client_id")
+		assert.StrNotEmpty(c.ClientSecret, assert.Exit, "missing client_secret")
+		auth = oauthx.NewBasicAuth(c.ClientID, c.ClientSecret)
 	case "client_secret_post":
-		oAuthConfig.Endpoint.AuthStyle = oauth2.AuthStyleInParams
-	default:
-		oAuthConfig.Endpoint.AuthStyle = oauth2.AuthStyleAutoDetect
+		assert.StrNotEmpty(c.ClientID, assert.Exit, "missing client_id")
+		assert.StrNotEmpty(c.ClientSecret, assert.Exit, "missing client_secret")
+		auth = oauthx.NewClientSecretPost(c.ClientID, c.ClientSecret)
+	case "private_key_jwt":
+		assert.NotNil(privateKey, assert.Exit, " '--pem-key' is required for 'private_key_jwt' auth method")
 
+		opts := []oauthx.PrivateKeyJwtOptFunc{}
+		opts = append(opts, oauthx.WithPrivateKeyJwtTTL(c.JwtProfileTokenDuration))
+		if c.ClientIDParamForTokenEndpoint {
+			opts = append(opts, oauthx.WithPrivateKeyJwtAlwaysIncludeClientIdParam())
+		}
+
+		if c.JwtProfileAudiance != "" {
+			opts = append(opts, oauthx.WithPrivateKeyJwtFixedAudiance(c.JwtProfileAudiance))
+		}
+
+		if c.JwtProfileEndpointAsAudiance {
+			opts = append(opts, oauthx.WithPrivateKeyJwtEndpointAsAudiance())
+		}
+		if c.JwtProfilePARAudiance != "" {
+			opts = append(opts, oauthx.WithPrivateKeyJwtAlternativeEndpointAudiance(oauthx.PushedAuthorizationRequestEndpoint, c.JwtProfilePARAudiance))
+		}
+		if c.JwtProfileTokenAudiance != "" {
+			opts = append(opts, oauthx.WithPrivateKeyJwtAlternativeEndpointAudiance(oauthx.TokenEndpoint, c.JwtProfileTokenAudiance))
+		}
+		if c.JwtProfileRevocationAudiance != "" {
+			opts = append(opts, oauthx.WithPrivateKeyJwtAlternativeEndpointAudiance(oauthx.RevocationEndpoint, c.JwtProfileRevocationAudiance))
+		}
+		if c.JwtProfileIntrospectionAudiance != "" {
+			opts = append(opts, oauthx.WithPrivateKeyJwtAlternativeEndpointAudiance(oauthx.IntrospectionEndpoint, c.JwtProfileIntrospectionAudiance))
+		}
+
+		auth = oauthx.NewPrivateKeyJwt(c.ClientID, privateKey, opts...)
+	case "none":
+
+		auth = oauthx.NewAuthMethodNone(c.ClientID)
+
+	default:
+		return nil, fmt.Errorf("invalid auth method %s", c.AuthMethod)
 	}
 
+	// create OauthClient with opts
+
+	opts := []oauthx.OAuthClientOptFunc{
+		oauthx.WithAuthMethod(auth),
+		oauthx.WithHttpClient(httpClient),
+	}
+
+	if privateKey != nil {
+		opts = append(opts, oauthx.WithOAuthPrivateKey(privateKey))
+	}
+
+	if c.UseRequestParameter {
+		assert.NotNil(privateKey, assert.Exit, "rfc9101: require '--pem-key' to generate 'request=' jwt parameter")
+	}
+
+	client := oauthx.NewOAuthClient(c.ClientID, wk, opts...)
+
 	return &OIDCClient{
-		config:      c,
-		logger:      l,
-		ctx:         ctx,
-		verifier:    verifier,
-		oAuthConfig: oAuthConfig,
-		provider:    provider,
-		jwkVerifier: jwkVerifier,
-		Wellknown:   wk,
-		jwtsigner:   jwtsigner,
+		config: c,
+		client: client,
+		ctx:    ctx,
+		logger: l,
+		auth:   auth,
 	}, nil
 }

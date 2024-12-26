@@ -1,12 +1,9 @@
 package cmd
 
 import (
-	"crypto/tls"
 	"os"
 
 	"github.com/spf13/cobra"
-	oidcclient "github.com/vdbulcke/oidc-client-demo/src/client"
-	"github.com/vdbulcke/oidc-client-demo/src/client/jwt/signer"
 )
 
 // args var
@@ -41,72 +38,14 @@ var introspectCmd = &cobra.Command{
 // startServer cobra server handler
 func runIntrospectToken(cmd *cobra.Command, args []string) {
 
-	appLogger := genLogger()
-
-	// Parse Config
-	config, err := oidcclient.ParseConfig(configFilename)
-	if err != nil {
-		appLogger.Error("Could not parse config", "err", err)
-		os.Exit(1)
-	}
-
-	// validate config
-	if !oidcclient.ValidateConfig(config) {
-		appLogger.Error("Could not validate config")
-		os.Exit(1)
-	}
-
-	var jwtsigner signer.JwtSigner
-
-	if privateKey != "" {
-		key, err := signer.ParsePrivateKey(privateKey)
-		if err != nil {
-			appLogger.Error("error parsing private key", "key", privateKey, "err", err)
-			os.Exit(1)
-		}
-
-		jwtsigner, err = signer.NewJwtSigner(key, config.JwtSigningAlg, mockKid)
-		if err != nil {
-			appLogger.Error("error generating jwt signer", "err", err)
-			os.Exit(1)
-		}
-
-	}
-
-	var clientCert tls.Certificate
-
-	//load client certificate and associated private key
-	if privateKey != "" && clientCertificate != "" {
-		clientCert, err = tls.LoadX509KeyPair(clientCertificate, privateKey)
-		if err != nil {
-			appLogger.Error("Couldn't load client cert or key", "err", err)
-			os.Exit(1)
-		}
-	}
-
-	// Validate introspect url
-	if config.IntrospectEndpoint == "" {
-		appLogger.Error("introspect_endpoint not found")
-		os.Exit(1)
-	}
-
-	// set output flag
-	config.OutputEnabled = output
-	config.OutputDir = outputDir
-
-	// Make a new OIDC Client
-	client, err := oidcclient.NewOIDCClient(config, jwtsigner, clientCert, appLogger)
-	if err != nil {
-		appLogger.Error("Error creating client", "error", err)
-		os.Exit(1)
-	}
+	client := initClient()
 
 	// set default output
 	client.SetDefaultOutput()
 
-	err = client.IntrospectToken(token)
+	err := client.IntrospectToken(token)
 	if err != nil {
-		appLogger.Error("Error during introspect Token", "error", err)
+		client.GetLogger().Error("Error during introspect Token", "error", err)
 		os.Exit(1)
 	}
 

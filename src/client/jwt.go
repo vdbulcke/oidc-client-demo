@@ -3,9 +3,9 @@ package oidcclient
 import (
 	"errors"
 	"strings"
-	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/vdbulcke/oauthx"
 )
 
 type JwtProfileClaims struct {
@@ -17,91 +17,40 @@ type JwtProfileClaims struct {
 
 // https://www.rfc-editor.org/rfc/rfc7523.html
 func (c *OIDCClient) GenerateJwtProfile(endpoint string) (string, error) {
-	if c.jwtsigner == nil {
-		return "", errors.New("jwtsigner is required for jwt profile")
+
+	privateKeyJwt, ok := c.auth.(*oauthx.PrivateKeyJwt)
+	if !ok {
+		return "", errors.New("invalid auth method must be 'private_key_jwt'")
 	}
 
-	jti, err := c.randString(10)
-	if err != nil {
-		return "", err
-	}
+	return privateKeyJwt.GenerateJwtProfileAssertion(oauthx.TokenEndpoint, endpoint)
 
-	// override audiance if config present
-	if c.config.JwtProfileAudiance != "" {
-		endpoint = c.config.JwtProfileAudiance
-	}
-
-	claims := JwtProfileClaims{
-		Jti:      jti,
-		Audience: endpoint,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(c.config.JwtProfileTokenDuration)),
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			NotBefore: jwt.NewNumericDate(time.Now()),
-			Issuer:    c.config.ClientID,
-			Subject:   c.config.ClientID,
-			// ID:        "1",
-			// Audience: []string{endpoint},
-		},
-	}
-
-	signedJwt, err := c.jwtsigner.SignJWT(claims)
-	if err != nil {
-		return "", err
-	}
-
-	return signedJwt, nil
 }
 
-func (c *OIDCClient) GenerateRequestJwt(extraClaims map[string]interface{}) (string, error) {
-	if c.jwtsigner == nil {
-		return "", errors.New("jwtsigner is required for request jwt ")
-	}
+func (c *OIDCClient) GenerateRequestJwt() (string, error) {
 
-	aud := c.config.Issuer
-
-	// override audiance if config present
-	if c.config.JwtRequestAudiance != "" {
-		aud = c.config.JwtRequestAudiance
-	}
-
-	claims := jwt.MapClaims{}
-	// standard claims
-	claims["aud"] = aud
-	claims["exp"] = jwt.NewNumericDate(time.Now().Add(c.config.JwtRequestTokenDuration))
-	claims["iat"] = jwt.NewNumericDate(time.Now())
-	claims["nbf"] = jwt.NewNumericDate(time.Now())
-	claims["iss"] = c.config.ClientID
-	claims["sub"] = c.config.ClientID
-	// signed params
-	claims["client_id"] = c.config.ClientID
-	claims["redirect_uri"] = c.config.RedirectUri
-	claims["scope"] = strings.Join(c.config.Scopes, " ")
-	claims["response_type"] = "code"
-
-	if c.config.AcrValues != "" {
-		claims["acr_values"] = c.config.AcrValues
-	}
-
-	// add extra claims to request jwt
-	for k, v := range extraClaims {
-		claims[k] = v
+	opts := []oauthx.OAuthOption{
+		oauthx.ClientIdOpt(c.config.ClientID),
+		oauthx.RedirectUriOpt(c.config.RedirectUri),
+		oauthx.ScopeOpt(c.config.Scopes),
+		oauthx.ResponseTypeCodeOpt(),
+		oauthx.AcrValuesOpt(strings.Split(c.config.AcrValues, " ")),
 	}
 
 	if c.config.JwtRequestAdditionalParameter != nil {
 
 		// add extra claims to request jwt
 		for k, v := range c.config.JwtRequestAdditionalParameter {
-			claims[k] = v
+			opts = append(opts,
+				oauthx.SetOAuthClaimOnly(k, v),
+			)
 		}
 	}
 
-	// response_type
-	signedJwt, err := c.jwtsigner.SignJWT(claims)
-	if err != nil {
-		c.logger.Error("error signing", err)
-		return "", err
+	claims := make(map[string]interface{})
+	for _, opt := range opts {
+		opt.SetClaim(claims)
 	}
 
-	return signedJwt, nil
+	return c.client.PlumbingGenerateRFC9101RequestJwt(claims)
 }

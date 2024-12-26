@@ -1,14 +1,12 @@
 package oidcclient
 
 import (
-	"crypto/rand"
-	"encoding/base64"
 	"encoding/json"
-	"io"
 	"net/http"
 	"time"
 
-	internaloauth2 "github.com/vdbulcke/oidc-client-demo/src/client/internal/oauth2"
+	"github.com/hashicorp/go-hclog"
+	"github.com/vdbulcke/oauthx"
 )
 
 // JSONAccessTokenResponse ...
@@ -23,14 +21,6 @@ type JSONAccessTokenResponse struct {
 	ExpiresInHumanReadable string `json:"expires_in_human_readable"`
 }
 
-func (c *OIDCClient) randString(nByte int) (string, error) {
-	b := make([]byte, nByte)
-	if _, err := io.ReadFull(rand.Reader, b); err != nil {
-		return "", err
-	}
-	return base64.RawURLEncoding.EncodeToString(b), nil
-}
-
 func (c *OIDCClient) setCallbackCookie(w http.ResponseWriter, r *http.Request, name, value string) {
 	cookie := &http.Cookie{
 		Name:     name,
@@ -42,79 +32,13 @@ func (c *OIDCClient) setCallbackCookie(w http.ResponseWriter, r *http.Request, n
 	http.SetCookie(w, cookie)
 }
 
-func (c *OIDCClient) parseInternalAccessTokenResponse(oauth2Token *internaloauth2.Token) (*JSONAccessTokenResponse, error) {
-	// common logger text
-	commonLoggerText := "Access Token Response"
+func (c *OIDCClient) processAccessTokenResponse(tokenResponse *oauthx.TokenResponse) {
 
-	// Parse Access Token
-	accessToken := oauth2Token.AccessToken
-	if c.logger.IsDebug() {
-		c.logger.Debug(commonLoggerText, "access_token", accessToken)
+	var accessTokenResponse json.RawMessage
+	err := json.Unmarshal(tokenResponse.Raw, &accessTokenResponse)
+	if err != nil {
+		c.logger.Error("Error Marchalling access Token Resp", "err", err)
 	}
-
-	// Parse Token Type
-	tokenType := oauth2Token.Type()
-	// tokenType := "Bearer"
-	if c.logger.IsDebug() {
-		c.logger.Debug(commonLoggerText, "token_type", tokenType)
-	}
-
-	// Parse (and format) Token Expiration
-	tokenExpiration := oauth2Token.Expiry.String()
-	if c.logger.IsDebug() {
-		c.logger.Debug(commonLoggerText, "expires_in", tokenExpiration)
-	}
-
-	// Parse (and format) Token Expiration
-	refreshToken := oauth2Token.RefreshToken
-	if c.logger.IsDebug() {
-		c.logger.Debug(commonLoggerText, "refresh_token", refreshToken)
-	}
-
-	// create the base JSON Access Token obj
-	jsonAccessTokenResp := &JSONAccessTokenResponse{
-		AccessToken:            accessToken,
-		ExpiresInHumanReadable: tokenExpiration,
-		TokenType:              tokenType,
-		RefreshToken:           refreshToken,
-	}
-
-	// Parsing Extra field
-
-	// Parsing IdToken
-	idToken, ok := oauth2Token.Extra("id_token").(string)
-	if ok {
-		if c.logger.IsDebug() {
-			c.logger.Debug(commonLoggerText, "id_token", idToken)
-		}
-
-		jsonAccessTokenResp.IDToken = idToken
-	}
-
-	// Parsing Nonce
-	nonce, ok := oauth2Token.Extra("nonce").(string)
-	if ok {
-		if c.logger.IsDebug() {
-			c.logger.Debug(commonLoggerText, "nonce", nonce)
-		}
-
-		jsonAccessTokenResp.Nonce = nonce
-	}
-
-	// Parsing Scopes
-	scope, ok := oauth2Token.Extra("scope").(string)
-	if ok {
-		if c.logger.IsDebug() {
-			c.logger.Debug(commonLoggerText, "scope", scope)
-		}
-
-		jsonAccessTokenResp.Scope = scope
-	}
-
-	return jsonAccessTokenResp, nil
-}
-
-func (c *OIDCClient) processAccessTokenResponse(accessTokenResponse *JSONAccessTokenResponse) {
 
 	accessTokenResponseLog, err := json.MarshalIndent(accessTokenResponse, "", "    ")
 	if err != nil {
@@ -129,4 +53,8 @@ func (c *OIDCClient) processAccessTokenResponse(accessTokenResponse *JSONAccessT
 		}
 	}
 
+}
+
+func (c *OIDCClient) GetLogger() hclog.Logger {
+	return c.logger
 }

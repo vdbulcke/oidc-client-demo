@@ -45,9 +45,25 @@ auth_method: client_secret_basic
 ### optional: default 5m
 # jwt_profile_token_duration: 15m
 
-### client_assertion jwt 'aud' audiance
+### client_assertion jwt 'aud' audiance (for all endpoints)
 ### optional: default value of token endpoint
 # jwt_profile_token_audiance: https://example.com/custom/audiance
+
+### override 'aud' for PAR endpoint
+# jwt_profile_par_endpoint_audiance: ""
+
+### override 'aud' for token endpoint
+# jwt_profile_token_endpoint_audiance: ""
+
+### override 'aud' for revocation endpoint
+# jwt_profile_revocation_endpoint_audiance: ""
+
+### override 'aud' for introspection endpoint
+# jwt_profile_introspection_endpoint_audiance: ""
+
+### use endpoint url as 'aud'
+### default: false
+# jwt_profile_endpoint_audiance: true
 
 ### client_assertion jwt and request jwt signing algorithm
 ###
@@ -92,6 +108,8 @@ auth_method: client_secret_basic
 ### optional: default value of Issuer
 # jwt_request_token_audiance: https://example.com/custom/audiance
 
+
+
 ### client_assertion jwt duration
 ### optional: default 5m
 # jwt_profile_token_duration: 15m
@@ -112,6 +130,50 @@ auth_method: client_secret_basic
 ###  * S256 (Recommended) Default if not specified
 ###  * plain
 # pkce_challenge_method: S256
+
+
+
+### openid-core-spec
+### 5.5.  Requesting Claims using the "claims" Request Parameter
+###
+### type: string of JSON representing
+###     requested claims object
+###  NOTE: can be multiline with '|-'
+# oidc_claims_param: |- 
+#   {
+#     "userinfo": {
+#       "foo": {
+#         "values": [
+#           "bar"
+#         ]
+#       }
+#     }
+#   }
+
+## rfc9396 OAuth 2.0 Rich Authorization Requests
+##
+### type: string of JSON representing
+###       authorization_details
+###  NOTE: can be multiline with '|-'
+# authorization_details: |-
+#   [
+#     {
+#       "type": "payment_initiation",
+#       "locations": [
+#         "https://example.com/payments"
+#       ],
+#       "instructedAmount": {
+#         "currency": "EUR",
+#         "amount": "123.50"
+#       },
+#       "creditorName": "Merchant A",
+#       "creditorAccount": {
+#         "bic": "ABCIDEFFXXX",
+#         "iban": "DE02100100109307118603"
+#       },
+#       "remittanceInformationUnstructured": "Ref Number Merchant"
+#     }
+#   ]
 
 ## Scopes: (Mandatory)
 scopes:
@@ -174,8 +236,6 @@ issuer: "https://idp.iamfas.int.belgium.be/fas/oauth2"
 ###  reference: rfc9126
 ### Enable PAR
 # use_par: true
-### Override PAR endpoint
-# par_endpoint: "https://example.com/par"
 ### Custom key (other than 'pushed_authorization_request_endpoint') on well known endpoint
 # par_endpoint_wellknown_key: "par_endpoint"
 ### Arbitrary Key/Value parameters to include in PAR request
@@ -192,15 +252,18 @@ issuer: "https://idp.iamfas.int.belgium.be/fas/oauth2"
 # authorize_additional_parameters:
 #   claims: '{"id_token": {"foo": {"values": ["bar", "baz"]}}}'
 
-## Introspect: (Mandatory for 'introspect sub command')
-##
-introspect_endpoint: "https://idp.iamfas.int.belgium.be/fas/oauth2/introspect"
-## Override Token endpoint: (Optional)
+
+## Override  endpoints: (Optional)
 ###   You can override some endpoints after they are fetched from ./well-known/openid-configuration
 ###
 # token_endpoint: "https://idp.iamfas.int.belgium.be/fas/oauth2/access_token"
 # authorize_endpoint: "https://idp.iamfas.int.belgium.be/fas/oauth2/authorize"
+# introspect_endpoint: "https://idp.iamfas.int.belgium.be/fas/oauth2/introspect"
 # jwks_endpoint: "https://iamapps-public.int.belgium.be/oidc/jwk_uri.json"
+# endsession_endpoint: "https://idp.iamfas.int.belgium.be/fas/oauth2/endSession"
+# revocation_endpoint: "https://idp.iamfas.int.belgium.be/fas/oauth2/token/revoke"
+# par_endpoint: "https://example.com/par"
+
 
 ## Acr Values: (Optional)
 # acr_values: "urn:be:fedict:iam:fas:citizen:Level100"
