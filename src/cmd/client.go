@@ -82,6 +82,9 @@ func initClient() *oidcclient.OIDCClient {
 
 	appLogger := genLogger()
 
+	version := buildVersion(Version, GitCommit, Date, BuiltBy)
+	appLogger.Info("oidc-client", "version", version)
+
 	// Parse Config
 	config, err := oidcclient.ParseConfig(configFilename)
 	if err != nil {

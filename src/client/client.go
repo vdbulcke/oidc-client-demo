@@ -22,10 +22,12 @@ type JSONAccessTokenResponse struct {
 }
 
 func (c *OIDCClient) setCallbackCookie(w http.ResponseWriter, r *http.Request, name, value string) {
+	ttl := 15 * time.Minute
 	cookie := &http.Cookie{
-		Name:     name,
-		Value:    value,
-		MaxAge:   int(time.Hour.Seconds()),
+		Name:  name,
+		Value: value,
+		// MaxAge:   int(time.Hour.Seconds()),
+		MaxAge:   int(ttl.Seconds()),
 		Secure:   r.TLS != nil,
 		HttpOnly: true,
 	}
@@ -33,6 +35,8 @@ func (c *OIDCClient) setCallbackCookie(w http.ResponseWriter, r *http.Request, n
 }
 
 func (c *OIDCClient) processAccessTokenResponse(tokenResponse *oauthx.TokenResponse) {
+
+	c.logger.Info("AccessToken expiration", "exp", tokenResponse.GetExpiration())
 
 	var accessTokenResponse json.RawMessage
 	err := json.Unmarshal(tokenResponse.Raw, &accessTokenResponse)

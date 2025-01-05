@@ -21,10 +21,21 @@ func (c *OIDCClient) IntrospectToken(token string) error {
 
 		var httpErr *oauthx.HttpErr
 		if errors.As(err, &httpErr) {
-			c.logger.Error("http error", "response_headers", httpErr.ResponseHeader, "response_body", string(httpErr.RespBody))
+			c.logger.Error("http error", "response_code", httpErr.StatusCode, "response_headers", httpErr.ResponseHeader, "response_body", string(httpErr.RespBody))
+			rfc6749Err, err := httpErr.AsRFC6749Error()
+			if err == nil {
+				c.logger.Error("rfc6749 err", "error", rfc6749Err.Error, "error_description", rfc6749Err.ErrorDescription, "error_uri", rfc6749Err.ErrorUri)
+			}
 		}
 		return err
 	}
+
+	var customClaims struct {
+		Foo string `json:"foo"`
+		Bar map[string]interface{}
+	}
+
+	err = resp.UnmarshallClaims(&customClaims)
 
 	// snippet only
 	var result json.RawMessage

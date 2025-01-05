@@ -39,6 +39,10 @@ type HttpClientConfig struct {
 	Timeout time.Duration `yaml:"timeout_duration" default:"10s"`
 
 	InsecureSkipVerify bool `yaml:"skip_tls_verification" default:"false"`
+
+	MaxRespSizeLimitBytes int64 `yaml:"limit_max_resp_size_limit" default:"60000"`
+
+	ExtraHeader map[string]string `yaml:"extra_headers"`
 }
 
 func (c *HttpClientConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -61,13 +65,14 @@ func (c *HttpClientConfig) UnmarshalYAML(unmarshal func(interface{}) error) erro
 
 // NewDefaultHttpClientCfg create a default config
 func NewDefaultHttpClientCfg() *HttpClientConfig {
-	return &HttpClientConfig{
-		MaxIdleConns:        10,
-		MaxIdleConnsPerHost: 10,
-		MaxConnsPerHost:     10,
-		Timeout:             10 * time.Second,
-		InsecureSkipVerify:  false,
+
+	cfg := &HttpClientConfig{}
+	err := defaults.Set(cfg)
+	if err != nil {
+		panic(err)
 	}
+
+	return cfg
 }
 
 // NewHttpClient Create new http.Transport initialize according

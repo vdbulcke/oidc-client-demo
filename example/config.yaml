@@ -314,8 +314,11 @@ issuer: "https://idp.iamfas.int.belgium.be/fas/oauth2"
 ## Http Client Config
 ##
 ### Optional
-# http_client_config: 
-  
+# http_client_config:
+#   ### Add extra headers (map[string]string)
+#   ### to http request 
+#   extra_headers:
+#     "x-feature-flag": "jwt-introspection"
 #   ## MaxIdleConns controls the maximum number of idle (keep-alive)
 #   ## connections across all hosts. Zero means no limit.
 #   max_idle_conns: 10

@@ -13,6 +13,7 @@ package oidcclient
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -58,10 +59,18 @@ func NewOIDCClient(c *OIDCClientConfig, privateKey oauthx.OAuthPrivateKey, clien
 	// http client set custom transport
 	httpClient := client_http.NewHttpClient(c.HttpClientConfig, l, clientCerts)
 
+	limit := c.HttpClientConfig.MaxRespSizeLimitBytes
+	if limit <= 0 {
+		limit = oauthx.LIMIT_HTTP_RESP_BODY_MAX_SIZE_BYTES
+	}
+
 	// create a context with trace-id header
 	ctx := context.Background()
 	traceId := uuid.New().String()
 	ctx = tracing.ContextWithTraceID(ctx, "x-trace-id", traceId)
+	if c.HttpClientConfig != nil && c.HttpClientConfig.ExtraHeader != nil {
+		ctx = tracing.ContextWithExtraHeader(ctx, c.HttpClientConfig.ExtraHeader)
+	}
 	l.Debug("Initial context", "trace_id", traceId)
 
 	// Let's starts by getting the AS metadata configuration
@@ -70,23 +79,36 @@ func NewOIDCClient(c *OIDCClientConfig, privateKey oauthx.OAuthPrivateKey, clien
 	if c.AlternativeWellKnownEndpoint != "" {
 		l.Warn("Using Alternative wellknown", "url", c.AlternativeWellKnownEndpoint)
 
-		wk, err = oauthx.NewInsecureWellKnownEndpoint(ctx, c.AlternativeWellKnownEndpoint, httpClient)
+		wk, err = oauthx.NewInsecureWellKnownEndpoint(ctx, c.AlternativeWellKnownEndpoint, oauthx.WellKnownWithHttpClient(httpClient, limit))
 		if err != nil {
+
+			var httpErr *oauthx.HttpErr
+			if errors.As(err, &httpErr) {
+				l.Error("http error", "response_headers", httpErr.ResponseHeader, "response_body", string(httpErr.RespBody))
+			}
 			return nil, fmt.Errorf("insecure wellknown: %w", err)
 		}
 
 	} else if c.InsecureWellKnownEndpoint {
 		wkEndpoint := strings.TrimSuffix(c.Issuer, "/") + "/.well-known/openid-configuration"
-		wk, err = oauthx.NewInsecureWellKnownEndpoint(ctx, wkEndpoint, httpClient)
+		wk, err = oauthx.NewInsecureWellKnownEndpoint(ctx, wkEndpoint, oauthx.WellKnownWithHttpClient(httpClient, limit))
 		if err != nil {
+			var httpErr *oauthx.HttpErr
+			if errors.As(err, &httpErr) {
+				l.Error("http error", "response_headers", httpErr.ResponseHeader, "response_body", string(httpErr.RespBody))
+			}
 			return nil, fmt.Errorf("oidc wellknown: %w", err)
 		}
 
 	} else {
 
 		// fetch /.well-known/openid-configuration
-		wk, err = oauthx.NewWellKnownOpenidConfiguration(ctx, c.Issuer, httpClient)
+		wk, err = oauthx.NewWellKnownOpenidConfiguration(ctx, c.Issuer, oauthx.WellKnownWithHttpClient(httpClient, limit))
 		if err != nil {
+			var httpErr *oauthx.HttpErr
+			if errors.As(err, &httpErr) {
+				l.Error("http error", "response_headers", httpErr.ResponseHeader, "response_body", string(httpErr.RespBody))
+			}
 			return nil, fmt.Errorf("oidc wellknown: %w", err)
 		}
 	}
@@ -179,7 +201,7 @@ func NewOIDCClient(c *OIDCClientConfig, privateKey oauthx.OAuthPrivateKey, clien
 
 	opts := []oauthx.OAuthClientOptFunc{
 		oauthx.WithAuthMethod(auth),
-		oauthx.WithHttpClient(httpClient),
+		oauthx.WithHttpClientWithLimit(httpClient, limit),
 	}
 
 	if privateKey != nil {

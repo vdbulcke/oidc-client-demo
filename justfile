@@ -1,8 +1,7 @@
 
 
 scan: 
-	# go list -json -deps |  nancy sleuth	
-	trivy fs .
+    trivy fs . --dependency-tree
 
 build: 
 	goreleaser build --clean
@@ -12,10 +11,10 @@ build-snapshot:
 
 
 release-skip-publish: 
-	goreleaser release --clean --skip-publish  --skip-sign
+	goreleaser release --clean --skip=publish,sign
 
 release-snapshot: 
-	goreleaser release --clean --skip-publish --snapshot --skip-sign
+	goreleaser release --clean --skip=publish,sign --snapshot
 
 
 lint: 

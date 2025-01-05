@@ -129,7 +129,7 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 				// pushed authorization endpoint and
 				// only use client_id and request_uri for
 				// redirect to the authorization_endpoint
-				oauthx.WithPushedAuthotizationRequest(),
+				oauthx.WithPushedAuthorizationRequest(),
 			)
 
 			for k, v := range c.config.PARAdditionalParameter {
@@ -149,7 +149,7 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 				// generate the 'request' jwt paramater by
 				// adding authorization options as jwt claims
 				// oauthx.WithGeneratedRequestJWT(),
-				oauthx.WithStrictGeneratedRequestJWT(),
+				oauthx.WithGeneratedRequestJWTOnly(),
 			)
 
 			for k, v := range c.config.JwtRequestAdditionalParameter {
