@@ -14,7 +14,7 @@ builds:
     goos:
       - linux
       - darwin
-      - windows
+      # - windows syscall.Kill issue 
     goarch:
       - amd64
       - arm64
