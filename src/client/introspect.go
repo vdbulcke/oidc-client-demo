@@ -30,13 +30,6 @@ func (c *OIDCClient) IntrospectToken(token string) error {
 		return err
 	}
 
-	var customClaims struct {
-		Foo string `json:"foo"`
-		Bar map[string]interface{}
-	}
-
-	err = resp.UnmarshallClaims(&customClaims)
-
 	// snippet only
 	var result json.RawMessage
 	err = json.Unmarshal(resp.RawPayload, &result)
