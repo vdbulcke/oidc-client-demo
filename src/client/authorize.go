@@ -80,7 +80,7 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 
 		if len(c.config.Scopes) > 0 {
 			authzReq.AddOpts(
-				oauthx.ScopeOpt(c.config.Scopes),
+				oauthx.ScopeOpt(c.config.Scopes...),
 			)
 		}
 

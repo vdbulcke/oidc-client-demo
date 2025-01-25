@@ -32,7 +32,7 @@ func (c *OIDCClient) GenerateRequestJwt() (string, error) {
 	opts := []oauthx.OAuthOption{
 		oauthx.ClientIdOpt(c.config.ClientID),
 		oauthx.RedirectUriOpt(c.config.RedirectUri),
-		oauthx.ScopeOpt(c.config.Scopes),
+		oauthx.ScopeOpt(c.config.Scopes...),
 		oauthx.ResponseTypeCodeOpt(),
 		oauthx.AcrValuesOpt(strings.Split(c.config.AcrValues, " ")),
 	}

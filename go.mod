@@ -11,7 +11,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/hashicorp/go-hclog v1.0.0
 	github.com/spf13/cobra v1.3.0
-	github.com/vdbulcke/oauthx v0.1.2
+	github.com/vdbulcke/oauthx v0.2.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
