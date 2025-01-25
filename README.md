@@ -1,6 +1,7 @@
 # oidc-client-demo
 
-`oidc-client` is a CLI tool for testing OIDC integration. See CLI docs [here](https://github.com/vdbulcke/oidc-client-demo/blob/main/doc/oidc-client.md).
+`oidc-client` is a CLI tool for testing OIDC integration. It is also a reference implementation for [oauthx](https://github.com/vdbulcke/oauthx)
+the oauth2 library used.
 
 
 ## Documentation
@@ -8,6 +9,8 @@
 The complete documentation is hosted [here](https://vdbulcke.github.io/oidc-client-demo/)
 
 ## Features
+
+`oidc-client` supports most of the feature of [oauthx](https://github.com/vdbulcke/oauthx).
 
 * OIDC Authorization Code flow 
 * Provider Discovery: Based on Issuer (`./well-known/openid-configuration`) or via an alternative endpoint

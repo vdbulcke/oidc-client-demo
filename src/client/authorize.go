@@ -297,10 +297,17 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 
 		if tokenResp.IDToken != "" {
 
-			opts := c.client.NewIDTokenDefaultValidation(
-				oauthx.WithIDTokenNonceValidation(oauthCtx.Nonce),
-			)
+			idToken, err := c.client.ParseIDToken(c.ctx, tokenResp.IDToken)
+			if err != nil {
+				c.logger.Error("ID Token standard validation failed", "err", err)
+				http.Error(w, "Failed to verify ID Token: "+err.Error(), http.StatusInternalServerError)
+				return
+			}
 
+			// extra id_token validation
+			opts := []oauthx.IDTokenValidationFunc{
+				oauthx.WithIDTokenNonceValidation(oauthCtx.Nonce),
+			}
 			if len(c.config.ACRWhitelist) > 0 {
 				opts = append(opts, oauthx.WithIDTokenAcrWhitelist(c.config.ACRWhitelist))
 			}
@@ -325,11 +332,9 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 				opts = append(opts, amrWhitelistValidationOpt)
 			}
 
-			idToken, err := c.client.ParseIDToken(c.ctx, tokenResp.IDToken,
-				oauthx.WithIDTokenParseOptCustomValidation(opts...),
-			)
+			err = idToken.Validate(c.ctx, opts...)
 			if err != nil {
-				c.logger.Error("ID Token validation failed", "err", err)
+				c.logger.Error("ID Token extra validation failed", "err", err)
 				http.Error(w, "Failed to verify ID Token: "+err.Error(), http.StatusInternalServerError)
 				return
 			}
@@ -426,11 +431,13 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 		//nolint
 		w.Write(data)
 
-		// stop program
-		go func() {
-			c.logger.Info("Stopping server")
-			close <- os.Interrupt
-		}()
+		if !c.config.KeepRunning {
+			// stop program
+			go func() {
+				c.logger.Info("Stopping server")
+				close <- os.Interrupt
+			}()
+		}
 	})
 
 	localAddress := fmt.Sprintf("%s:%d", c.config.ListenAddress, c.config.ListenPort)

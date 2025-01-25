@@ -25,6 +25,7 @@ var mockCodeVerifier string
 var mockKid string
 var privateKey string
 var clientCertificate string
+var keepRunning bool
 
 // default
 var DefaultListeningAddress = "127.0.0.1"
@@ -45,6 +46,7 @@ func init() {
 	clientCmd.Flags().StringVarP(&mockKid, "mock-jwt-kid", "", "", "Use static jwt 'kid' value")
 	clientCmd.Flags().StringVarP(&privateKey, "pem-key", "", "", "private key (pem format) for jwt signature or mTLS")
 	clientCmd.Flags().StringVarP(&clientCertificate, "pem-cert", "", "", "client certificate (pem format) mTLS")
+	clientCmd.Flags().BoolVarP(&keepRunning, "keep-running", "", false, "keep http client running until explicit 'CTRL-C'")
 
 	// required flags
 	//nolint
@@ -154,6 +156,10 @@ func initClient() *oidcclient.OIDCClient {
 	if fakePKCEVerifier {
 		config.FakePKCEVerifier = true
 	}
+
+	// set flag to keep http server running on
+	// response until explicit CTRL+C
+	config.KeepRunning = keepRunning
 
 	// set output flag
 	config.OutputEnabled = output

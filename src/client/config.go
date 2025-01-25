@@ -88,6 +88,10 @@ type OIDCClientConfig struct {
 	MockNonce        string
 	MockCodeVerifier string
 
+	// keep server running during authorizaiton code flow
+	//
+	KeepRunning bool
+
 	// Output
 	OutputEnabled       bool
 	OutputDir           string
