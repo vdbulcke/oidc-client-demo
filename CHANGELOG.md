@@ -2,6 +2,45 @@
 ## [Unreleased]
 
 
+<a name="v0.22.0"></a>
+## [v0.22.0] - 2025-01-25
+### Features
+- 5feb965 - new '--keep-running' for authorization code flow
+- 1fb0579 - update oauthx v0.2.0
+
+
+<a name="v0.22.0-oauthx-beta"></a>
+## [v0.22.0-oauthx-beta] - 2025-01-05
+### Bug Fixes
+- f044179 - drop window native build due to syscall issue (use WSL instead)
+- 480b69e - linting issue
+- e048ec2 - client_id private_key_jwt
+
+### Features
+- 6ffd975 - update oauthx v.1.2
+- d99f3e4 - refactor everything to use oauthx lib
+
+
+<a name="v0.21.0"></a>
+## [v0.21.0] - 2024-12-04
+### Features
+- f2824f0 - new 'strict_oidc_rcf6749_param' to include mandaroy parameter in par request when using RCF9101 "request" parameter
+
+
+<a name="v0.20.2"></a>
+## [v0.20.2] - 2024-07-21
+### Bug Fixes
+- e6dd766 - dependencies
+- 406031e - PAR urlencoded format
+- c6b2a12 - update dependencies
+
+
+<a name="v0.20.1"></a>
+## [v0.20.1] - 2024-04-12
+### Bug Fixes
+- 5b4d7dd - req body parsing ([#60](https://github.com/vdbulcke/oidc-client-demo/issues/60))
+
+
 <a name="v0.20.0"></a>
 ## [v0.20.0] - 2024-04-12
 ### Features
@@ -210,7 +249,12 @@
 <a name="v0.0.1"></a>
 ## v0.0.1 - 2021-07-23
 
-[Unreleased]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.20.0...HEAD
+[Unreleased]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.22.0...HEAD
+[v0.22.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.22.0-oauthx-beta...v0.22.0
+[v0.22.0-oauthx-beta]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.21.0...v0.22.0-oauthx-beta
+[v0.21.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.20.2...v0.21.0
+[v0.20.2]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.20.1...v0.20.2
+[v0.20.1]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.20.0...v0.20.1
 [v0.20.0]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.19.3...v0.20.0
 [v0.19.3]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.19.2...v0.19.3
 [v0.19.2]: https://github.com/vdbulcke/oidc-client-demo/compare/v0.19.1...v0.19.2
