@@ -20,8 +20,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/go-hclog"
 	"github.com/vdbulcke/oauthx"
-	"github.com/vdbulcke/oauthx/assert"
 	"github.com/vdbulcke/oauthx/tracing"
+
+	"github.com/vdbulcke/assert"
 	client_http "github.com/vdbulcke/oidc-client-demo/src/client/http"
 )
 
@@ -48,6 +49,10 @@ func NewOIDCClient(c *OIDCClientConfig, privateKey oauthx.OAuthPrivateKey, clien
 
 	if c.SkipTLSVerification {
 		l.Warn("TLS Validation is disabled")
+	}
+
+	if c.AllowNonCompliantAmr {
+		oauthx.AllowNonCompliantAmr = true
 	}
 
 	clientCerts := []tls.Certificate{}

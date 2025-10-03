@@ -143,6 +143,13 @@ func (c *OIDCClient) OIDCAuthorizationCodeFlow() error {
 
 		}
 
+		if c.config.LegacyRequestJwtHeaderType {
+			authzReq.AddOpts(
+				// force JWT header 'typ': 'JWT'
+				oauthx.WithLegacyRequestJWTHeaderType(),
+			)
+		}
+
 		if c.config.UseRequestParameter {
 
 			authzReq.AddOpts(

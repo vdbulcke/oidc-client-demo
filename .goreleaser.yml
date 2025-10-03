@@ -14,7 +14,7 @@ builds:
     goos:
       - linux
       - darwin
-      # - windows syscall.Kill issue 
+      - windows  
     goarch:
       - amd64
       - arm64
@@ -26,6 +26,14 @@ builds:
       - -X github.com/vdbulcke/oidc-client-demo/src/cmd.Version={{ .Version }}  
       - -X github.com/vdbulcke/oidc-client-demo/src/cmd.Date={{ .CommitDate }}
       - -X github.com/vdbulcke/oidc-client-demo/src/cmd.BuiltBy=goreleaser
+
+
+    # Custom flags.
+    #
+    # Templates: allowed.
+    flags:
+      - -trimpath
+      
 archives:
   - 
     ## Deprecated "replacements"

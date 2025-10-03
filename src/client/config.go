@@ -63,13 +63,15 @@ type OIDCClientConfig struct {
 	TokenSigningAlg    []string `yaml:"token_signing_alg" validate:"required"`
 	TokenEncryptionAlg []string `yaml:"token_encryption_alg" validate:"dive,oneof=ECDH-ES RSA-OAEP RSA-OAEP-256 ECDH-ES+A128KW ECDH-ES+A192KW ECDH-ES+A256KW"`
 
-	AMRWhitelist []string `yaml:"amr_list"`
-	ACRWhitelist []string `yaml:"acr_list"`
+	AllowNonCompliantAmr bool     `yaml:"allow_non_compliant_amr" default:"false"`
+	AMRWhitelist         []string `yaml:"amr_list"`
+	ACRWhitelist         []string `yaml:"acr_list"`
 
 	RedirectUri string `yaml:"override_redirect_uri"`
 
 	UseRequestParameter             bool                   `yaml:"use_request_parameter" default:"false"`
 	StrictOIDCAndRCF6749Param       bool                   `yaml:"strict_oidc_rcf6749_param" default:"false"`
+	LegacyRequestJwtHeaderType      bool                   `yaml:"legacy_request_jwt_header_type" default:"false"`
 	JwtProfileTokenDuration         time.Duration          `yaml:"jwt_profile_token_duration" default:"5m"`
 	JwtProfileAudiance              string                 `yaml:"jwt_profile_token_audiance" `
 	JwtProfilePARAudiance           string                 `yaml:"jwt_profile_par_endpoint_audiance" `
