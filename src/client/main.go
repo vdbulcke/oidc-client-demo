@@ -174,23 +174,23 @@ func NewOIDCClient(c *OIDCClientConfig, privateKey oauthx.OAuthPrivateKey, clien
 		}
 
 		if c.JwtProfileAudiance != "" {
-			opts = append(opts, oauthx.WithPrivateKeyJwtFixedAudiance(c.JwtProfileAudiance))
+			opts = append(opts, oauthx.WithPrivateKeyJwtFixedAudience(c.JwtProfileAudiance))
 		}
 
 		if c.JwtProfileEndpointAsAudiance {
-			opts = append(opts, oauthx.WithPrivateKeyJwtEndpointAsAudiance())
+			opts = append(opts, oauthx.WithPrivateKeyJwtEndpointAsAudience())
 		}
 		if c.JwtProfilePARAudiance != "" {
-			opts = append(opts, oauthx.WithPrivateKeyJwtAlternativeEndpointAudiance(oauthx.PushedAuthorizationRequestEndpoint, c.JwtProfilePARAudiance))
+			opts = append(opts, oauthx.WithPrivateKeyJwtAlternativeEndpointAudience(oauthx.PushedAuthorizationRequestEndpoint, c.JwtProfilePARAudiance))
 		}
 		if c.JwtProfileTokenAudiance != "" {
-			opts = append(opts, oauthx.WithPrivateKeyJwtAlternativeEndpointAudiance(oauthx.TokenEndpoint, c.JwtProfileTokenAudiance))
+			opts = append(opts, oauthx.WithPrivateKeyJwtAlternativeEndpointAudience(oauthx.TokenEndpoint, c.JwtProfileTokenAudiance))
 		}
 		if c.JwtProfileRevocationAudiance != "" {
-			opts = append(opts, oauthx.WithPrivateKeyJwtAlternativeEndpointAudiance(oauthx.RevocationEndpoint, c.JwtProfileRevocationAudiance))
+			opts = append(opts, oauthx.WithPrivateKeyJwtAlternativeEndpointAudience(oauthx.RevocationEndpoint, c.JwtProfileRevocationAudiance))
 		}
 		if c.JwtProfileIntrospectionAudiance != "" {
-			opts = append(opts, oauthx.WithPrivateKeyJwtAlternativeEndpointAudiance(oauthx.IntrospectionEndpoint, c.JwtProfileIntrospectionAudiance))
+			opts = append(opts, oauthx.WithPrivateKeyJwtAlternativeEndpointAudience(oauthx.IntrospectionEndpoint, c.JwtProfileIntrospectionAudiance))
 		}
 
 		auth = oauthx.NewPrivateKeyJwt(c.ClientID, privateKey, opts...)

@@ -32,7 +32,8 @@ type OIDCClientConfig struct {
 	AccessTokenJwt  bool `yaml:"access_token_jwt"`
 	RefreshTokenJwt bool `yaml:"refresh_token_jwt"`
 
-	Scopes []string `yaml:"scopes"  validate:"required"`
+	Scopes   []string `yaml:"scopes"  validate:"required"`
+	Audience []string `yaml:"audiences"`
 
 	AcrValues string `yaml:"acr_values"`
 
