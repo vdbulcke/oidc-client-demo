@@ -393,8 +393,8 @@ github.com/subosito/gotenv v1.2.0/go.mod h1:N0PQaV/YGNqwC0u51sEeR/aUtSLEXKX9iv69
 github.com/tv42/httpunix v0.0.0-20150427012821-b75d8614f926/go.mod h1:9ESjWnEqriFuLhtthL60Sar/7RFoluCcXsuvEwTV5KM=
 github.com/vdbulcke/assert v0.0.2 h1:e9taDa+oiJ2eRD4Yy/KwJI5lnQWZWlpyMfywmYWvRSo=
 github.com/vdbulcke/assert v0.0.2/go.mod h1:JQVzoxpnfY/gCKBFSOVRXqhdBvJp+v4zwOLQCrSdEus=
-github.com/vdbulcke/oauthx v0.4.0 h1:z9KIsEiDmcJPpNvUZr82MVdoI1jLFdpQG5+iHkDLftQ=
-github.com/vdbulcke/oauthx v0.4.0/go.mod h1:Hljuv3I1FT5ivVULn4612GZ8bH9up1hbfgiFNo/9Mqk=
+github.com/vdbulcke/oauthx v0.5.0 h1:UzmWwqWg+y38GPxAqV0Kyn/yL4mpvAYGQfdfHwpUL4s=
+github.com/vdbulcke/oauthx v0.5.0/go.mod h1:Hljuv3I1FT5ivVULn4612GZ8bH9up1hbfgiFNo/9Mqk=
 github.com/yuin/goldmark v1.1.25/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.32/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
