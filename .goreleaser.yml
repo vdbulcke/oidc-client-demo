@@ -100,14 +100,16 @@ changelog:
 ##
 signs:
   - cmd: cosign
-    signature: "${artifact}.sig"
-    certificate: '${artifact}.pem'
+    # signature: "${artifact}.sig"
+    # certificate: '${artifact}.pem'
+    signature: "${artifact}.sigstore.json"
     output: true
     args: 
       - "sign-blob"
       - "--oidc-issuer=https://token.actions.githubusercontent.com" 
-      - "--output-certificate=${artifact}.pem"
-      - "--output-signature=${artifact}.sig" 
+      # - "--output-certificate=${artifact}.pem"
+      # - "--output-signature=${artifact}.sig" 
+      - "--bundle=${signature}"
       - "${artifact}"
     artifacts: all
 # release:
