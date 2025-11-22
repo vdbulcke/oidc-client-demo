@@ -106,7 +106,7 @@ signs:
     output: true
     args: 
       - "sign-blob"
-      - "--oidc-issuer=https://token.actions.githubusercontent.com" 
+      # - "--oidc-issuer=https://token.actions.githubusercontent.com" 
       # - "--output-certificate=${artifact}.pem"
       # - "--output-signature=${artifact}.sig" 
       - "--bundle=${signature}"
